@@ -1,0 +1,161 @@
+<%- include('../partials/admin/header') %>
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title">Category List</h2>
+            <p>Category Management</p>
+        </div>
+        <button class="add-category-btn" onclick="window.location.href='/admin/addcategory'">+ Add Category</button>
+    </div>
+
+
+    <style>
+
+        .add-category-btn{
+            background-color: #000000;
+            color: white; 
+            font-size: 14px;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            border: 1px solid #000000;
+        }
+        
+        .users-table th,
+        .users-table td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #000000;
+        }
+        
+        .users-table th {
+            background-color: #f8f8f8;
+            font-weight: bold;
+            color: #000000;
+            border-bottom: 1px solid #000000;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .delete-btn {
+            background-color: #000000;
+        }
+
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .page-link {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .page-link.active {
+            background-color: #000000;
+            color: white;
+            border-color: #4a90e2;
+        }
+
+        .no-data {
+            text-align: center;
+            font-weight: bold;
+            margin-top: 20px;
+            font-size: 18px;
+            color: #555;
+        }
+    </style>
+
+    <% if (categories.length > 0) { %>
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>SL.No</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% categories.forEach((category, index) => { %>
+                    <tr>
+                        <td><%= index + 1 %></td>
+                        <td><%= category.name %></td>
+                        <td><%= category.description %></td>
+                        <td><%= category.status ? "Active" : "Inactive" %></td>
+                        <td>
+                            <button onclick="confirmBlock('<%= category.id %>')" class="action-btn delete-btn">
+                                <%= category.status ? "Block" : "Unblock" %>
+                            </button>
+                            <a href="/admin/editcategory/<%= category.id %>"><button  class="action-btn delete-btn">
+                                Edit
+                            </button></a>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <p class="no-data">No categories found</p>
+    <% } %>
+
+    <div class="pagination">
+        <% if (currentPage > 1) { %>
+            <a href="/admin/categories?page=<%= currentPage - 1 %>" class="page-link">←</a>
+        <% } %>
+
+        <% for (let i = 1; i <= totalPages; i++) { %>
+            <a href="/admin/categories?page=<%= i %>" class="page-link <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+        <% } %>
+
+        <% if (currentPage < totalPages) { %>
+            <a href="/admin/categories?page=<%= currentPage + 1 %>" class="page-link">→</a>
+        <% } %>
+    </div>
+
+</section>
+
+<%- include('../partials/admin/footer') %>
+
+<script>
+    function confirmBlock(categoryId) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "Do you want to continue?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#000000",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes",
+            cancelButtonText: "No"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/admin/blockcategory/${categoryId}`;
+            }
+        });
+    }
+
+</script>

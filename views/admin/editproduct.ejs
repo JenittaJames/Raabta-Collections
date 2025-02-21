@@ -1,0 +1,152 @@
+<%- include('../partials/admin/header') %>
+
+<style>
+    .preview-box {
+        margin-bottom: 15px;
+    }
+    .preview-placeholder {
+        border: 2px dashed #ccc;
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+    }
+    .preview-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border: 1px solid #ddd;
+    }
+</style>
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h1 class="content-title card-title">Edit Product</h1>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-8">
+                <form method="post" action="/admin/editproduct/<%= product._id %>" enctype="application/x-www-form-urlencoded" onsubmit="return validateForm()">
+                    <input type="hidden" name="id" value="<%= product._id %>">
+
+                    <div class="mb-4">
+                        <label for="name" class="form-label">Product Name</label>
+                        <input type="text" class="form-control" id="name" name="name" value="<%= product.productName %>" required />
+                        <div id="nameError" class="text-danger"></div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" required><%= product.description %></textarea>
+                        <div id="descriptionError" class="text-danger"></div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="price" class="form-label">Price</label>
+                        <input type="number" class="form-control" id="price" name="price" required value="<%= product.price %>" />
+                        <div id="priceError" class="text-danger"></div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="stock" class="form-label">Stock Quantity</label>
+                        <input type="number" class="form-control" id="stock" name="stock" required value="<%= product.totalStock %>" />
+                        <div id="stockError" class="text-danger"></div>
+                    </div>
+
+                    <!-- Image Preview Section -->
+                    <div class="mb-4">
+                        <label class="form-label">Image Previews</label>
+                        <div class="row" id="imagePreview">
+                            <% for(let i = 0; i < 3; i++) { %>
+                                <div class="col-md-4 preview-box">
+                                    <% if (product.productImage && product.productImage[i]) { %>
+                                        <img src="/<%= product.productImage[i] %>" class="preview-image" alt="Product Image <%= i + 1 %>">
+                                    <% } else { %>
+                                        <div class="preview-placeholder">
+                                            <span>Image <%= i + 1 %></span>
+                                        </div>
+                                    <% } %>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                    <a href="/admin/editimage/<%= product._id %>" class="btn btn-dark">Edit Images</a>
+                    <div class="d-flex justify-content-center mt-3">
+                        <button type="submit" class="btn btn-dark">Update Product</button>
+                    </div>  
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function validateForm() {
+        var name = document.getElementById("name").value;
+        var description = document.getElementById("description").value;
+        var price = document.getElementById("price").value;
+        var stock = document.getElementById("stock").value;
+        var images = document.getElementById("image").files;
+
+        var nameError = document.getElementById("nameError");
+        var descriptionError = document.getElementById("descriptionError");
+        var priceError = document.getElementById("priceError");
+        var stockError = document.getElementById("stockError");
+        var imageError = document.getElementById("imageError");
+
+        // Clear previous error messages
+        nameError.innerHTML = "";
+        descriptionError.innerHTML = "";
+        priceError.innerHTML = "";
+        stockError.innerHTML = "";
+        imageError.innerHTML = "";
+
+        if (name.trim() === "") {
+            nameError.innerHTML = "Product name is required";
+            return false;
+        }
+
+        if (description.trim() === "") {
+            descriptionError.innerHTML = "Product description is required";
+            return false;
+        }
+
+        if (price.trim() === "" || isNaN(price) || price <= 0) {
+            priceError.innerHTML = "Valid price is required";
+            return false;
+        }
+
+        if (stock.trim() === "" || isNaN(stock) || stock < 0) {
+            stockError.innerHTML = "Valid stock quantity is required";
+            return false;
+        }
+
+        return true;
+    }
+
+    document.getElementById('image').addEventListener('change', function() {
+        const files = this.files;
+        const previewBoxes = document.querySelectorAll('.preview-box');
+
+        previewBoxes.forEach((box, index) => {
+            box.innerHTML = `<div class="preview-placeholder"><span>Image ${index + 1}</span></div>`;
+        });
+
+        Array.from(files).forEach((file, index) => {
+            if (index < 3) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewBoxes[index].innerHTML = `
+                        <img src="${e.target.result}" class="preview-image" alt="Preview ${index + 1}">
+                    `;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    });
+</script>
+
+<%- include('../partials/admin/footer') %>

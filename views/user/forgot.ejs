@@ -1,0 +1,132 @@
+<%- include('../partials/user/header') %>
+
+        <!-- Begin Hiraola's Breadcrumb Area -->
+        <div class="breadcrumb-area">
+            <div class="container">
+                <div class="breadcrumb-content">
+                    <h2>Other</h2>
+                    <ul>
+                        <li><a href="/home">Home</a></li>
+                        <li class="active">OTP Verification</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- Hiraola's Breadcrumb Area End Here -->
+        <!-- Begin Hiraola's Login Register Area -->
+        <div class="hiraola-login-register_area">
+            <div class="container">
+                <div class="row d-flex justify-content-center">
+                    <div class="col-sm-12 col-md-12 col-xs-12 col-lg-6">
+                        <!-- Forgot Password Email Verification Form -->
+                        <form action="/forgot" method="post" id="forgotPasswordForm" onsubmit="return validateForm()">
+                            <div class="login-form">
+                                <h4 class="login-title">Forgot Password</h4>
+                                <div class="row">
+                                    <div class="col-md-12 col-12 mb-3">
+                                        <p class="text-center">Enter your email address to receive an OTP for password reset.</p>
+                                    </div>
+                                    <div class="col-md-12 col-12">
+                                        <label>Email Address*</label>
+                                        <input 
+                                            type="email" 
+                                            class="form-control" 
+                                            name="email" 
+                                            id="email"
+                                            required
+                                            pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                                            oninput="validateEmail(this)"
+                                        >
+                                        <small id="emailError" class="text-danger"></small>
+                                    </div>
+                                    <div class="col-md-12 mt-4">
+                                        <button type="submit" class="hiraola-login_btn" id="submitBtn">Send OTP</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <script>
+            function validateEmail(input) {
+                const email = input.value;
+                const emailError = document.getElementById('emailError');
+                const submitBtn = document.getElementById('submitBtn');
+                
+                // Regular expression for email validation
+                const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                
+                if (email.trim() === '') {
+                    emailError.textContent = 'Email is required';
+                    input.classList.add('is-invalid');
+                    submitBtn.disabled = true;
+                    return false;
+                }
+                
+                if (!emailRegex.test(email)) {
+                    emailError.textContent = 'Please enter a valid email address';
+                    input.classList.add('is-invalid');
+                    submitBtn.disabled = true;
+                    return false;
+                }
+                
+                emailError.textContent = '';
+                input.classList.remove('is-invalid');
+                input.classList.add('is-valid');
+                submitBtn.disabled = false;
+                return true;
+            }
+            
+            function validateForm() {
+                const email = document.getElementById('email');
+                
+                // Check if email is valid before submitting
+                if (!validateEmail(email)) {
+                    return false;
+                }
+                
+                // Add loading state to button
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending...';
+                submitBtn.disabled = true;
+                
+                return true;
+            }
+            
+            // Add some CSS for validation styles
+            document.head.insertAdjacentHTML('beforeend', `
+                <style>
+                    .is-invalid {
+                        border-color: #dc3545 !important;
+                        background-color: #fff !important;
+                    }
+                    
+                    .is-valid {
+                        border-color: #198754 !important;
+                        background-color: #fff !important;
+                    }
+                    
+                    .text-danger {
+                        color: #dc3545;
+                        font-size: 0.875rem;
+                        margin-top: 0.25rem;
+                        display: block;
+                    }
+                    
+                    .form-control:focus {
+                        box-shadow: none;
+                        border-width: 2px;
+                    }
+                </style>
+            `);
+            </script>
+
+
+        
+        <!-- Hiraola's Login Register Area  End Here -->
+        <%- include('../partials/user/footer') %>

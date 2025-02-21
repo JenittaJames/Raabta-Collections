@@ -1,0 +1,63 @@
+<%- include('../partials/admin/header') %>
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h1 class="content-title card-title">Edit Category</h1>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-8">
+                <form method="post" action="/admin/editcategory/<%= category._id %>" onsubmit="return validateForm()">
+                    <input type="hidden" name="id" value="<%= category._id %>">
+                    <div class="mb-4">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" placeholder="Type here" class="form-control" id="name" name="name" value="<%= category.name %>" required />
+                        <div id="nameError" class="text-danger"></div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea id="description" name="description" class="form-control" required><%= category.description %></textarea>
+                        <div id="descriptionError" class="text-danger"></div>
+                    </div>
+
+                    <button type="submit" class="btn btn-dark">Update Category</button>
+                </form>
+            </div>
+        </div>
+    </div> 
+</section>
+
+<script>
+    function validateForm() {
+        var name = document.getElementById('name').value;
+        var description = document.getElementById('description').value;
+        var nameError = document.getElementById('nameError');
+        var descriptionError = document.getElementById('descriptionError');
+
+        nameError.innerHTML = '';
+        descriptionError.innerHTML = '';
+
+        // Validate name
+        if (name.trim() === '') {
+            nameError.innerHTML = 'Name is required';
+            return false;
+        } else if (/\d/.test(name)) {
+            nameError.innerHTML = 'Name should not contain numbers';
+            return false;
+        }
+
+        // Validate description
+        if (description.trim() === '') {
+            descriptionError.innerHTML = 'Description is required';
+            return false;
+        }
+
+        return true;
+    }
+</script>
+
+<%- include('../partials/admin/footer') %>

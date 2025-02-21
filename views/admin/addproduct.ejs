@@ -1,0 +1,253 @@
+<%- include('../partials/admin/header') %>
+
+<style>
+    .preview-box {
+      margin-bottom: 15px;
+    }
+    .preview-placeholder {
+      border: 2px dashed #ccc;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f8f9fa;
+    }
+    .preview-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border: 1px solid #ddd;
+    }
+</style>
+
+<section class="content-main">
+  <div class="content-header">
+    <div>
+      <h1 class="content-title card-title">Add Product</h1>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-8">
+        <form
+          method="post"
+          action="/admin/addproduct"
+          enctype="multipart/form-data"
+          onsubmit="return validateForm()"
+        >
+          <div class="mb-4">
+            <label for="name" class="form-label">Product Name</label>
+            <input
+              type="text"
+              placeholder="Type here"
+              class="form-control"
+              id="name"
+              name="name"
+              required
+            />
+            <div id="nameError" class="text-danger"></div>
+          </div>
+
+          <div class="mb-4">
+            <label for="description" class="form-label">Product Description</label>
+            <textarea
+              placeholder="Type here"
+              class="form-control"
+              id="description"
+              name="description"
+              required
+            ></textarea>
+            <div id="descriptionError" class="text-danger"></div>
+          </div>
+
+          <div class="mb-4">
+            <label for="price" class="form-label">Price</label>
+            <input
+              type="number"
+              placeholder="Enter price"
+              class="form-control"
+              id="price"
+              name="price"
+              required
+            />
+            <div id="priceError" class="text-danger"></div>
+          </div>
+
+          <div class="mb-4">
+            <label for="stock" class="form-label">Stock Quantity</label>
+            <input
+              type="number"
+              placeholder="Enter stock quantity"
+              class="form-control"
+              id="stock"
+              name="stock"
+              required
+            />
+            <div id="stockError" class="text-danger"></div>
+          </div>
+
+          <div class="mb-4">
+            <label for="category" class="form-label">Category</label>
+            <select id="category" name="category" class="form-select" required>
+              <option value="" disabled selected>Select a category</option>
+               <% categoryData.forEach(category => { %>
+                <option value="<%= category._id %>"><%= category.name %></option>
+               <% }) %>
+            </select>
+            <div id="categoryError" class="text-danger"></div>
+          </div>
+
+          <div class="mb-4">
+            <label for="image" class="form-label">Product Images (Exactly 3 required)</label>
+            <input
+              type="file"
+              class="form-control"
+              id="image"
+              name="images"
+              accept="image/*"
+              multiple
+              required
+            />
+            <div id="imageError" class="text-danger"></div>
+          </div>
+
+          <!-- Image Preview Section -->
+          <div class="mb-4">
+            <label class="form-label">Image Previews</label>
+            <div class="row" id="imagePreview">
+              <div class="col-md-4 preview-box">
+                <div class="preview-placeholder">
+                  <span>Image 1</span>
+                </div>
+              </div>
+              <div class="col-md-4 preview-box">
+                <div class="preview-placeholder">
+                  <span>Image 2</span>
+                </div>
+              </div>
+              <div class="col-md-4 preview-box">
+                <div class="preview-placeholder">
+                  <span>Image 3</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-dark">Add Product</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  function validateForm() {
+    var name = document.getElementById("name").value;
+    var description = document.getElementById("description").value;
+    var price = document.getElementById("price").value;
+    var stock = document.getElementById("stock").value;
+    var category = document.getElementById("category").value;
+    var images = document.getElementById("image").files;
+
+    var nameError = document.getElementById("nameError");
+    var descriptionError = document.getElementById("descriptionError");
+    var priceError = document.getElementById("priceError");
+    var stockError = document.getElementById("stockError");
+    var categoryError = document.getElementById("categoryError");
+    var imageError = document.getElementById("imageError");
+
+    // Clear previous error messages
+    nameError.innerHTML = "";
+    descriptionError.innerHTML = "";
+    priceError.innerHTML = "";
+    stockError.innerHTML = "";
+    categoryError.innerHTML = "";
+    imageError.innerHTML = "";
+
+    // Validating name
+    if (name.trim() === "") {
+      nameError.innerHTML = "Product name is required";
+      return false;
+    } else if (/\d/.test(name)) {
+      nameError.innerHTML = "Product name should not contain numbers";
+      return false;
+    }
+
+    // Validating description
+    if (description.trim() === "") {
+      descriptionError.innerHTML = "Product description is required";
+      return false;
+    }
+
+    // Validating price
+    if (price.trim() === "" || isNaN(price) || price <= 0) {
+      priceError.innerHTML = "Valid price is required";
+      return false;
+    }
+
+    // Validating stock
+    if (stock.trim() === "" || isNaN(stock) || stock < 0) {
+      stockError.innerHTML = "Valid stock quantity is required";
+      return false;
+    }
+
+    // Validating category
+    if (category.trim() === "") {
+      categoryError.innerHTML = "Category is required";
+      return false;
+    }
+
+    // Validating images (exactly 3 required)
+    if (images.length !== 3) {
+      imageError.innerHTML = "Please upload exactly 3 images";
+      return false;
+    }
+
+    return true;
+  }
+
+document.getElementById('image').addEventListener('change', function() {
+    const files = this.files;
+    const previewBoxes = document.querySelectorAll('.preview-box');
+    
+    // Keep track of existing previews if any
+    const existingPreviews = {};
+    previewBoxes.forEach((box, index) => {
+        if (box.querySelector('img')) {
+            existingPreviews[index] = box.innerHTML;
+        }
+    });
+    
+    // Function to create placeholder
+    const createPlaceholder = (index) => {
+        return `<div class="preview-placeholder"><span>Image ${index + 1}</span></div>`;
+    };
+    
+    // Reset empty preview boxes
+    previewBoxes.forEach((box, index) => {
+        if (!existingPreviews[index]) {
+            box.innerHTML = createPlaceholder(index);
+        }
+    });
+    
+    // Handle new files
+    Array.from(files).forEach((file, index) => {
+        if (index < 3) {  // Only process up to 3 files
+            const reader = new FileReader();
+            const currentIndex = index;  // Preserve the index for this file
+            
+            reader.onload = function(e) {
+                previewBoxes[currentIndex].innerHTML = `
+                    <img src="${e.target.result}" 
+                         class="preview-image" 
+                         alt="Preview ${currentIndex + 1}">
+                `;
+            };
+            
+            reader.readAsDataURL(file);
+        }
+    });
+});
+</script>
+
+<%- include('../partials/admin/footer') %>

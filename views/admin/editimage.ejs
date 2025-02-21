@@ -1,0 +1,91 @@
+<%- include('../partials/admin/header') %>
+
+<style>
+    .image-container {
+        position: relative;
+        margin-bottom: 20px;
+    }
+    .preview-box {
+        border: 2px dashed #ccc;
+        height: 200px;
+        margin: 10px 0;
+        position: relative;
+    }
+    .preview-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .preview-placeholder {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+    }
+    .file-input-container {
+        margin-top: 10px;
+    }
+</style>
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h1 class="content-title card-title">Edit Product Images</h1>
+        </div>
+    </div>
+    
+    <div class="card-body">
+        <form method="post" action="/admin/editimage/<%= product._id %>" enctype="multipart/form-data">
+            <div class="row">
+                <% for(let i = 0; i < 3; i++) { %>
+                    <div class="col-md-4">
+                        <div class="image-container">
+                            <div class="preview-box" id="previewBox<%= i %>">
+                                <% if (product.productImage && product.productImage[i]) { %>
+                                    <img src="/<%= product.productImage[i] %>" class="preview-image" alt="Product Image <%= i + 1 %>">
+                                <% } else { %>
+                                    <div class="preview-placeholder">
+                                        <span>Image <%= i + 1 %></span>
+                                    </div>
+                                <% } %>
+                            </div>
+                            <div class="file-input-container">
+                                <input type="file" 
+                                       name="images" 
+                                       id="image<%= i %>" 
+                                       class="form-control" 
+                                       accept="image/*"
+                                       onchange="previewImage(this,'<%= i %>')">
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+            
+            <div class="d-flex justify-content-end mt-3">
+                <a href="/admin/products" class="btn btn-outline-dark me-2">Cancel</a>
+                <button type="submit" class="btn btn-dark">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script>
+function previewImage(input, index) {
+    const previewBox = document.getElementById(`previewBox${index}`);
+    const file = input.files[0];
+    
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewBox.innerHTML = `
+                <img src="${e.target.result}" class="preview-image" alt="Preview ${index + 1}">
+            `;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+</script>
+
+<%- include('../partials/admin/footer') %>

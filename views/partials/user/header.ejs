@@ -1,0 +1,322 @@
+<!doctype html>
+<html class="no-js" lang="en">
+
+
+<!-- Mirrored from template.hasthemes.com/hiraola/hiraola/single-product.html by HTTrack Website Copier/3.x [XR&CO'2014], Sat, 25 Jan 2025 12:57:15 GMT -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>𝓡𝓪𝓪𝓫𝓽𝓪 𝓒𝓸𝓵𝓵𝓮𝓬𝓽𝓲𝓸𝓷𝓼</title>
+    <meta name="robots" content="noindex, follow" />
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="/public/user/assets/images/favicon.png">
+
+    <!-- CSS
+	============================================ -->
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/public/user/assets/css/bootstrap.min.css">
+    <!-- Fontawesome -->
+    <link rel="stylesheet" href="/public/user/assets/css/font-awesome.min.css">
+    <!-- Fontawesome Star -->
+    <link rel="stylesheet" href="/public/user/assets/css/fontawesome-stars.css">
+    <!-- Ion Icon -->
+    <link rel="stylesheet" href="/public/user/assets/css/ionicons.min.css">
+    <!-- Slick CSS -->
+    <link rel="stylesheet" href="/public/user/assets/css/slick.min.css">
+    <!-- Animation -->
+    <link rel="stylesheet" href="/public/user/assets/css/animate.min.css">
+    <!-- jQuery Ui -->
+    <link rel="stylesheet" href="/public/user/assets/css/jquery-ui.min.css">
+    <!-- Nice Select -->
+    <link rel="stylesheet" href="/public/user/assets/css/nice-select.min.css">
+    <!-- Timecircles -->
+    <link rel="stylesheet" href="/public/user/assets/css/timecircles.min.css">
+
+    <!-- Main Style CSS -->
+    <link rel="stylesheet" href="/public/user/assets/css/style.css">
+
+    <!-- Add this in your head tag -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/elevatezoom/2.2.3/jquery.elevatezoom.min.css">
+
+<!-- sweet alert -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+
+</head>
+
+<style>
+    .header-right_area i {
+    font-size: 24px;
+}
+</style>
+
+<body class="template-color-1">
+
+    <div class="main-wrapper">
+
+        <!-- Begin Hiraola's Header Main Area -->
+        <header class="header-main_area">
+            <div class="header-middle_area d-none d-lg-block">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-3">
+                            <div class="header-logo">
+                                <a href="/">
+                                    <img src="/public/user/assets/images/menu/logo/1.png" alt="Hiraola's Header Logo">
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-lg-9">
+                            <div class="hm-form_area">
+                                <form action="#" class="hm-searchbox">
+                                    <input type="text" placeholder="Enter your search key ...">
+                                    <button class="li-btn" type="submit"><i class="fa fa-search"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="header-bottom_area header-sticky stick">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-4 col-sm-4 d-lg-none d-block">
+                            <div class="header-logo">
+                                <a href="/">
+                                    <img src="/public/user/assets/images/menu/logo/2.png" alt="Hiraola's Header Logo">
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-lg-9 d-none d-lg-block position-static">
+                            <div class="main-menu_area">
+                                <nav>
+                                    <ul>
+                                        <li class="dropdown-holder"><a href="/">Home</a></li>
+                                        <li class="megamenu-holder"><a href="/shop">Shop</a></li>
+                                        <li><a href="about-us">About Us</a></li>
+                                        <li><a href="contact">Contact</a></li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+
+
+                        <div class="col-lg-3 col-md-8 col-sm-8">
+                            <div class="header-right_area">
+                                <div class="main-menu_area">
+                                    <nav>
+                                        <% if (!locals.session.isAuth) { %>
+                                            <ul>
+                                                <li class="dropdown-holder">
+                                                    <a href="/login">
+                                                        <i class="ion-log-in"></i>
+                                                        Login
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        <% } else { %>
+                                            <ul>
+                                                <li>
+                                                    <a href="/profile" class="wishlist-btn">
+                                                        <i class="ion-person"></i>
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="/wishlist" class="wishlist-btn">
+                                                        <i class="ion-android-favorite-outline"></i>
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a href="/cart" class="wishlist-btn">
+                                                        <i class="ion-bag"></i>
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        <% } %>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+            <div class="offcanvas-minicart_wrapper" id="miniCart">
+                <div class="offcanvas-menu-inner">
+                    <a href="#" class="btn-close"><i class="ion-android-close"></i></a>
+                    <div class="minicart-content">
+                        <div class="minicart-heading">
+                            <h4>Shopping Cart</h4>
+                        </div>
+                        <ul class="minicart-list">
+                            <li class="minicart-product">
+                                <a class="product-item_remove" href="javascript:void(0)"><i class="ion-android-close"></i></a>
+                                <div class="product-item_img">
+                                    <img src="/public/user/assets/images/product/small-size/2-1.jpg" alt="Hiraola's Product Image">
+                                </div>
+                                <div class="product-item_content">
+                                    <a class="product-item_title" href="/shop">Magni dolorum vel</a>
+                                    <span class="product-item_quantity">1 x $120.80</span>
+                                </div>
+                            </li>
+                            <li class="minicart-product">
+                                <a class="product-item_remove" href="javascript:void(0)"><i class="ion-android-close"></i></a>
+                                <div class="product-item_img">
+                                    <img src="/public/user/assets/images/product/small-size/2-2.jpg" alt="Hiraola's Product Image">
+                                </div>
+                                <div class="product-item_content">
+                                    <a class="product-item_title" href="/shop">Eius accusantium omnis</a>
+                                    <span class="product-item_quantity">1 x $120.80</span>
+                                </div>
+                            </li>
+                            <li class="minicart-product">
+                                <a class="product-item_remove" href="javascript:void(0)"><i class="ion-android-close"></i></a>
+                                <div class="product-item_img">
+                                    <img src="/public/user/assets/images/product/small-size/2-3.jpg" alt="Hiraola's Product Image">
+                                </div>
+                                <div class="product-item_content">
+                                    <a class="product-item_title" href="/shop">Aperiam adipisci dolorem</a>
+                                    <span class="product-item_quantity">1 x $120.80</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="minicart-item_total">
+                        <span>Subtotal</span>
+                        <span class="ammount">$360.00</span>
+                    </div>
+                    <div class="minicart-btn_area">
+                        <a href="/cart" class="hiraola-btn hiraola-btn_dark hiraola-btn_fullwidth">Minicart</a>
+                    </div>
+                    <div class="minicart-btn_area">
+                        <a href="/checkout" class="hiraola-btn hiraola-btn_dark hiraola-btn_fullwidth">Checkout</a>
+                    </div>
+                </div>
+            </div>
+            <div class="mobile-menu_wrapper" id="mobileMenu">
+                <div class="offcanvas-menu-inner">
+                    <div class="container">
+                        <a href="#" class="btn-close"><i class="ion-android-close"></i></a>
+                        <div class="offcanvas-inner_search">
+                            <form action="#" class="hm-searchbox">
+                                <input type="text" placeholder="Search for item...">
+                                <button class="search_btn" type="submit"><i class="ion-ios-search-strong"></i></button>
+                            </form>
+                        </div>
+                        <nav class="offcanvas-navigation">
+                            <ul class="mobile-menu">
+                                <li class="menu-item-has-children active"><a href="/"><span class="mm-text">Home</span></a>
+                                    <ul class="sub-menu">
+                                </li>
+                                <li class="menu-item-has-children">
+                                    <a href="/shop">
+                                        <span class="mm-text">Shop</span>
+                                    </a>
+                                    <!-- <ul class="sub-menu">
+                                        <li class="menu-item-has-children">
+                                            <a href="#">
+                                                <span class="mm-text">Single Product Type</span>
+                                            </a>
+                                            </li>
+                                    </ul> -->
+                                </li>
+                                <li class="menu-item-has-children">
+                                    <a href="#">
+                                        <span class="mm-text">Pages</span>
+                                    </a>
+                                    <ul class="sub-menu">
+                                        <li>
+                                            <a href="/useraccount">
+                                                <span class="mm-text">My Account</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/register">
+                                                <span class="mm-text">Register</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/login">
+                                                <span class="mm-text">Login</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/wishlist">
+                                                <span class="mm-text">Wishlist</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/cart">
+                                                <span class="mm-text">Cart</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/checkout">
+                                                <span class="mm-text">Checkout</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </nav>
+                        <nav class="offcanvas-navigation user-setting_area">
+                            <ul class="mobile-menu">
+                                <li class="menu-item-has-children active">
+                                    <a href="#">
+                                        <span class="mm-text">User
+                                        Setting
+                                    </span>
+                                    </a>
+                                    <ul class="sub-menu">
+                                        <li>
+                                            <a href="/useraccount">
+                                                <span class="mm-text">My Account</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/login">
+                                                <span class="mm-text">Login</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="/register">
+                                                <span class="mm-text">Register</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="menu-item-has-children"><a href="#"><span class="mm-text">Language</span></a>
+                                    <ul class="sub-menu">
+                                        <li>
+                                            <a href="javascript:void(0)">
+                                                <span class="mm-text">English</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0)">
+                                                <span class="mm-text">Français</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0)">
+                                                <span class="mm-text">Romanian</span>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="javascript:void(0)">
+                                                <span class="mm-text">Japanese</span>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- Hiraola's Header Main Area End Here -->

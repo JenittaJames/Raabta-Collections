@@ -1,0 +1,218 @@
+<%- include('../partials/user/header') %>
+
+<!-- Begin Hiraola's Breadcrumb Area -->
+        <div class="breadcrumb-area">
+            <div class="container">
+                <div class="breadcrumb-content">
+                    <h2>Other</h2>
+                    <ul>
+                        <li><a href="/home">Home</a></li>
+                        <li class="active">Register</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- Hiraola's Breadcrumb Area End Here -->
+        <!-- Begin Hiraola's Login Register Area -->
+        <div class="hiraola-login-register_area">
+            <div class="container">
+                <div class="row d-flex justify-content-center">
+                    <div class="col-sm-12 col-md-12 col-lg-6 col-xs-12">
+                        <form id="regform" action="/register" method="post">
+                            <div class="login-form">
+                                <h4 class="login-title">Register</h4>
+                                <div class="row">
+                                    <div class="col-12 mb-4 text-center">
+                                        <a href ="/auth/google" class="btn btn-light w-100 position-relative d-flex align-items-center justify-content-center" style="border: 1px solid #ddd; padding: 10px 20px; gap: 10px;">
+                                            <img src="https://cdn.cdnlogo.com/logos/g/35/google-icon.svg" alt="Google Logo" style="width: 20px; height: 20px;">
+                                            <span>Continue with Google</span>
+                                        </a>
+                                    </div>
+                                    
+                                    <div class="col-12 mb-4 text-center">
+                                        <div style="display: flex; align-items: center; gap: 10px;">
+                                            <hr style="flex: 1; border-top: 1px solid #ddd;">
+                                            <span style="color: #666;">or</span>
+                                            <hr style="flex: 1; border-top: 1px solid #ddd;">
+                                        </div>
+                                    </div>
+        
+                                    <div class="col-md-6 col-12 mb--20">
+                                        <label>First Name</label>
+                                        <input type="text" placeholder="First Name" name="firstName" id="firstName">
+                                        <div id="error1" class="error-message"></div>
+                                    </div>
+                                    <div class="col-md-6 col-12 mb--20">
+                                        <label>Last Name</label>
+                                        <input type="text" placeholder="Last Name" name="lastName" id="lastName">
+                                        <div id="error2" class="error-message"></div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label>Email Address*</label>
+                                        <input type="email" placeholder="Email Address" name="email" id="email">
+                                        <div id="error3" class="error-message"></div>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label>Mobile number</label>
+                                        <input type="number" placeholder="Mobile Number" name="phone" id="number">
+                                        <div id="error6" class="error-message"></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label>Password</label>
+                                        <input type="password" placeholder="Password" name="password" id="password">
+                                        <div id="error4" class="error-message"></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label>Confirm Password</label>
+                                        <input type="password" placeholder="Confirm Password" name="confirmPassword" id="confirmPassword">
+                                        <div id="error5" class="error-message" ></div>
+                                    </div>
+                                    <div class="col-12">
+                                        <button type="submit" class="hiraola-register_btn">Register</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Hiraola's Login Register Area  End Here -->
+        <%- include('../partials/user/footer') %>
+
+
+
+
+        <script>
+
+document.addEventListener("DOMContentLoaded", function() {
+    const fnameid = document.getElementById("firstName");
+    const lnameid = document.getElementById("lastName");
+    const emailid = document.getElementById("email");
+    const mobilenum = document.getElementById("number");
+    const passid = document.getElementById("password");
+    const cpassid = document.getElementById("confirmPassword");
+    const error1 = document.getElementById("error1");
+    const error2 = document.getElementById("error2");
+    const error3 = document.getElementById("error3");
+    const error4 = document.getElementById("error4");
+    const error5 = document.getElementById("error5");
+    const error6 = document.getElementById("error6");
+    const regform = document.getElementById("regform");
+
+    function fnameValidateChecking() {
+        const fnameval = fnameid.value;
+        const fnamepattern = /^[A-Za-z\s]+$/;
+
+        if (fnameval.trim() === "") {
+            error1.style.display = "block";
+            error1.innerHTML = "Please enter a valid name";
+            return false;
+        } else if (!fnamepattern.test(fnameval)) {
+            error1.style.display = "block";
+            error1.innerHTML = "Name can only contain alphabets and spaces";
+            return false;
+        } else {
+            error1.style.display = "none";
+            error1.innerHTML = "";
+            return true;
+        }
+    }
+
+    function lnameValidateChecking() {
+        const lnameval = lnameid.value;
+        const lnamepattern = /^[A-Za-z\s]+$/;
+
+        if (lnameval.trim() === "") {
+            error2.style.display = "block";
+            error2.innerHTML = "Please enter a valid name";
+            return false;
+        } else if (!lnamepattern.test(lnameval)) {
+            error2.style.display = "block";
+            error2.innerHTML = "Name can only contain alphabets and spaces";
+            return false;
+        } else {
+            error2.style.display = "none";
+            error2.innerHTML = "";
+            return true;
+        }
+    }
+
+    function emailValidateChecking() {
+        const emailval = emailid.value;
+        const emailpattern = /^[a-zA-Z0-9._-]+@([a-zA-Z0-9.-]+)\.([a-zA-Z]{2,4})$/;
+
+        if (!emailpattern.test(emailval)) {
+            error3.style.display = "block";
+            error3.innerHTML = "Invalid Format";
+            return false;
+        } else {
+            error3.style.display = "none";
+            error3.innerHTML = "";
+            return true;
+        }
+    }
+
+
+    function mobileValidateChecking() {
+    const mobval = mobilenum.value.trim();
+    
+    if (!mobval) {
+        error6.style.display = "block";
+        error6.innerHTML = "Enter a valid phone number";
+    } else if (!/^\d{10}$/.test(mobval)) {
+        error6.style.display = "block";
+        error6.innerHTML = "Enter a 10-digit number";
+    } else {
+        error6.style.display = "none";
+        error6.innerHTML = "";
+        return true;
+    }
+}
+
+
+    function passValidateChecking() {
+        const passval = passid.value;
+        const cpassval = cpassid.value;
+        const alpha = /[a-zA-Z]/;
+        const digit = /\d/;
+        let isValid = true;
+
+        if (passval.length < 8) {
+            error4.style.display = "block";
+            error4.innerHTML = "Should contain at least 8 characters";
+            isValid = false;
+        } else if (!alpha.test(passval) || !digit.test(passval)) {
+            error4.style.display = "block";
+            error4.innerHTML = "Should contain number and alphabets";
+            isValid = false;
+        } else {
+            error4.style.display = "none";
+            error4.innerHTML = "";
+        }
+
+        if (passval !== cpassval) {
+            error5.style.display = "block";
+            error5.innerHTML = "Passwords do not match";
+            isValid = false;
+        } else {
+            error5.style.display = "none";
+            error5.innerHTML = "";
+        }
+
+        return isValid;
+    }
+
+    regform.addEventListener("submit", function(e) {
+        const isFnameValid = fnameValidateChecking();
+        const isLnameValid = lnameValidateChecking();
+        const isEmailValid = emailValidateChecking();
+        const isMobileNumValid = mobileValidateChecking();
+        const isPasswordValid = passValidateChecking();
+
+        if (!isFnameValid || !isLnameValid || !isEmailValid || !isMobileNumValid || !isPasswordValid) {
+            e.preventDefault();
+        }
+    });
+});
+        </script>

@@ -1,0 +1,197 @@
+<%- include('../partials/admin/header') %>
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title">Product List</h2>
+            <p>Product Management</p>
+        </div>
+        <button class="add-category-btn" onclick="window.location.href='/admin/addproduct'">+ Add Product</button>
+    </div>
+
+    <style>
+        .add-category-btn {
+            background-color: #000000;
+            color: white;
+            font-size: 14px;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            border: 1px solid #000000;
+        }
+
+        .users-table th {
+            padding: 12px;
+            text-align: center;
+            background-color: #f8f8f8;
+            font-weight: bold;
+            color: #000000;
+            border: 1px solid #000000;
+        }
+
+        .users-table td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #000000;
+            vertical-align: middle;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            min-width: 80px;
+            background-color: #000000;
+        }
+
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .page-link {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .page-link.active {
+            background-color: #000000;
+            color: white;
+            border-color: #4a90e2;
+        }
+
+        .page-link:hover {
+            background-color: #f5f5f5;
+        }
+
+        .active.page-link:hover {
+            background-color: #000000;
+        }
+
+        .no-data {
+            text-align: center;
+            font-weight: bold;
+            margin-top: 20px;
+            font-size: 18px;
+            color: #555;
+        }
+
+        .product-image {
+            max-width: 50px;
+            max-height: 50px;
+            display: block;
+            margin: 0 auto;
+            object-fit: contain;
+        }
+    </style>
+
+    <% if (products.length > 0) { %>
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>SL.No</th>
+                    <th>Product Name</th>
+                    <th>Image</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% products.forEach((product, index) => { %>
+                    <tr>
+                        <td><%= index + 1 %></td>
+                        <td><%= product.productName %></td>
+                        <td>
+                            <img src="/<%= product.productImage[0] %>" 
+                                 class="product-image" 
+                                 alt="<%= product.productName %>">
+                        </td>
+                        <td><%= product.description %></td>
+                        <td><%= product.category.name%></td>
+                        <td><%= product.price %></td>
+                        <td><%= product.totalStock %></td>
+                        <td><%= product.status ? "Active" : "Inactive" %></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button onclick="confirmBlock('<%= product.id %>')" class="action-btn">
+                                    <%= product.status ? "Block" : "Unblock" %>
+                                </button>
+                                <a href="/admin/editproduct/<%= product.id %>" class="action-btn">Edit</a>
+                            </div>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <p class="no-data">No products found</p>
+    <% } %>
+
+    <div class="pagination">
+        <% if (currentPage > 1) { %>
+            <a href="/admin/products?page=<%= currentPage - 1 %>" class="page-link">←</a>
+        <% } %>
+
+        <% for (let i = 1; i <= totalPages; i++) { %>
+            <a href="/admin/products?page=<%= i %>" class="page-link <%= i === currentPage ? 'active' : '' %>">
+                <%= i %>
+            </a>
+        <% } %>
+
+        <% if (currentPage < totalPages) { %>
+            <a href="/admin/products?page=<%= currentPage + 1 %>" class="page-link">→</a>
+        <% } %>
+    </div>
+</section>
+
+<%- include('../partials/admin/footer') %>
+
+<script>
+    function confirmBlock(productId) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "Do you want to continue?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#000000",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes",
+            cancelButtonText: "No"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/admin/blockproduct/${productId}`;
+            }
+        });
+    }
+</script>

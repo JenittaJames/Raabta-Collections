@@ -1,0 +1,191 @@
+<%- include('../partials/user/header') %>
+<!-- Begin Hiraola's Breadcrumb Area -->
+<div class="breadcrumb-area">
+  <div class="container">
+    <div class="breadcrumb-content">
+      <h2>Other</h2>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li class="active">Cart</li>
+      </ul>
+    </div>
+  </div>
+</div>
+<!-- Hiraola's Breadcrumb Area End Here -->
+<!-- Begin Hiraola's Cart Area -->
+<div class="hiraola-cart-area">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <form action="javascript:void(0)">
+          <div class="table-content table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th class="hiraola-product-thumbnail">Sl. No</th>
+                  <th class="hiraola-product-thumbnail">images</th>
+                  <th class="cart-product-name">Product</th>
+                  <th class="hiraola-product-price">Unit Price</th>
+                  <th class="hiraola-product-quantity">Quantity</th>
+                  <th class="hiraola-product-subtotal">Total</th>
+                  <th class="hiraola-product-remove">remove</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (cartDetails.length > 0 && cartDetails[0].cartItem &&
+                cartDetails[0].cartItem.length > 0) { %> <% let index = 1; %> <%
+                cartDetails[0].cartItem.forEach(item => { %>
+                <tr>
+                  <td class="hiraola-product-price">
+                    <span class="amount"><%= index++ %></span>
+                  </td>
+                  <td class="hiraola-product-thumbnail">
+                    <a href="javascript:void(0)">
+                      <img
+                        src="/<%= item.productId.productImage[0] %>"
+                        alt="Product Image"
+                        style="width: 70px; height: 70px"
+                      />
+                    </a>
+                  </td>
+                  <td class="hiraola-product-name">
+                    <a href="javascript:void(0)"
+                      ><%= item.productId.productName %></a
+                    >
+                  </td>
+                  <td class="hiraola-product-price">
+                    <span class="amount"
+                      ><%= item.productId.price.toFixed(2) %></span
+                    >
+                  </td>
+                  <td class="quantity">
+                    <div class="cart-plus-minus">
+                      <input
+                        class="cart-plus-minus-box"
+                        value="<%= item.quantity %>"
+                        type="text"
+                        data-product-id="<%= item.productId._id %>"
+                      />
+                      <div class="dec qtybutton">
+                        <i class="fa fa-angle-down"></i>
+                      </div>
+                      <div class="inc qtybutton">
+                        <i class="fa fa-angle-up"></i>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="product-subtotal">
+                    <span class="amount"><%= item.total.toFixed(2) %></span>
+                  </td>
+                  <td class="hiraola-product-remove">
+                    <a
+                      href="javascript:void(0);"
+                      onclick="removeFromCart('<%= item.productId._id %>')"
+                    >
+                      <i class="fa fa-trash" title="Remove"></i>
+                    </a>
+                  </td>
+                </tr>
+                <% }); %> <% } else { %>
+                <tr>
+                  <td colspan="7" style="text-align: center">
+                    Your cart is empty.
+                  </td>
+                </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="row">
+            <div class="col-md-5 ml-auto">
+              <div class="cart-page-total">
+                <h2>Cart totals</h2>
+                <ul>
+                  <li>
+                    Subtotal
+                    <span
+                      ><%= cartDetails.length > 0 && cartDetails[0].cartTotal ?
+                      cartDetails[0].cartTotal.toFixed(2) : '0.00' %></span
+                    >
+                  </li>
+                  <li>
+                    Total
+                    <span
+                      ><%= cartDetails.length > 0 && cartDetails[0].cartTotal ?
+                      cartDetails[0].cartTotal.toFixed(2) : '0.00' %></span
+                    >
+                  </li>
+                </ul>
+                <a href="/shop">Continue Shopping</a>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('../partials/user/footer') %>
+
+<script>
+  function removeFromCart(productId) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you really want to remove this product from the cart?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, remove it!",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = `/remove/${productId}`;
+      }
+    });
+  }
+</script>
+
+<script>
+  $(document).ready(function () {
+    // Increment quantity
+    $('.inc.qtybutton').on('click', function () {
+      const input = $(this).siblings('.cart-plus-minus-box');
+      const newQuantity = parseInt(input.val()) + 1;
+      input.val(newQuantity);
+      updateCart(input);
+    });
+
+    // Decrement quantity
+    $('.dec.qtybutton').on('click', function () {
+      const input = $(this).siblings('.cart-plus-minus-box');
+      const newQuantity = parseInt(input.val()) - 1;
+      if (newQuantity >= 1) {
+        input.val(newQuantity);
+        updateCart(input);
+      }
+    });
+
+    // Function to send AJAX request
+    function updateCart(input) {
+      const productId = input.data('product-id');
+      const quantity = input.val();
+
+      $.ajax({
+        url: '/update-cart', // Backend endpoint
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ productId, quantity }),
+        success: function (response) {
+          console.log('Cart updated successfully:', response);
+          // Reload the page or update the UI dynamically
+          location.reload(); // Reload the page to reflect changes
+        },
+        error: function (xhr, status, error) {
+          console.error('Error updating cart:', error);
+        },
+      });
+    }
+  });
+</script>
