@@ -1,0 +1,184 @@
+<%- include('../partials/user/header') %>
+
+<style>
+  .address-container {
+    background-color: #f5f5f5;
+    padding: 2rem 0;
+    min-height: 100vh;
+  }
+
+  .address-card {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    margin: 0 auto;
+    max-width: 600px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: #cda557;
+    outline: none;
+  }
+
+  .save-address-as {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .save-address-as label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: #555;
+  }
+
+  .save-address-as input[type="radio"] {
+    margin: 0;
+  }
+
+  .make-default {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .make-default input[type="checkbox"] {
+    margin: 0;
+  }
+
+  .submit-btn {
+    background: #cda557;
+    color: white;
+    border: none;
+    padding: 1rem;
+    width: 100%;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+
+  .submit-btn:hover {
+    background-color: #b08c4a;
+  }
+
+  .char-count {
+    font-size: 0.875rem;
+    color: #666;
+    margin-top: 0.25rem;
+  }
+</style>
+<form action="/checkout" method="post">
+<div class="address-container">
+  <div class="address-card">
+    <h2>Add Shipping Details</h2>
+
+    <!-- Contact Details -->
+    <div class="form-group">
+      <label for="name">Name *</label>
+      <input type="text" id="name" name="name" placeholder="Enter your name" required>
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email *</label>
+      <input type="email" id="email" name="email" placeholder="Enter your email" required>
+    </div>
+
+    <div class="form-group">
+      <label for="contact-number">Contact Number *</label>
+      <div style="display: flex; gap: 0.5rem;">
+        <select style="flex: 0 0 80px;">
+          <option value="+91">+91</option>
+          <!-- Add more country codes if needed -->
+        </select>
+        <input type="tel" id="contact-number" name="mobile" placeholder="Enter your contact number" required>
+      </div>
+    </div>
+
+    <!-- Address Details -->
+    <div class="form-group">
+      <label for="country">Country *</label>
+      <select id="country" name="country" required>
+        <option value="IN">India</option>
+        <!-- Add more countries if needed -->
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="pincode">Pincode *</label>
+      <input type="text" id="pincode" name="pincode" placeholder="Enter your pincode" required>
+    </div>
+
+    <div class="form-group">
+      <label for="city">City *</label>
+      <input type="text" id="city" name="city" placeholder="Enter your city" required>
+    </div>
+
+    <div class="form-group">
+      <label for="state">State *</label>
+      <input type="text" id="state" name="state" placeholder="Enter your state" required>
+    </div>
+
+    <div class="form-group">
+        <label for="houseNo">House No., Building *</label>
+        <input type="text" id="houseNo" name="houseName" placeholder="Enter your house number or building name" required />
+      </div>
+      
+      <div class="form-group">
+        <label for="street">Street, Area *</label>
+        <input type="text" id="street" name="street" placeholder="Enter your street and area" required />
+      </div>
+
+    <!-- Save Address As -->
+    <div class="save-address-as">
+      <label>
+        <input type="radio" name="saveAs" value="Home"> Home
+      </label>
+      <label>
+        <input type="radio" name="saveAs" value="Work"> Work
+      </label>
+      <label>
+        <input type="radio" name="saveAs" value="Other"> Other
+      </label>
+    </div>
+
+    <!-- Make Default Address -->
+    <div class="make-default">
+      <input type="checkbox" id="make-default" name="isDefault">
+      <label for="make-default">Make this address default</label>
+    </div>
+
+    <!-- Submit Button -->
+    <button class="submit-btn">Save Address</button>
+  </div>
+</div>
+</form>
+
+<%- include('../partials/user/footer') %>

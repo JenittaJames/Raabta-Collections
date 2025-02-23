@@ -1,4 +1,17 @@
 <%- include('../partials/user/header') %>
+<style>
+  .cart-page-total .btn {
+    background-color: #595959 !important; /* Change to your desired color */
+    border-color: #595959 !important;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.cart-page-total .btn:hover {
+    background-color: #cda557 !important; /* Hover color */
+    border-color: #cda557 !important;
+}
+
+</style>
 <!-- Begin Hiraola's Breadcrumb Area -->
 <div class="breadcrumb-area">
   <div class="container">
@@ -98,26 +111,31 @@
           </div>
 
           <div class="row">
-            <div class="col-md-5 ml-auto">
+            <div class="col-md-6">
+              <a href="/shop" class="btn btn-secondary">← Continue Shopping</a>
+            </div>
+
+            <div class="col-md-6 text-right">
               <div class="cart-page-total">
-                <h2>Cart totals</h2>
+                <h2>Cart Totals</h2>
                 <ul>
                   <li>
                     Subtotal
-                    <span
-                      ><%= cartDetails.length > 0 && cartDetails[0].cartTotal ?
-                      cartDetails[0].cartTotal.toFixed(2) : '0.00' %></span
-                    >
+                    <span>
+                      <%= cartDetails.length > 0 && cartDetails[0].cartTotal ?
+                      cartDetails[0].cartTotal.toFixed(2) : '0.00' %>
+                    </span>
                   </li>
                   <li>
                     Total
-                    <span
-                      ><%= cartDetails.length > 0 && cartDetails[0].cartTotal ?
-                      cartDetails[0].cartTotal.toFixed(2) : '0.00' %></span
-                    >
+                    <span>
+                      <%= cartDetails.length > 0 && cartDetails[0].cartTotal ?
+                      cartDetails[0].cartTotal.toFixed(2) : '0.00' %>
+                    </span>
                   </li>
                 </ul>
-                <a href="/shop">Continue Shopping</a>
+                <a href="/checkout" class="btn btn-primary"
+                  >Proceed to Checkout →</a>
               </div>
             </div>
           </div>
@@ -149,44 +167,44 @@
 
 <script>
   $(document).ready(function () {
-    // Increment quantity
-    $('.inc.qtybutton').on('click', function () {
-      const input = $(this).siblings('.cart-plus-minus-box');
-      const newQuantity = parseInt(input.val()) + 1;
-      input.val(newQuantity);
-      updateCart(input);
-    });
+   // Increment quantity
+$(".inc.qtybutton").off("click").on("click", function () {
+  const input = $(this).siblings(".cart-plus-minus-box");
+  let currentQuantity = parseInt(input.val()) || 0; // Ensure it's a valid number
+  input.val(currentQuantity + 1);
+  updateCart(input);
+});
 
-    // Decrement quantity
-    $('.dec.qtybutton').on('click', function () {
-      const input = $(this).siblings('.cart-plus-minus-box');
-      const newQuantity = parseInt(input.val()) - 1;
-      if (newQuantity >= 1) {
-        input.val(newQuantity);
-        updateCart(input);
-      }
-    });
+// Decrement quantity
+$(".dec.qtybutton").off("click").on("click", function () {
+  const input = $(this).siblings(".cart-plus-minus-box");
+  let currentQuantity = parseInt(input.val()) || 0;
+  if (currentQuantity > 1) {
+    input.val(currentQuantity - 1);
+    updateCart(input);
+  }
+});
+
 
     // Function to send AJAX request
     function updateCart(input) {
-      const productId = input.data('product-id');
+      const productId = input.data("product-id");
       const quantity = input.val();
 
       $.ajax({
-        url: '/update-cart', // Backend endpoint
-        method: 'POST',
-        contentType: 'application/json',
+        url: "/update-cart", // Backend endpoint
+        method: "POST",
+        contentType: "application/json",
         data: JSON.stringify({ productId, quantity }),
         success: function (response) {
-          console.log('Cart updated successfully:', response);
+          console.log("Cart updated successfully:", response);
           // Reload the page or update the UI dynamically
           location.reload(); // Reload the page to reflect changes
         },
         error: function (xhr, status, error) {
-          console.error('Error updating cart:', error);
+          console.error("Error updating cart:", error);
         },
       });
     }
   });
-  
 </script>

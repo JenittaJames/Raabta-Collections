@@ -1,0 +1,184 @@
+<%- include('../partials/user/header') %>
+
+<style>
+    .checkout-container {
+      background-color: #f5f5f5;
+      padding: 2rem 0;
+      min-height: 100vh;
+    }
+    
+    .checkout-card {
+      background: white;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+  
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 1rem;
+    }
+  
+    .new-address-btn {
+      background: white;
+      color: #cda557;
+      border: 1px solid #cda557;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+  
+    .new-address-btn:hover {
+      background-color: #cda557;
+      color: white;
+    }
+  
+    .voucher-section {
+      background: #f8f8f8;
+      padding: 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+  
+    .voucher-section:hover {
+      background-color: #e0e0e0;
+    }
+  
+    .order-summary {
+      background: #f8f8f8;
+      padding: 1.5rem;
+      border-radius: 8px;
+    }
+  
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      color: #666;
+    }
+  
+    .total-row {
+      border-top: 1px solid #ddd;
+      padding-top: 1rem;
+      margin-top: 1rem;
+      font-weight: bold;
+      color: #333;
+    }
+  
+    .proceed-btn {
+      background: #595959;
+      color: white;
+      border: none;
+      padding: 1rem;
+      width: 100%;
+      border-radius: 4px;
+      margin-top: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+  
+    .proceed-btn:hover {
+      background-color: #cda557;
+    }
+  
+    .savings {
+      color: #22C55E;
+    }
+  </style>
+
+<div class="checkout-container">
+    <div class="container">
+      <div class="row">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+          <!-- Delivery Address Section -->
+          <div class="checkout-card">
+            <div class="d-flex justify-content-between align-items-center">
+              <h2 class="section-title">DELIVER TO</h2>
+              <a href="/createaddress"><button class="new-address-btn">+ New Address</button></a>
+            </div>
+            <% if (userAddress) { %>
+                <p class="text-muted">
+                  <%= userAddress.name %><br>
+                  <%= userAddress.houseName %>, <%= userAddress.street %><br>
+                  <%= userAddress.city %>, <%= userAddress.state %><br>
+                  <%= userAddress.country %>, <%= userAddress.pincode %><br>
+                  Mobile: <%= userAddress.mobile %>
+                </p>
+              <% } else { %>
+                <p class="text-muted">No saved address</p>
+              <% } %>
+          </div>
+  
+          <!-- Gift Cards Section -->
+          <div class="checkout-card">
+            <h2 class="section-title">GIFTCARDS AND VOUCHERS</h2>
+            <p class="text-muted small">
+              Apply DigitGold, Encircle Points, NetCoins, GiftCards/E-Gift Cards, E-Vouchers, Discount Vouchers etc.
+            </p>
+            <div class="voucher-section mt-3">
+              <span>Coupons and Vouchers</span>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Right Column - Order Summary -->
+        <div class="col-lg-4">
+          <div class="checkout-card">
+            <h2 class="section-title">ORDER SUMMARY</h2>
+            
+            <!-- Price Details -->
+            <div class="order-summary">
+              <div class="price-row">
+                <span>Sub Total</span>
+                <span>₹<%= totalPrice.toFixed(2) %></span>
+              </div>
+              
+              <div class="price-row">
+                <span>Discount</span>
+                <span class="savings"></span>
+              </div>
+              
+              <div class="price-row">
+                <span>Delivery Charge</span>
+                <span class="text-success">FREE</span>
+              </div>
+              
+              <div class="price-row total-row">
+                <span>TOTAL</span>
+                <span>₹<%= totalPrice.toFixed(2) %></span>
+              </div>
+            </div>
+  
+            <!-- Order Items -->
+            <div class="mt-4">
+                <% if (cartItems && cartItems.length > 0) { %>
+                  <% cartItems.forEach(item => { %>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <div>
+                        <h6 class="mb-0"><%= item.productId.productName %></h6>
+                        <small class="text-muted">Qty: <%= item.quantity %></small>
+                      </div>
+                      <span>₹<%= item.total.toFixed(2) %></span>
+                    </div>
+                  <% }) %>
+                <% } else { %>
+                  <p class="text-muted">Your cart is empty.</p>
+                <% } %>
+              </div>
+  
+            <button class="proceed-btn">
+              Proceed To Buy
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<%- include('../partials/user/footer') %>

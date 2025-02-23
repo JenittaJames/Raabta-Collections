@@ -4,6 +4,7 @@ const userController = require("../controller/user/userController");
 const productController = require("../controller/user/productController");
 const cartController = require("../controller/user/cartController")
 const profileController = require("../controller/user/profileController");
+const checkoutController = require("../controller/user/checkoutController")
 const {verifyUser,ifLogged} = require("../middleware/userMiddleware")
 const passport = require("passport")
 
@@ -46,7 +47,13 @@ router.get('/remove/:productId',ifLogged,cartController.removeCart)
 router.post('/update-cart',ifLogged,cartController.updateCartQuantity);
 
 
+router.get('/checkout',ifLogged,checkoutController.checkout)
+
+
 router.get('/profile',ifLogged,profileController.profile)
+router.post('/updateprofile',ifLogged,profileController.updateProfile)
+router.get('/createaddress',ifLogged,profileController.createAddress)
+router.post('/checkout',ifLogged,profileController.addressPost)
 
 
 
