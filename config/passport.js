@@ -31,15 +31,17 @@ passport.use(
                 // Check if the user already exists in your database
                 let user = await User.findOne({ googleId: profile.id });
 
+                console.log("entering to the google controller");
+
                 if (!user) {
                     // Create a new user if they don't exist
                     user = new User({
                         googleId: profile.id,
-                        firstName: profile.name.givenName,
-                        lastName: profile.name.familyName,
+                        userName: profile.name.givenName,
                         email: profile.emails[0].value,
                     });
                     await user.save();
+                    console.log("user...........",user);
                 }
 
                 done(null, user);

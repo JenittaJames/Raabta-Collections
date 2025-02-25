@@ -65,7 +65,7 @@ const loadRegister = async (req, res) => {
 
 const register = async (req, res) => {
   try {
-    const { firstName, lastName, email, phone, password, confirmPassword } =
+    const { userName, email, phone, password, confirmPassword } =
       req.body;
     if (password !== confirmPassword) {
       return res.render("user/register", { message: "Passwords do not match" });
@@ -79,8 +79,7 @@ const register = async (req, res) => {
     const otp = generateOtp();
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = new User({
-      firstName,
-      lastName,
+      userName,
       email,
       phone,
       password: hashedPassword,

@@ -37,16 +37,12 @@
                                         </div>
                                     </div>
         
-                                    <div class="col-md-6 col-12 mb--20">
-                                        <label>First Name</label>
-                                        <input type="text" placeholder="First Name" name="firstName" id="firstName">
+                                    <div class="col-md-12 mb--20">
+                                        <label>User Name</label>
+                                        <input type="text" placeholder="User Name" name="userName" id="userName">
                                         <div id="error1" class="error-message"></div>
                                     </div>
-                                    <div class="col-md-6 col-12 mb--20">
-                                        <label>Last Name</label>
-                                        <input type="text" placeholder="Last Name" name="lastName" id="lastName">
-                                        <div id="error2" class="error-message"></div>
-                                    </div>
+                                    
                                     <div class="col-md-12">
                                         <label>Email Address*</label>
                                         <input type="email" placeholder="Email Address" name="email" id="email">
@@ -86,29 +82,27 @@
         <script>
 
 document.addEventListener("DOMContentLoaded", function() {
-    const fnameid = document.getElementById("firstName");
-    const lnameid = document.getElementById("lastName");
+    const unameid = document.getElementById("userName");
     const emailid = document.getElementById("email");
     const mobilenum = document.getElementById("number");
     const passid = document.getElementById("password");
     const cpassid = document.getElementById("confirmPassword");
     const error1 = document.getElementById("error1");
-    const error2 = document.getElementById("error2");
     const error3 = document.getElementById("error3");
     const error4 = document.getElementById("error4");
     const error5 = document.getElementById("error5");
     const error6 = document.getElementById("error6");
     const regform = document.getElementById("regform");
 
-    function fnameValidateChecking() {
-        const fnameval = fnameid.value;
-        const fnamepattern = /^[A-Za-z\s]+$/;
+    function unameValidateChecking() {
+        const unameval = unameid.value;
+        const unamepattern = /^[A-Za-z\s]+$/;
 
-        if (fnameval.trim() === "") {
+        if (unameval.trim() === "") {
             error1.style.display = "block";
             error1.innerHTML = "Please enter a valid name";
             return false;
-        } else if (!fnamepattern.test(fnameval)) {
+        } else if (!unamepattern.test(unameval)) {
             error1.style.display = "block";
             error1.innerHTML = "Name can only contain alphabets and spaces";
             return false;
@@ -119,25 +113,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    function lnameValidateChecking() {
-        const lnameval = lnameid.value;
-        const lnamepattern = /^[A-Za-z\s]+$/;
-
-        if (lnameval.trim() === "") {
-            error2.style.display = "block";
-            error2.innerHTML = "Please enter a valid name";
-            return false;
-        } else if (!lnamepattern.test(lnameval)) {
-            error2.style.display = "block";
-            error2.innerHTML = "Name can only contain alphabets and spaces";
-            return false;
-        } else {
-            error2.style.display = "none";
-            error2.innerHTML = "";
-            return true;
-        }
-    }
-
+    
     function emailValidateChecking() {
         const emailval = emailid.value;
         const emailpattern = /^[a-zA-Z0-9._-]+@([a-zA-Z0-9.-]+)\.([a-zA-Z]{2,4})$/;
@@ -204,13 +180,12 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     regform.addEventListener("submit", function(e) {
-        const isFnameValid = fnameValidateChecking();
-        const isLnameValid = lnameValidateChecking();
+        const isUnameValid = unameValidateChecking();
         const isEmailValid = emailValidateChecking();
         const isMobileNumValid = mobileValidateChecking();
         const isPasswordValid = passValidateChecking();
 
-        if (!isFnameValid || !isLnameValid || !isEmailValid || !isMobileNumValid || !isPasswordValid) {
+        if (!isUnameValid || !isEmailValid || !isMobileNumValid || !isPasswordValid) {
             e.preventDefault();
         }
     });

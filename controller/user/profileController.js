@@ -7,6 +7,7 @@ const bcrypt = require("bcrypt");
 const profile = async (req,res) => {
     try {
         const user = await userModel.findById(req.session.userId);
+        console.log("user.....",user)
         res.render('user/profile',{user})
     } catch (error) {
         console.log("error occured");

@@ -52,11 +52,11 @@
                             <div id="viewMode">
                                 <div class="info-row">
                                     <span class="info-label">Name:</span>
-                                    <span><%= user.firstName %></span>
-                                </div>
-                                <div class="info-row">
+                                    <span><%= user ? user.userName : 'Guest' %></span>
+                                  </div>
+                                  <div class="info-row">
                                     <span class="info-label">Phone number:</span>
-                                    <span><%= user.phone %></span>
+                                    <span><%= user && user.phone ? user.phone : 'Not provided' %></span>
                                 </div>
                                 <div class="info-row">
                                     <span class="info-label">Email address:</span>
@@ -68,7 +68,7 @@
                             <form id="editMode" style="display: none;" onsubmit="updateProfile(event)">
                                 <div class="form-group">
                                     <label>Name:</label>
-                                    <input type="text" name="firstName" value="<%= user.firstName %>" required>
+                                    <input type="text" name="userName" value="<%= user.userName %>" required>
                                 </div>
                                 <div class="form-group">
                                     <label>Phone number:</label>
@@ -88,7 +88,7 @@
                     
                         <!-- Welcome Section -->
                         <div class="welcome-section">
-                            <p>Hello <strong><%= user.firstName %></strong> (not <%= user.firstName %>? <a href="/logout">Logout</a>)</p>
+                            <p>Hello <strong><%= user.userName %></strong> (not <%= user.userName %>? <a href="/logout">Logout</a>)</p>
                             <p>From your account dashboard you can view your recent orders, manage your shipping and
                                 billing addresses and <a href="javascript:void(0)" onclick="toggleEdit()">edit your password and account
                                 details</a>.</p>
