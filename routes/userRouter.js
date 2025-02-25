@@ -5,6 +5,7 @@ const productController = require("../controller/user/productController");
 const cartController = require("../controller/user/cartController")
 const profileController = require("../controller/user/profileController");
 const checkoutController = require("../controller/user/checkoutController")
+const orderController = require('../controller/user/orderController')
 const {verifyUser,ifLogged} = require("../middleware/userMiddleware")
 const passport = require("passport")
 
@@ -53,7 +54,14 @@ router.get('/checkout',ifLogged,checkoutController.checkout)
 router.get('/profile',ifLogged,profileController.profile)
 router.post('/updateprofile',ifLogged,profileController.updateProfile)
 router.get('/createaddress',ifLogged,profileController.createAddress)
-router.post('/checkout',ifLogged,profileController.addressPost)
+router.post('/address',ifLogged,profileController.addressPost)
+router.post('/address/default/:id',ifLogged,profileController.setDefaultAddress);
+router.get('/address',ifLogged,profileController.addressDetails)
+router.get('/changepassword',ifLogged,profileController.changePassword)
+router.post('/changepassword',ifLogged,profileController.changePasswordPost)
+
+router.get('/orders',ifLogged,orderController.orders)
+router.get('/orderDetails',ifLogged,orderController.orderDetails)
 
 
 

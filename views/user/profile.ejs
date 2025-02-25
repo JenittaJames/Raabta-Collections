@@ -26,13 +26,13 @@
                             <a class="nav-link active" id="account-dashboard-tab" href="/profile" aria-controls="account-dashboard" aria-selected="true">Dashboard</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" id="account-orders-tab" href="#account-orders" aria-controls="account-orders" aria-selected="false">Orders</a>
+                            <a class="nav-link" id="account-orders-tab" href="/orders" aria-controls="account-orders" aria-selected="false">Orders</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" id="account-address-tab" href="/address" aria-controls="account-address" aria-selected="false">Addresses</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" id="account-details-tab" href="/accountdetails" aria-controls="account-details" aria-selected="false">Account Details</a>
+                            <a class="nav-link" id="account-details-tab" href="/changepassword" aria-controls="account-details" aria-selected="false">Change Password</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" id="account-logout-tab" href="/logout" role="tab" aria-selected="false">Logout</a>
@@ -88,7 +88,7 @@
                     
                         <!-- Welcome Section -->
                         <div class="welcome-section">
-                            <p>Hello <strong><%= user.firstName %></strong> (not <%= user.firstName %>? <a href="/logout">Sign out</a>)</p>
+                            <p>Hello <strong><%= user.firstName %></strong> (not <%= user.firstName %>? <a href="/logout">Logout</a>)</p>
                             <p>From your account dashboard you can view your recent orders, manage your shipping and
                                 billing addresses and <a href="javascript:void(0)" onclick="toggleEdit()">edit your password and account
                                 details</a>.</p>

@@ -95,7 +95,7 @@
     margin-top: 0.25rem;
   }
 </style>
-<form action="/checkout" method="post">
+<form action="/address" method="post">
 <div class="address-container">
   <div class="address-card">
     <h2>Add Shipping Details</h2>
@@ -170,10 +170,13 @@
     </div>
 
     <!-- Make Default Address -->
-    <div class="make-default">
-      <input type="checkbox" id="make-default" name="isDefault">
-      <label for="make-default">Make this address default</label>
-    </div>
+   <!-- Replace the problematic form with this -->
+<div class="form-group make-default">
+  <label>
+      <input type="checkbox" name="isDefault" id="isDefault"> 
+      Make this my default address
+  </label>
+</div>
 
     <!-- Submit Button -->
     <button class="submit-btn">Save Address</button>

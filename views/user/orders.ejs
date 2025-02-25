@@ -1,52 +1,318 @@
 <%- include('../partials/user/header') %>
-        <!-- Begin Hiraola's Breadcrumb Area -->
-        <div class="breadcrumb-area">
-            <div class="container">
-                <div class="breadcrumb-content">
-                    <h2>Other</h2>
-                    <ul>
-                        <li><a href="/">Home</a></li>
-                        <li class="active">My Account</li>
+<!-- Begin Hiraola's Breadcrumb Area -->
+<div class="breadcrumb-area">
+    <div class="container">
+        <div class="breadcrumb-content">
+            <h2>My Orders</h2>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/orders">My Account</a></li>
+                <li class="active">Orders</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Begin Hiraola's Page Content Area -->
+<main class="page-content">
+    <div class="account-page-area">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3">
+                    <ul class="nav myaccount-tab-trigger" id="account-page-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link" id="account-dashboard-tab" href="/profile" aria-controls="account-dashboard" aria-selected="false">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" id="account-orders-tab" href="/orders" aria-controls="account-orders" aria-selected="true">Orders</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="account-address-tab" href="/address" aria-controls="account-address" aria-selected="false">Addresses</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="account-details-tab" href="/changepassword" aria-controls="account-details" aria-selected="false">Change Password</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="account-logout-tab" href="/logout" role="tab" aria-selected="false">Logout</a>
+                        </li>
                     </ul>
                 </div>
-            </div>
-        </div>
-        <!-- Hiraola's Breadcrumb Area End Here -->
-        <!-- Begin Hiraola's Page Content Area -->
-        <main class="page-content">
-            <!-- Begin Hiraola's Account Page Area -->
-            <div class="account-page-area">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-lg-3">
-                            <ul class="nav myaccount-tab-trigger" id="account-page-tab" role="tablist">
-                                <li class="nav-item">
-                                    <a class="nav-link active" id="account-dashboard-tab"  href="/profile"  aria-controls="account-dashboard" aria-selected="true">Dashboard</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="account-orders-tab"  href="#account-orders"  aria-controls="account-orders" aria-selected="false">Orders</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="account-address-tab"  href="/address"  aria-controls="account-address" aria-selected="false">Addresses</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="account-details-tab"  href="/accountdetails"  aria-controls="account-details" aria-selected="false">Account Details</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="account-logout-tab" href="/logout" role="tab" aria-selected="false">Logout</a>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="col-lg-9">
-                            <div class="tab-content myaccount-tab-content" id="account-page-tab-content">
-                                
+                <div class="col-lg-9">
+                    <div class="tab-content myaccount-tab-content" id="account-page-tab-content">
+                        <div class="tab-pane fade show active" id="account-orders" role="tabpanel" aria-labelledby="account-orders-tab">
+                            <div class="myaccount-orders">
+                                <h4 class="small-title">MY ORDERS</h4>
+                                <% if (orders && orders.length > 0) { %>
+                                    <% orders.forEach(function(order) { %>
+                                        <div class="order-card">
+                                            <div class="order-header">
+                                                <div class="order-header-left">
+                                                    <div class="order-id">Order ID: <%= order._id %></div>
+                                                    <div class="order-date">Ordered on: <%= new Date(order.createdAt).toLocaleDateString() %></div>
+                                                </div>
+                                                <div class="order-header-right">
+                                                    <div class="order-amount">Total: ₹<%= order.orderAmount %></div>
+                                                    <div class="payment-status <%= order.paymentStatus.toLowerCase() %>">
+                                                        Payment: <%= order.paymentStatus %>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="order-items">
+                                                <% order.orderedItem.forEach(function(item) { %>
+                                                    <div class="order-item">
+                                                        <div class="item-details">
+                                                            <% if (item.productId.productImage) { %>
+                                                                <img src="/uploads/<%= item.productId.productImage[0] %>" alt="Product Image" class="product-image">
+                                                            <% } %>
+                                                            <div class="item-info">
+                                                                <h5><%= item.productId.productName %></h5>
+                                                                <p>Quantity: <%= item.quantity %></p>
+                                                                <p>Price: ₹<%= item.productPrice %></p>
+                                                                <p>Total: ₹<%= item.totalProductPrice %></p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="item-status">
+                                                            <span class="status-badge <%= item.productStatus.toLowerCase() %>">
+                                                                <%= item.productStatus %>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                <% }); %>
+                                            </div>
+
+                                            <div class="order-footer">
+                                                <div class="delivery-info">
+                                                    <% if (order.deliveryDate) { %>
+                                                        <p>Delivery Date: <%= new Date(order.deliveryDate).toLocaleDateString() %></p>
+                                                    <% } %>
+                                                    <% if (order.shippingDate) { %>
+                                                        <p>Shipping Date: <%= new Date(order.shippingDate).toLocaleDateString() %></p>
+                                                    <% } %>
+                                                    <p>Payment Method: <%= order.paymentMethod %></p>
+                                                </div>
+                                                <div class="order-actions">
+                                                    <a href="/order/<%= order._id %>" class="btn-view-order">View Details</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    <% }); %>
+                                <% } else { %>
+                                    <div class="no-orders">
+                                        <p>No orders found</p>
+                                        <a href="/shop" class="btn-shop">Start Shopping</a>
+                                    </div>
+                                <% } %>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- Hiraola's Account Page Area End Here -->
-        </main>
-        <!-- Hiraola's Page Content Area End Here -->
+        </div>
+    </div>
+</main>
 
-         <%- include('../partials/user/footer') %>
+<style>
+.order-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #eee;
+}
+
+.order-header-left, .order-header-right {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.order-id {
+    font-weight: 600;
+    color: #333;
+}
+
+.order-date {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.order-amount {
+    font-weight: 600;
+    color: #2e7d32;
+}
+
+.order-items {
+    padding: 15px;
+}
+
+.order-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.order-item:last-child {
+    border-bottom: none;
+}
+
+.item-details {
+    display: flex;
+    gap: 15px;
+}
+
+.product-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.item-info h5 {
+    margin: 0;
+    color: #333;
+}
+
+.item-info p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.status-badge.pending {
+    background-color: #fff3e0;
+    color: #e65100;
+}
+
+.status-badge.confirmed {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.status-badge.shipped {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.status-badge.delivered {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.status-badge.cancelled {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.payment-status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.payment-status.pending {
+    background-color: #fff3e0;
+    color: #e65100;
+}
+
+.payment-status.completed {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.payment-status.failed {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.order-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-top: 1px solid #eee;
+}
+
+.delivery-info p {
+    margin: 0;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.btn-view-order {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #333;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+
+.btn-view-order:hover {
+    background-color: #000;
+}
+
+.no-orders {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.btn-shop {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #333;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    margin-top: 15px;
+    transition: all 0.3s;
+}
+
+.btn-shop:hover {
+    background-color: #000;
+}
+
+@media (max-width: 768px) {
+    .order-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .item-details {
+        flex-direction: column;
+    }
+    
+    .order-footer {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+}
+</style>
+
+<%- include('../partials/user/footer') %>
