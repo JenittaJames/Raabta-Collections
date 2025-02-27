@@ -56,21 +56,19 @@ router.get("/remove/:productId", ifLogged, cartController.removeCart);
 router.post("/update-cart", ifLogged, cartController.updateCartQuantity);
 
 router.get("/checkout", ifLogged, checkoutController.checkout);
+router.get("/placingorder", ifLogged, checkoutController.placingOrder)
 
 router.get("/profile", ifLogged, profileController.profile);
 router.post("/updateprofile", ifLogged, profileController.updateProfile);
 router.get("/createaddress", ifLogged, profileController.createAddress);
 router.post("/address", ifLogged, profileController.addressPost);
-router.post(
-  "/address/default/:id",
-  ifLogged,
-  profileController.setDefaultAddress
-);
+router.post("/address/default/:id", ifLogged, profileController.setDefaultAddress);
 router.get("/address", ifLogged, profileController.addressDetails);
 router.get("/changepassword", ifLogged, profileController.changePassword);
 router.post("/changepassword", ifLogged, profileController.changePasswordPost);
 
 router.get("/orders", ifLogged, orderController.orders);
 router.get("/orderDetails", ifLogged, orderController.orderDetails);
+router.get("/confirmorder", ifLogged, orderController.placeOrder)
 
 module.exports = router;

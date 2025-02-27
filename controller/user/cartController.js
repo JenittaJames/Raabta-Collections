@@ -3,7 +3,6 @@ const cartModel = require("../../models/cartSchema");
 
 const loadCart = async (req, res) => {
   try {
-    console.log("Entering to cart page");
     const userId = req.session.userId;
     const cartDetails = await cartModel
       .find({ user: userId })

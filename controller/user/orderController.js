@@ -8,12 +8,12 @@ const cartModel = require('../../models/cartSchema')
 const orders = async (req, res) => {
     try {
         const orders = await ordersModel.find({ userId: req.session.userId })
-            .populate('orderedItem.productId')
+            .populate({
+                path: 'orderedItem.productId',
+                model: 'Product'  // Make sure this matches your product model name exactly
+            })
             .populate('userId')
             .sort('-createdAt');
-
-
-            console.log("ordersseeeeeee",orders);
         
         res.render('user/orders', { orders });
     } catch (error) {
@@ -23,88 +23,25 @@ const orders = async (req, res) => {
 };
 
 
-const placeOrder = async (req, res) => {
-  try {
-      const userId = req.session.userId ;
-      const { addressId, paymentMethod } = req.body;
-
-      const cart = await cartModel.findOne({ userId })
-          .populate('cartItem.productId');
-
-      if (!cart || cart.items.length === 0) {
-          return res.status(400).json({ success: false, message: 'Cart is empty' });
-      }
-
-      // Get user's address
-      const user = await userModel.findById(userId);
-      const deliveryAddress = user.address.find(addr => addr._id.toString() === addressId);
-
-      if (!deliveryAddress) {
-          return res.status(400).json({ success: false, message: 'Invalid delivery address' });
-      }
-
-      // Prepare ordered items
-      const orderedItems = cart.item.map(item => ({
-          productId: item.productId._id,
-          quantity: item.quantity,
-          productPrice: item.productId.price,
-          productStatus: 'pending',
-          totalProductPrice: item.quantity * item.productId.price
-      }));
-
-      // Calculate total order amount
-      const orderAmount = orderedItems.reduce((total, item) => total + item.totalProductPrice, 0);
-
-      // Create new order
-      const newOrder = new Order({
-          userId,
-          cartId: cart._id,
-          orderedItem: orderedItems,
-          deliveryAddress: [deliveryAddress],
-          orderAmount,
-          paymentMethod,
-          paymentStatus: paymentMethod === 'COD' ? 'pending' : 'completed',
-      });
-
-      await newOrder.save();
-
-      // Clear cart after order placement
-      await Cart.findByIdAndUpdate(cart._id, { $set: { items: [] } });
-
-      // Update product stock
-      for (const item of orderedItems) {
-          await Product.findByIdAndUpdate(item.productId, {
-              $inc: { stock: -item.quantity }
-          });
-      }
-
-      res.status(200).json({
-          success: true,
-          message: 'Order placed successfully',
-          orderId: newOrder._id
-      });
-
-  } catch (error) {
-      console.error('Error in placeOrder:', error);
-      res.status(500).json({ success: false, message: 'Failed to place order' });
-  }
-}
-
-
 const orderDetails = async (req, res) => {
   try {
+
+    console.log("ividuthe order details eathhaa.....");
       const orderId = req.params.orderId;
       const userId = req.session.userId;
 
       const order = await ordersModel.findOne({ _id: orderId, userId })
-          .populate('orderedItem.productId')
+          .populate({
+            path: 'orderedItem.productId',
+            model: 'Product'  // Make sure this matches your product model name exactly
+        })
           .populate('userId');
 
       if (!order) {
           return res.status(404).render('error', { message: 'Order not found' });
       }
 
-      res.render('/orderDetails', { order });
+      res.render('user/orderDetails', { order });
 
   } catch (error) {
       console.error('Error in getOrderDetails:', error);
@@ -114,9 +51,77 @@ const orderDetails = async (req, res) => {
 
 
 
+const placeOrder = async (req, res) => {
+    try {
+
+        const userId = req.session.userId;
+        const user = await userModel.findById(userId);
+
+        const cart = await cartModel.findOne({ user: userId  })
+            .populate('cartItem.productId');
+        
+        if (!cart || cart.cartItem.length === 0) {
+            return res.status(400).send('No items in cart');
+        }
+        
+        const address = await addressModel.findOne({ userId});
+        
+        if (!address) {
+            return res.status(400).send('No delivery address found');
+        }
+        
+        // Calculate total amount
+        let totalAmount = 0;
+        const orderedItems = cart.cartItem.map(item => {
+            const itemTotal = item.quantity * item.productId.price;
+            totalAmount += itemTotal;
+            
+            return {
+                productId: item.productId._id,
+                quantity: item.quantity,
+                productPrice: item.productId.price,
+                productStatus: "pending",
+                totalProductPrice: itemTotal
+            };
+        });
+        
+        // Create a new order
+        const newOrder = new ordersModel({
+            userId: userId,
+            cartId: cart._id,
+            orderedItem: orderedItems,
+            deliveryAddress: [address],
+            orderAmount: totalAmount,
+            paymentMethod: "Cash on Delivery", 
+            paymentStatus: "pending"
+        });
+
+        
+        await newOrder.save();
+        
+        await cartModel.deleteOne({user : userId});
+        
+        const orderNumber = 'ORD' + Math.floor(Math.random() * 1000000);
+        
+        res.render('user/confirmorder', { 
+            order: {
+                customerName: user.username || user.name || 'Customer',
+                orderNumber: orderNumber,
+                _id: newOrder._id,
+                orderAmount: totalAmount,
+                items: orderedItems,
+            }
+        });
+        
+    } catch (error) {
+        console.log("Error occurred while placing the order", error);
+        res.status(500).send('An error occurred while placing your order');
+    }
+}
+
 
 module.exports = {
     orders,
-    placeOrder,
     orderDetails,
+    placeOrder,
 }
