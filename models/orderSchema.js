@@ -10,6 +10,11 @@ const orderSchema = new Schema({
         type :  mongoose.Schema.ObjectId,
         ref : "Cart"
     },
+    deliveryAddress: { 
+        type: mongoose.Schema.ObjectId,
+        ref: "Address",
+        required: true
+    },
     orderedItem : [{
         productId : {
             type :  mongoose.Schema.ObjectId,
@@ -36,10 +41,6 @@ const orderSchema = new Schema({
             type : String,
         }
     }],
-    deliveryAddress : {
-        type : Array,
-        required : true
-    },
     orderAmount : {
         type : Number,
         required : true

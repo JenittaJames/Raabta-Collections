@@ -68,7 +68,7 @@ router.get("/changepassword", ifLogged, profileController.changePassword);
 router.post("/changepassword", ifLogged, profileController.changePasswordPost);
 
 router.get("/orders", ifLogged, orderController.orders);
-router.get("/orderDetails", ifLogged, orderController.orderDetails);
+router.get("/orderdetails/:orderId", ifLogged, orderController.orderDetails);
 router.get("/confirmorder", ifLogged, orderController.placeOrder)
 
 module.exports = router;

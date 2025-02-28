@@ -23,33 +23,6 @@ const orders = async (req, res) => {
 };
 
 
-const orderDetails = async (req, res) => {
-  try {
-
-    console.log("ividuthe order details eathhaa.....");
-      const orderId = req.params.orderId;
-      const userId = req.session.userId;
-
-      const order = await ordersModel.findOne({ _id: orderId, userId })
-          .populate({
-            path: 'orderedItem.productId',
-            model: 'Product'  // Make sure this matches your product model name exactly
-        })
-          .populate('userId');
-
-      if (!order) {
-          return res.status(404).render('error', { message: 'Order not found' });
-      }
-
-      res.render('user/orderDetails', { order });
-
-  } catch (error) {
-      console.error('Error in getOrderDetails:', error);
-      res.status(500).render('error', { message: 'Failed to load order details' });
-  }
-}
-
-
 
 const placeOrder = async (req, res) => {
     try {
@@ -119,6 +92,32 @@ const placeOrder = async (req, res) => {
     }
 }
 
+
+
+const orderDetails = async (req, res) => {
+    try {
+        const orderId = req.params.orderId;
+        const userId = req.session.userId;
+        
+        const order = await ordersModel.findOne({ _id: orderId, userId })
+            .populate({
+                path: 'orderedItem.productId',
+                model: 'Product'
+            })
+            .populate('userId');
+        
+        if (!order) {
+            return res.status(404).render('error', { message: 'Order not found' });
+        }
+        
+        const address = await addressModel.findOne({ userId: userId });
+        
+        res.render('user/orderdetails', { order, address });
+    } catch (error) {
+        console.error('Error in getOrderDetails:', error);
+        res.status(500).render('error', { message: 'Failed to load order details' });
+    }
+}
 
 module.exports = {
     orders,

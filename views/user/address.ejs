@@ -58,7 +58,7 @@
                                                 
                                                 <div class="address-details">
                                                     <h5 class="address-name"><%= address.name %></h5>
-                                                    <p class="address-phone">+<%= address.mobile %></p>
+                                                    <p class="address-phone"><%= address.mobile %></p>
                                                     <p class="address-text">
                                                         <% if (address.houseName && address.houseName.trim() !== '') { %><%= address.houseName %>, <% } %>
                                                         <% if (address.street && address.street.trim() !== '') { %><%= address.street %>, <% } %><br>
