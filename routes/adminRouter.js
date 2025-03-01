@@ -3,6 +3,7 @@ const router = express.Router();
 const adminController = require("../controller/admin/adminController");
 const categoryController = require("../controller/admin/categoryController")
 const productController = require("../controller/admin/productController")
+const orderController = require("../controller/admin/orderController")
 const {adminAuth} = require("../middleware/adminMiddleware")
 const multer = require("multer");
 
@@ -38,7 +39,8 @@ router.post("/editimage/:productId",adminAuth,upload.array("images"),productCont
 
 
 
-
+router.get("/orders", adminAuth, orderController.orders)
+router.get('/orders/:orderId',adminAuth, orderController.orderDetails);
 
 
 module.exports = router;

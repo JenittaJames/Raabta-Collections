@@ -109,13 +109,21 @@
                       >
                         Payment: <%= order.paymentStatus %>
                       </div>
+                      <div
+                        class="order-status <%= order.orderStatus.toLowerCase() %>"
+                      >
+                        Status: <%= order.orderStatus %>
+                      </div>
                     </div>
                   </div>
-                  
+
                   <div class="order-footer">
                     <div class="order-actions">
-                      <a href="/orderdetails/<%= order._id %>" class="btn-view-order"
-                        >View Details</a>
+                      <a
+                        href="/orderdetails/<%= order._id %>"
+                        class="btn-view-order"
+                        >View Details</a
+                      >
                     </div>
                   </div>
                 </div>
@@ -222,7 +230,7 @@
   .btn-view-order:hover {
     background-color: #000;
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
 
   .no-orders {
@@ -244,6 +252,39 @@
   .btn-shop:hover {
     background-color: #000;
   }
+
+  .order-status {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    margin-top: 5px;
+  }
+
+  .order-status.pending {
+    background-color: #e3f2fd;
+    color: #1565c0;
+  }
+
+  .order-status.processing {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+  }
+  
+  .order-status.shipped {
+    background-color: #e0f7fa;
+    color: #00838f;
+  }
+
+  .order-status.delivered {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  .order-status.cancelled {
+    background-color: #ffebee;
+    color: #c62828;
+  }
+
 
   @media (max-width: 768px) {
     .order-header {

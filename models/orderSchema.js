@@ -11,7 +11,7 @@ const orderSchema = new Schema({
         ref : "Cart"
     },
     deliveryAddress: { 
-        type: mongoose.Schema.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "Address",
         required: true
     },
@@ -37,9 +37,6 @@ const orderSchema = new Schema({
             type : Number,
             required : true
         },
-        returnReason : {
-            type : String,
-        }
     }],
     orderAmount : {
         type : Number,
@@ -59,6 +56,11 @@ const orderSchema = new Schema({
         type : String,
         required : true
     },
+    orderStatus: { 
+        type: String,
+        enum: ["Pending", "Confirmed", "Shipped", "Delivered", "Cancelled"], 
+        default: "Pending" 
+    }
 },{ timestamps : true });
 
 const Orders = mongoose.model("Orders", orderSchema);

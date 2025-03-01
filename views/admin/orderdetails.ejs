@@ -1,0 +1,204 @@
+<%- include('../partials/admin/header') %>
+
+<div class="container mt-4">
+    <div class="row mb-3">
+        <div class="col-12">
+            <a href="/admin/orders" class="btn btn-secondary">← Back to Orders</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Order #<%= order._id.toString().slice(-6).toUpperCase() %></h4>
+                    <span class="badge bg-<%= order.orderStatus === 'Delivered' ? 'success' : order.orderStatus === 'Cancelled' ? 'danger' : 'warning' %>">
+                        <%= order.orderStatus %>
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h5>Order Details</h5>
+                            <p><strong>Order Date:</strong> <%= new Date(order.createdAt).toLocaleString() %></p>
+                            <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+                            <p><strong>Payment Status:</strong> <%= order.paymentStatus %></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Customer Details</h5>
+                            <p><strong>Name:</strong> <%= order.userId.userName || order.userId.name || 'N/A' %></p>
+                            <p><strong>Email:</strong> <%= order.userId.email || 'N/A' %></p>
+                            <p><strong>Phone:</strong> <%= order.userId.phone || 'N/A' %></p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5>Shipping Address</h5>
+                            <% if (address && address.address && address.address.length > 0) { %>
+                                <div class="address-card">
+                                  <% const addr = address.address[0]; %>
+                                  <div class="address-name"><%= addr.name || '' %></div>
+                                  <p class="address-phone"><%= addr.mobile || '' %></p>
+                                  <p class="address-text">
+                                    <%= [ addr.houseName, addr.street, addr.city, addr.state,
+                                    addr.pincode, addr.country ].filter(Boolean).join(', ') %>
+                                  </p>
+                                  <span class="address-type"><%= addr.saveAs || '' %></span>
+                                </div>
+                                <% } else { %>
+                                <p>No delivery address available</p>
+                                <% } %>
+                        </div>
+                    </div>
+
+                    <h5>Order Items</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th>Status</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% order.orderedItem.forEach(item => { %>
+                                    <tr>
+                                        <td>
+                                            <% if (item.productId) { %>
+                                                <%= item.productId.productName %>
+                                            <% } else { %>
+                                                Product Unavailable
+                                            <% } %>
+                                        </td>
+                                        <td>₹<%= item.productPrice.toFixed(2) %></td>
+                                        <td><%= item.quantity %></td>
+                                        <td><%= item.productStatus %></td>
+                                        <td>₹<%= item.totalProductPrice.toFixed(2) %></td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="4" class="text-end">Order Total:</th>
+                                    <th>₹<%= order.orderAmount.toFixed(2) %></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Update Order Status</h5>
+                </div>
+                <div class="card-body">
+                    <form id="updateOrderForm">
+                        <input type="hidden" name="orderId" value="<%= order._id %>">
+                        
+                        <div class="mb-3">
+                            <label for="orderStatus" class="form-label">Order Status</label>
+                            <select class="form-select" id="orderStatus" name="orderStatus">
+                                <option value="Pending" <%= order.orderStatus === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                <option value="Processing" <%= order.orderStatus === 'Processing' ? 'selected' : '' %>>Processing</option>
+                                <option value="Shipped" <%= order.orderStatus === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                                <option value="Delivered" <%= order.orderStatus === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                <option value="Cancelled" <%= order.orderStatus === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="paymentStatus" class="form-label">Payment Status</label>
+                            <select class="form-select" id="paymentStatus" name="paymentStatus">
+                                <option value="pending" <%= order.paymentStatus === 'pending' ? 'selected' : '' %>>Pending</option>
+                                <option value="paid" <%= order.paymentStatus === 'paid' ? 'selected' : '' %>>Paid</option>
+                                <option value="failed" <%= order.paymentStatus === 'failed' ? 'selected' : '' %>>Failed</option>
+                                <option value="refunded" <%= order.paymentStatus === 'refunded' ? 'selected' : '' %>>Refunded</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">Update Status</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Order Timeline</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>Order Placed</strong>
+                                    <p class="mb-0">Status: Created</p>
+                                </div>
+                                <small><%= new Date(order.createdAt).toLocaleString() %></small>
+                            </div>
+                        </li>
+                        <% if (order.updatedAt && order.updatedAt > order.createdAt) { %>
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <strong>Last Updated</strong>
+                                        <p class="mb-0">Status: <%= order.orderStatus %></p>
+                                    </div>
+                                    <small><%= new Date(order.updatedAt).toLocaleString() %></small>
+                                </div>
+                            </li>
+                        <% } %>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const updateOrderForm = document.getElementById('updateOrderForm');
+    
+    updateOrderForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const updateData = {
+            orderId: formData.get('orderId'),
+            orderStatus: formData.get('orderStatus'),
+            paymentStatus: formData.get('paymentStatus')
+        };
+        
+        fetch('/admin/orders/update-status', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updateData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                alert('Order status updated successfully');
+                // Reload the page to reflect the changes
+                window.location.reload();
+            } else {
+                alert('Failed to update order status: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while updating order status');
+        });
+    });
+});
+</script>
+
+<%- include('../partials/admin/footer') %>

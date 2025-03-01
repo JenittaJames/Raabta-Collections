@@ -146,8 +146,19 @@
                                         <option value="4">XL</option>
                                     </select>
                                 </div> -->
+
+                                <a href="#">
+                                  <% if (product.totalStock == 0) { %>
+                                    Out Of Stock
+                                  <% } else { %>
+                                   Availability : <%= product.totalStock %> Item Available
+                                  <% } %>
+                                </a>
+
             <div class="quantity">
               <label>Quantity</label>
+
+              
               <div class="cart-plus-minus">
                 <input class="cart-plus-minus-box" value="1" type="text" />
                 <div class="dec qtybutton">
@@ -157,6 +168,8 @@
               </div>
             </div>
 
+
+            
             <div class="qty-btn_area">
               <ul>
                 <li>
@@ -355,7 +368,7 @@
           <div class="slide-item">
             <div class="single_product">
               <div class="product-img">
-                <a href="/product/<%= related._id %>">
+                <a href="/singleproduct/<%= related._id %>">
                   <img
                     class="primary-img"
                     src="/<%= related.productImage[0] %>"

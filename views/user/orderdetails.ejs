@@ -83,26 +83,20 @@
         <div class="address-section">
           <h3>Shipping Address</h3>
           <% if (address && address.address && address.address.length > 0) { %>
-              <div class="address-card">
-                  <% const addr = address.address[0]; %>
-                  <div class="address-name"><%= addr.name || '' %></div>
-                  <p class="address-phone"><%= addr.mobile || '' %></p>
-                  <p class="address-text">
-                      <%= [
-                          addr.houseName,
-                          addr.street,
-                          addr.city,
-                          addr.state,
-                          addr.pincode,
-                          addr.country
-                      ].filter(Boolean).join(', ') %>
-                  </p>
-                  <span class="address-type"><%= addr.saveAs || '' %></span>
-              </div>
+          <div class="address-card">
+            <% const addr = address.address[0]; %>
+            <div class="address-name"><%= addr.name || '' %></div>
+            <p class="address-phone"><%= addr.mobile || '' %></p>
+            <p class="address-text">
+              <%= [ addr.houseName, addr.street, addr.city, addr.state,
+              addr.pincode, addr.country ].filter(Boolean).join(', ') %>
+            </p>
+            <span class="address-type"><%= addr.saveAs || '' %></span>
+          </div>
           <% } else { %>
-              <p>No delivery address available</p>
+          <p>No delivery address available</p>
           <% } %>
-      </div>
+        </div>
 
         <!-- Order Items Section -->
         <div class="order-items-section">
@@ -186,18 +180,9 @@
           </div>
         </div>
 
-        <!-- Actions Section -->
         <div class="order-actions-section">
           <a href="/orders" class="btn-back">Back to Orders</a>
-          <% if (order.orderStatus === 'Pending' || order.orderStatus ===
-          'Confirmed') { %>
-          <a
-            href="/cancel-order/<%= order._id %>"
-            class="btn-cancel"
-            onclick="return confirm('Are you sure you want to cancel this order?')"
-            >Cancel Order</a
-          >
-          <% } %>
+          <button id="cancelOrderBtn" data-order-id="<%= order._id %>" class="cancel-order-btn">Cancel Order</button>
           <a href="#" class="btn-contact">Contact Support</a>
         </div>
       </div>
@@ -535,3 +520,70 @@
 </style>
 
 <%- include('../partials/user/footer') %>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const cancelButtons = document.querySelectorAll('.cancel-order-btn');
+    
+    cancelButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const orderId = this.getAttribute('data-order-id');
+        
+        // Show SweetAlert confirmation
+        Swal.fire({
+          title: 'Cancel Order?',
+          text: 'Are you sure you want to cancel this order?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#3085d6',
+          confirmButtonText: 'Yes, cancel it!'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // User confirmed, send request to server
+            cancelOrder(orderId);
+          }
+        });
+      });
+    });
+    
+    function cancelOrder(orderId) {
+      fetch(`/orders/${orderId}/cancel`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Show success message
+          Swal.fire(
+            'Cancelled!',
+            'Your order has been cancelled.',
+            'success'
+          ).then(() => {
+            // Redirect or reload page
+            window.location.href = '/orders';
+          });
+        } else {
+          // Show error message
+          Swal.fire(
+            'Error!',
+            data.message || 'Failed to cancel order',
+            'error'
+          );
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        Swal.fire(
+          'Error!',
+          'Something went wrong',
+          'error'
+        );
+      });
+    }
+  });
+</script>

@@ -17,7 +17,6 @@ const loadDashboard = async (req,res) =>{
 
 const adminLogin = async (req,res) => {
     try {
-        console.log("rendering the admin login page");
         res.render("admin/login");
         
     } catch (error) {
@@ -28,7 +27,6 @@ const adminLogin = async (req,res) => {
 const adminLoginPost = async (req,res) => {
     try {
         const {email,password} = req.body;
-        console.log(req.body);
         const admin = await adminModel.findOne({email:email,isAdmin:true})
         const isMatch = await bcrypt.compare(password,admin.password)
         console.log(admin);

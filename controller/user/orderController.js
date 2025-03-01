@@ -2,6 +2,7 @@ const userModel = require('../../models/userSchema')
 const addressModel = require('../../models/addressSchema')
 const ordersModel = require('../../models/orderSchema')
 const cartModel = require('../../models/cartSchema')
+const productModel = require('../../models/productSchema')
 
 
 
@@ -66,7 +67,8 @@ const placeOrder = async (req, res) => {
             deliveryAddress: [address],
             orderAmount: totalAmount,
             paymentMethod: "Cash on Delivery", 
-            paymentStatus: "pending"
+            paymentStatus: "pending",
+            orderStatus: "Pending"
         });
 
         
@@ -83,6 +85,7 @@ const placeOrder = async (req, res) => {
                 _id: newOrder._id,
                 orderAmount: totalAmount,
                 items: orderedItems,
+                orderStatus: newOrder.orderStatus
             }
         });
         
@@ -119,8 +122,43 @@ const orderDetails = async (req, res) => {
     }
 }
 
+
+
+const cancelOrder = async (req, res) => {
+    try {
+        const orderId = req.params.orderId || req.body.orderId || req.query.orderId;
+        console.log("Final orderId:", orderId);
+      
+      // Find the order without modifying it first
+      const order = await ordersModel.findById(orderId);
+      
+      if (!order) {
+        return res.status(404).json({ success: false, message: 'Order not found' });
+      }
+      
+  
+      // Save the modified order
+      const result = await ordersModel.findByIdAndUpdate(
+        orderId,
+        { orderStatus: 'Cancelled' },
+        { new: true, runValidators: false }
+      );
+      
+      if (!result) {
+        return res.status(404).json({ success: false, message: 'Order not found' });
+      }
+      
+      return res.status(200).json({ success: true, message: 'Order cancelled successfully' });
+    } catch (error) {
+      console.warn('Error cancelling order:', error);
+      return res.status(500).json({ success: false, message: 'Failed to cancel order' });
+    }
+  };
+
+
 module.exports = {
     orders,
     orderDetails,
     placeOrder,
+    cancelOrder
 }

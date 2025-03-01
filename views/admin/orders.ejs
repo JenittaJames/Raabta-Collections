@@ -1,0 +1,160 @@
+<%- include('../partials/admin/header') %>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1>Orders List</h1>
+            <p class="lead">Orders Management</p>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <% if (order.length > 0) { %>
+            <div class="col-12">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>SL.No</th>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Order Status</th>
+                                <th>Payment Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% order.forEach((order, index) => { %>
+                                <tr data-order-id="<%= order.id %>">
+                                    <td><%= index + 1 %></td>
+                                    <td>#<%= order.orderNumber %></td>
+                                    <td><%= order.userName %></td>
+                                    <td><%= new Date(order.orderDate).toLocaleDateString() %></td>
+                                    <td>₹<%= order.totalAmount ? order.totalAmount.toFixed(2) : '0.00' %></td>
+                                    <td>
+                                        <select class="form-select form-select-sm order-status-select">
+                                            <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                            <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
+                                            <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                                            <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                            <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select class="form-select form-select-sm payment-status-select">
+                                            <option value="pending" <%= order.paymentStatus === 'pending' ? 'selected' : '' %>>Pending</option>
+                                            <option value="paid" <%= order.paymentStatus === 'paid' ? 'selected' : '' %>>Paid</option>
+                                            <option value="failed" <%= order.paymentStatus === 'failed' ? 'selected' : '' %>>Failed</option>
+                                            <option value="refunded" <%= order.paymentStatus === 'refunded' ? 'selected' : '' %>>Refunded</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <a href="/admin/orders/<%= order.id %>" class="btn btn-sm" style="background-color: black; color: white;">
+                                            View
+                                        </a>
+                                        
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        <% } else { %>
+            <div class="col-12">
+                <div class="alert alert-info">
+                    No Orders found
+                </div>
+            </div>
+        <% } %>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-12">
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    <% if (currentPage > 1) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= currentPage - 1 %>" aria-label="Previous">
+                                <span aria-hidden="true">&larr;</span>
+                            </a>
+                        </li>
+                    <% } %>
+                
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                        <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                        </li>
+                    <% } %>
+                
+                    <% if (currentPage < totalPages) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= currentPage + 1 %>" aria-label="Next">
+                                <span aria-hidden="true">&rarr;</span>
+                            </a>
+                        </li>
+                    <% } %>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Add JavaScript for AJAX status updates -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Status update function
+    function updateOrderStatus(orderId, statusType, statusValue) {
+        const updateData = {
+            orderId: orderId
+        };
+        
+        if (statusType === 'order') {
+            updateData.orderStatus = statusValue;
+        } else if (statusType === 'payment') {
+            updateData.paymentStatus = statusValue;
+        }
+        
+        fetch('/admin/orders/update-status', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updateData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                alert('Status updated successfully');
+            } else {
+                alert('Failed to update status: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while updating status');
+        });
+    }
+    
+    // Order status change event
+    document.querySelectorAll('.order-status-select').forEach(select => {
+        select.addEventListener('change', function() {
+            const orderId = this.closest('tr').dataset.orderId;
+            updateOrderStatus(orderId, 'order', this.value);
+        });
+    });
+    
+    // Payment status change event
+    document.querySelectorAll('.payment-status-select').forEach(select => {
+        select.addEventListener('change', function() {
+            const orderId = this.closest('tr').dataset.orderId;
+            updateOrderStatus(orderId, 'payment', this.value);
+        });
+    });
+});
+</script>
+
+<%- include('../partials/admin/footer') %>
