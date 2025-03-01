@@ -378,11 +378,66 @@ const pageNotFound = async (req, res) => {
 
 const loadShop = async (req, res) => {
   try {
-    const products = await productModel.find({status: true});
+    const page = parseInt(req.query.page) || 1;
+    const limit = 9;
+    const skip = (page - 1) * limit;
+    
+    const totalProducts = await productModel.countDocuments({ status: true });
+    const totalPages = Math.ceil(totalProducts / limit);
+    
+    const products = await productModel.find({ status: true })
+      .skip(skip)
+      .limit(limit);
+    
     const categories = await catModel.find({});
-    res.render("user/shop", { products, categories });
+    
+    res.render("user/shop", { 
+      products, 
+      categories,
+      currentPage: page,
+      totalPages,
+      totalProducts,
+      limit
+    });
   } catch (error) {
     console.error("Error loading shop page:", error);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
+
+
+const shopByFilter = async (req, res) => {
+  try {
+    const categoryId = req.params.categoryId;
+    
+    const page = parseInt(req.query.page) || 1;
+    const limit = 12;
+    const skip = (page - 1) * limit;
+    
+    const categories = await catModel.find();
+    
+    const totalProducts = await productModel.countDocuments({ category: categoryId });
+    const totalPages = Math.ceil(totalProducts / limit);
+    
+    const products = await productModel.find({ category: categoryId })
+      .skip(skip)
+      .limit(limit);
+    
+    const currentCategory = await catModel.findById(categoryId);
+    
+    res.render('user/shopbyfilter', {
+      products, 
+      categories,
+      currentPage: page,
+      totalPages,
+      totalProducts,
+      limit,
+      categoryId,
+      currentCategory: currentCategory || { name: 'Selected Category' }
+    });
+  } catch (error) {
+    console.log("error occurred while rendering shop by filter page", error);
     res.status(500).send("Internal Server Error");
   }
 };
@@ -415,6 +470,7 @@ module.exports = {
   loadOtpPage,
   resendOtp,
   loadShop,
+  shopByFilter,
   loadForgot,
   forgot,
   loadForgototp,

@@ -28,7 +28,7 @@
                                 <div class="module-body">
                                     <ul class="module-list_item">
                                         <% categories.forEach(category => { %>
-                                            <li><a href="javascript:void(0)"><%= category.name %></a></li>
+                                            <li><a href="/shopbyfilter/<%= category._id %>"><%= category.name %></a></li>
                                         <% }) %>
                                     </ul>
                                 </div>
@@ -126,18 +126,29 @@
                                     <div class="row">
                                         <div class="col-lg-6 col-md-6 col-sm-6">
                                             <ul class="hiraola-pagination-box">
-                                                <li class="active"><a href="javascript:void(0)">1</a></li>
-                                                <li><a href="javascript:void(0)">2</a></li>
-                                                <li><a href="javascript:void(0)">3</a></li>
-                                                <li><a class="Next" href="javascript:void(0)"><i
-                                                    class="ion-ios-arrow-right"></i></a></li>
-                                                <li><a class="Next" href="javascript:void(0)">>|</a></li>
+                                                <% if (currentPage > 1) { %>
+                                                    <li><a href="/shop?page=1">|<</a></li>
+                                                    <li><a class="Previous" href="/shop?page=<%= currentPage - 1 %>"><i class="ion-ios-arrow-left"></i></a></li>
+                                                <% } %>
+                                                
+                                                <% for(let i = 1; i <= totalPages; i++) { %>
+                                                    <% if (i === currentPage) { %>
+                                                        <li class="active"><a href="javascript:void(0)"><%= i %></a></li>
+                                                    <% } else { %>
+                                                        <li><a href="/shop?page=<%= i %>"><%= i %></a></li>
+                                                    <% } %>
+                                                <% } %>
+                                                
+                                                <% if (currentPage < totalPages) { %>
+                                                    <li><a class="Next" href="/shop?page=<%= currentPage + 1 %>"><i class="ion-ios-arrow-right"></i></a></li>
+                                                    <li><a href="/shop?page=<%= totalPages %>">|></a></li>
+                                                <% } %>
                                             </ul>
                                         </div>
                                         <div class="col-lg-6 col-md-6 col-sm-6">
                                             <div class="product-select-box">
                                                 <div class="product-short">
-                                                    <p>Showing 1 to 12 of 18 (2 Pages)</p>
+                                                    <p>Showing <%= (currentPage - 1) * limit + 1 %> to <%= Math.min(currentPage * limit, totalProducts) %> of <%= totalProducts %> (<%= totalPages %> Pages)</p>
                                                 </div>
                                             </div>
                                         </div>

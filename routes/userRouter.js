@@ -48,6 +48,7 @@ router.get("/reset-password", userController.loadResetPassword);
 router.post("/reset-password", userController.resetPassword);
 
 router.get("/shop", userController.loadShop);
+router.get("/shopbyfilter/:categoryId", userController.shopByFilter)
 router.get("/singleproduct/:id", productController.loadSingleproduct);
 
 router.get("/cart", ifLogged, cartController.loadCart);
