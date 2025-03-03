@@ -64,7 +64,7 @@ const placeOrder = async (req, res) => {
             userId: userId,
             cartId: cart._id,
             orderedItem: orderedItems,
-            deliveryAddress: [address],
+            deliveryAddress: address,
             orderAmount: totalAmount,
             paymentMethod: "Cash on Delivery", 
             paymentStatus: "pending",

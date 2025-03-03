@@ -1,193 +1,467 @@
-<%- include('../partials/user/header') %>
-
-<!-- Begin Hiraola's Breadcrumb Area -->
-        <div class="breadcrumb-area">
-            <div class="container">
-                <div class="breadcrumb-content">
-                    <h2>Other</h2>
-                    <ul>
-                        <li><a href="/home">Home</a></li>
-                        <li class="active">Register</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <!-- Hiraola's Breadcrumb Area End Here -->
-        <!-- Begin Hiraola's Login Register Area -->
-        <div class="hiraola-login-register_area">
-            <div class="container">
-                <div class="row d-flex justify-content-center">
-                    <div class="col-sm-12 col-md-12 col-lg-6 col-xs-12">
-                        <form id="regform" action="/register" method="post">
-                            <div class="login-form">
-                                <h4 class="login-title">Register</h4>
-                                <div class="row">
-                                    <div class="col-12 mb-4 text-center">
-                                        <a href ="/auth/google" class="btn btn-light w-100 position-relative d-flex align-items-center justify-content-center" style="border: 1px solid #ddd; padding: 10px 20px; gap: 10px;">
-                                            <img src="https://cdn.cdnlogo.com/logos/g/35/google-icon.svg" alt="Google Logo" style="width: 20px; height: 20px;">
-                                            <span>Continue with Google</span>
-                                        </a>
-                                    </div>
-                                    
-                                    <div class="col-12 mb-4 text-center">
-                                        <div style="display: flex; align-items: center; gap: 10px;">
-                                            <hr style="flex: 1; border-top: 1px solid #ddd;">
-                                            <span style="color: #666;">or</span>
-                                            <hr style="flex: 1; border-top: 1px solid #ddd;">
-                                        </div>
-                                    </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>𝓡𝓪𝓪𝓫𝓽𝓪 𝓒𝓸𝓵𝓵𝓮𝓬𝓽𝓲𝓸𝓷𝓼</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/public/user/assets/images/favicon.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
         
-                                    <div class="col-md-12 mb--20">
-                                        <label>User Name</label>
-                                        <input type="text" placeholder="User Name" name="userName" id="userName">
-                                        <div id="error1" class="error-message"></div>
-                                    </div>
-                                    
-                                    <div class="col-md-12">
-                                        <label>Email Address*</label>
-                                        <input type="email" placeholder="Email Address" name="email" id="email">
-                                        <div id="error3" class="error-message"></div>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <label>Mobile number</label>
-                                        <input type="number" placeholder="Mobile Number" name="phone" id="number">
-                                        <div id="error6" class="error-message"></div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label>Password</label>
-                                        <input type="password" placeholder="Password" name="password" id="password">
-                                        <div id="error4" class="error-message"></div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label>Confirm Password</label>
-                                        <input type="password" placeholder="Confirm Password" name="confirmPassword" id="confirmPassword">
-                                        <div id="error5" class="error-message" ></div>
-                                    </div>
-                                    <div class="col-12">
-                                        <button type="submit" class="hiraola-register_btn">Register</button>
-                                    </div>
-                                </div>
+        .bg-wrapper {
+            height: 100%;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            background: url('/api/placeholder/1920/1080') no-repeat center center;
+            background-size: cover;
+        }
+        
+        .blur-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            transition: all 0.3s ease;
+        }
+        
+        .login-container:hover {
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.4);
+        }
+        
+        .login-area h2 {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 24px;
+        }
+        
+        .form-control {
+            height: 40px;
+            border-radius: 6px;
+            box-shadow: none;
+            margin-bottom: 5px;
+            padding-left: 15px;
+            border: 1px solid #e8e8e8;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .form-control:focus {
+            border-color: #1D2951;
+            box-shadow: 0 0 0 0.25rem #324688;
+        }
+        
+        .default-btn {
+            width: 100%;
+            height: 40px;
+            background: linear-gradient(135deg, #1D2951 0%, #1D2951 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+        
+        .default-btn:hover {
+            background: linear-gradient(135deg, #1D2951 0%, #1D2951 100%);
+            transform: translateY(-2px);
+        }
+        
+        .forgot-password {
+            display: block;
+            text-align: center;
+            color: #6c757d;
+            font-size: 13px;
+            margin-top: 10px;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .forgot-password:hover {
+            color: #1D2951;
+        }
+        
+        .register-link {
+            display: block;
+            text-align: center;
+            margin-top: 5px;
+        }
+        
+        .google-btn {
+            width: 100%;
+            height: 40px;
+            background: #fff;
+            color: #757575;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .google-btn:hover {
+            background: #f1f1f1;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .google-icon {
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        
+        .google-icon i {
+            background: conic-gradient(from -45deg, #ea4335 110deg, #4285f4 90deg 180deg, #34a853 180deg 270deg, #fbbc05 270deg) 73% 55%/150% 150% no-repeat;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 15px 0;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e8e8e8;
+        }
+        
+        .divider span {
+            padding: 0 10px;
+            color: #6c757d;
+            font-size: 13px;
+        }
+        
+        .error-text {
+            color: #dc3545;
+            font-size: 11px;
+            margin-bottom: 10px;
+            display: none;
+        }
+        
+        .form-group {
+            margin-bottom: 12px;
+        }
+        
+        .is-invalid {
+            border-color: #dc3545 !important;
+        }
+        
+        .alert {
+            padding: 8px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-wrapper">
+        <div class="blur-overlay">
+            <div class="login-container">
+                <section class="login-area">
+                    <div class="login-content">
+                        <h2>Create Your Account</h2>
+                        
+                        <% if (locals.errors && errors.length > 0) { %>
+                            <div class="alert alert-danger">
+                                <% errors.forEach(error => { %>
+                                    <div><%= error %></div>
+                                <% }) %>
                             </div>
+                        <% } %>
+                        
+                        <a href="/auth/google" class="google-btn">
+                            <span class="google-icon"><i class="fab fa-google"></i></span>
+                            <span>Sign up with Google</span>
+                        </a>
+                        
+                        <div class="divider">
+                            <span>OR</span>
+                        </div>
+                        
+                        <form id="registerForm" class="login-form" action="/register" method="post" novalidate>
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="username" placeholder="Enter your Name" name="userName" value="<%= locals.input ? input.userName : '' %>">
+                                <small id="nameError" class="error-text">Name is required</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <input type="email" class="form-control" id="email" placeholder="Enter your email Address" name="email" value="<%= locals.input ? input.email : '' %>">
+                                <small id="emailError" class="error-text">Please enter a valid email address</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <input type="tel" class="form-control" id="number" placeholder="Enter your number" name="number" value="<%= locals.input ? input.number : '' %>">
+                                <small id="numberError" class="error-text">Please enter a valid phone number</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <input type="password" class="form-control" id="password" placeholder="Enter your password" name="password">
+                                <small id="passwordError" class="error-text">Password must be at least 6 characters</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm Password" name="confirmPassword">
+                                <small id="confirmPasswordError" class="error-text">Passwords do not match</small>
+                            </div>
+                            
+                            <button type="submit" class="default-btn">SignUp</button>
+                            <a href="/login" class="forgot-password register-link">Do you have an account? Login</a>
                         </form>
                     </div>
-                </div>
+                </section>
             </div>
         </div>
-        <!-- Hiraola's Login Register Area  End Here -->
-        <%- include('../partials/user/footer') %>
+    </div>
 
-
-
-
-        <script>
-
-document.addEventListener("DOMContentLoaded", function() {
-    const unameid = document.getElementById("userName");
-    const emailid = document.getElementById("email");
-    const mobilenum = document.getElementById("number");
-    const passid = document.getElementById("password");
-    const cpassid = document.getElementById("confirmPassword");
-    const error1 = document.getElementById("error1");
-    const error3 = document.getElementById("error3");
-    const error4 = document.getElementById("error4");
-    const error5 = document.getElementById("error5");
-    const error6 = document.getElementById("error6");
-    const regform = document.getElementById("regform");
-
-    function unameValidateChecking() {
-        const unameval = unameid.value;
-        const unamepattern = /^[A-Za-z\s]+$/;
-
-        if (unameval.trim() === "") {
-            error1.style.display = "block";
-            error1.innerHTML = "Please enter a valid name";
-            return false;
-        } else if (!unamepattern.test(unameval)) {
-            error1.style.display = "block";
-            error1.innerHTML = "Name can only contain alphabets and spaces";
-            return false;
-        } else {
-            error1.style.display = "none";
-            error1.innerHTML = "";
-            return true;
-        }
-    }
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     
-    function emailValidateChecking() {
-        const emailval = emailid.value;
-        const emailpattern = /^[a-zA-Z0-9._-]+@([a-zA-Z0-9.-]+)\.([a-zA-Z]{2,4})$/;
-
-        if (!emailpattern.test(emailval)) {
-            error3.style.display = "block";
-            error3.innerHTML = "Invalid Format";
-            return false;
-        } else {
-            error3.style.display = "none";
-            error3.innerHTML = "";
-            return true;
-        }
-    }
-
-
-    function mobileValidateChecking() {
-    const mobval = mobilenum.value.trim();
-    
-    if (!mobval) {
-        error6.style.display = "block";
-        error6.innerHTML = "Enter a valid phone number";
-    } else if (!/^\d{10}$/.test(mobval)) {
-        error6.style.display = "block";
-        error6.innerHTML = "Enter a 10-digit number";
-    } else {
-        error6.style.display = "none";
-        error6.innerHTML = "";
-        return true;
-    }
-}
-
-
-    function passValidateChecking() {
-        const passval = passid.value;
-        const cpassval = cpassid.value;
-        const alpha = /[a-zA-Z]/;
-        const digit = /\d/;
-        let isValid = true;
-
-        if (passval.length < 8) {
-            error4.style.display = "block";
-            error4.innerHTML = "Should contain at least 8 characters";
-            isValid = false;
-        } else if (!alpha.test(passval) || !digit.test(passval)) {
-            error4.style.display = "block";
-            error4.innerHTML = "Should contain number and alphabets";
-            isValid = false;
-        } else {
-            error4.style.display = "none";
-            error4.innerHTML = "";
-        }
-
-        if (passval !== cpassval) {
-            error5.style.display = "block";
-            error5.innerHTML = "Passwords do not match";
-            isValid = false;
-        } else {
-            error5.style.display = "none";
-            error5.innerHTML = "";
-        }
-
-        return isValid;
-    }
-
-    regform.addEventListener("submit", function(e) {
-        const isUnameValid = unameValidateChecking();
-        const isEmailValid = emailValidateChecking();
-        const isMobileNumValid = mobileValidateChecking();
-        const isPasswordValid = passValidateChecking();
-
-        if (!isUnameValid || !isEmailValid || !isMobileNumValid || !isPasswordValid) {
-            e.preventDefault();
-        }
-    });
-});
-        </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('registerForm');
+            const username = document.getElementById('username');
+            const email = document.getElementById('email');
+            const number = document.getElementById('number');
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirmPassword');
+            
+            const nameError = document.getElementById('nameError');
+            const emailError = document.getElementById('emailError');
+            const numberError = document.getElementById('numberError');
+            const passwordError = document.getElementById('passwordError');
+            const confirmPasswordError = document.getElementById('confirmPasswordError');
+            
+            // Function to validate email
+            function isValidEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+            
+            // Function to validate phone number
+            function isValidPhoneNumber(phone) {
+                const phoneRegex = /^\d{10}$/;
+                return phoneRegex.test(phone);
+            }
+            
+            // Function to show error
+            function showError(input, errorElement, message) {
+                input.classList.add('is-invalid');
+                errorElement.style.display = 'block';
+                errorElement.textContent = message;
+            }
+            
+            // Function to hide error
+            function hideError(input, errorElement) {
+                input.classList.remove('is-invalid');
+                errorElement.style.display = 'none';
+            }
+            
+            // Username validation
+            username.addEventListener('blur', function() {
+                if (username.value.trim() === '') {
+                    showError(username, nameError, 'Name is required');
+                } else if (username.value.trim().length < 3) {
+                    showError(username, nameError, 'Name must be at least 3 characters');
+                } else {
+                    hideError(username, nameError);
+                }
+            });
+            
+            // Email validation
+            email.addEventListener('blur', function() {
+                if (email.value.trim() === '') {
+                    showError(email, emailError, 'Email is required');
+                } else if (!isValidEmail(email.value)) {
+                    showError(email, emailError, 'Please enter a valid email address');
+                } else {
+                    hideError(email, emailError);
+                }
+            });
+            
+            // Phone number validation
+            number.addEventListener('blur', function() {
+                if (number.value.trim() === '') {
+                    showError(number, numberError, 'Phone number is required');
+                } else if (!isValidPhoneNumber(number.value)) {
+                    showError(number, numberError, 'Please enter a valid 10 digit phone number');
+                } else {
+                    hideError(number, numberError);
+                }
+            });
+            
+            // Password validation
+            password.addEventListener('blur', function() {
+                if (password.value.trim() === '') {
+                    showError(password, passwordError, 'Password is required');
+                } else if (password.value.length < 6) {
+                    showError(password, passwordError, 'Password must be at least 6 characters');
+                } else {
+                    hideError(password, passwordError);
+                }
+                
+                // Also check confirm password match if it has a value
+                if (confirmPassword.value.trim() !== '') {
+                    if (password.value !== confirmPassword.value) {
+                        showError(confirmPassword, confirmPasswordError, 'Passwords do not match');
+                    } else {
+                        hideError(confirmPassword, confirmPasswordError);
+                    }
+                }
+            });
+            
+            // Confirm password validation
+            confirmPassword.addEventListener('blur', function() {
+                if (confirmPassword.value.trim() === '') {
+                    showError(confirmPassword, confirmPasswordError, 'Please confirm your password');
+                } else if (password.value !== confirmPassword.value) {
+                    showError(confirmPassword, confirmPasswordError, 'Passwords do not match');
+                } else {
+                    hideError(confirmPassword, confirmPasswordError);
+                }
+            });
+            
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                let isValid = true;
+                
+                // Validate username
+                if (username.value.trim() === '') {
+                    showError(username, nameError, 'Name is required');
+                    isValid = false;
+                } else if (username.value.trim().length < 3) {
+                    showError(username, nameError, 'Name must be at least 3 characters');
+                    isValid = false;
+                } else {
+                    hideError(username, nameError);
+                }
+                
+                // Validate email
+                if (email.value.trim() === '') {
+                    showError(email, emailError, 'Email is required');
+                    isValid = false;
+                } else if (!isValidEmail(email.value)) {
+                    showError(email, emailError, 'Please enter a valid email address');
+                    isValid = false;
+                } else {
+                    hideError(email, emailError);
+                }
+                
+                // Validate phone number
+                if (number.value.trim() === '') {
+                    showError(number, numberError, 'Phone number is required');
+                    isValid = false;
+                } else if (!isValidPhoneNumber(number.value)) {
+                    showError(number, numberError, 'Please enter a valid 10 digit phone number');
+                    isValid = false;
+                } else {
+                    hideError(number, numberError);
+                }
+                
+                // Validate password
+                if (password.value.trim() === '') {
+                    showError(password, passwordError, 'Password is required');
+                    isValid = false;
+                } else if (password.value.length < 6) {
+                    showError(password, passwordError, 'Password must be at least 6 characters');
+                    isValid = false;
+                } else {
+                    hideError(password, passwordError);
+                }
+                
+                // Validate confirm password
+                if (confirmPassword.value.trim() === '') {
+                    showError(confirmPassword, confirmPasswordError, 'Please confirm your password');
+                    isValid = false;
+                } else if (password.value !== confirmPassword.value) {
+                    showError(confirmPassword, confirmPasswordError, 'Passwords do not match');
+                    isValid = false;
+                } else {
+                    hideError(confirmPassword, confirmPasswordError);
+                }
+                
+                // Prevent form submission if validation fails
+                if (!isValid) {
+                    e.preventDefault();
+                }
+            });
+            
+            // Clear errors when inputs change
+            username.addEventListener('input', function() {
+                hideError(username, nameError);
+            });
+            
+            email.addEventListener('input', function() {
+                hideError(email, emailError);
+            });
+            
+            number.addEventListener('input', function() {
+                hideError(number, numberError);
+            });
+            
+            password.addEventListener('input', function() {
+                hideError(password, passwordError);
+                
+                // Also check confirm password match if it has a value
+                if (confirmPassword.value.trim() !== '') {
+                    if (password.value !== confirmPassword.value) {
+                        showError(confirmPassword, confirmPasswordError, 'Passwords do not match');
+                    } else {
+                        hideError(confirmPassword, confirmPasswordError);
+                    }
+                }
+            });
+            
+            confirmPassword.addEventListener('input', function() {
+                if (password.value !== confirmPassword.value) {
+                    showError(confirmPassword, confirmPasswordError, 'Passwords do not match');
+                } else {
+                    hideError(confirmPassword, confirmPasswordError);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

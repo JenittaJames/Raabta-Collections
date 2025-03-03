@@ -1,132 +1,171 @@
-<%- include('../partials/user/header') %>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>Attiro Fashions</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/public/user/assets/images/favicon.png">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      body,
+      html {
+        height: 100%;
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
 
-        <!-- Begin Hiraola's Breadcrumb Area -->
-        <div class="breadcrumb-area">
-            <div class="container">
-                <div class="breadcrumb-content">
-                    <h2>Other</h2>
-                    <ul>
-                        <li><a href="/home">Home</a></li>
-                        <li class="active">OTP Verification</li>
-                    </ul>
+      .bg-wrapper {
+        height: 100%;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+        background: url("/api/placeholder/1920/1080") no-repeat center center;
+        background-size: cover;
+      }
+
+      .blur-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .login-container {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+        padding: 40px;
+        width: 100%;
+        max-width: 500px;
+        transition: all 0.3s ease;
+      }
+
+      .login-container:hover {
+        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.4);
+      }
+
+      .login-area h2 {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 15px;
+        text-align: center;
+      }
+
+      .login-area p {
+        text-align: center;
+        color: #6c757d;
+        margin-bottom: 30px;
+      }
+
+      .form-control {
+        height: 50px;
+        border-radius: 8px;
+        box-shadow: none;
+        margin-bottom: 25px;
+        padding-left: 20px;
+        border: 1px solid #e8e8e8;
+        transition: all 0.3s;
+      }
+
+      .form-control:focus {
+        border-color: #1D2951;
+        box-shadow: 0 0 0 0.25rem #2d3f7c;
+      }
+
+      .default-btn {
+        width: 100%;
+        height: 50px;
+        background: linear-gradient(135deg, #1D2951 0%, #1D2951 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        margin-bottom: 20px;
+        transition: all 0.3s;
+      }
+
+      .default-btn:hover {
+        background: linear-gradient(135deg, #1D2951 0%, #1D2951 100%);
+        transform: translateY(-2px);
+      }
+
+      .back-to-login {
+        display: block;
+        text-align: center;
+        color: #6c757d;
+        font-size: 14px;
+        margin-top: 15px;
+        text-decoration: none;
+        transition: color 0.3s;
+      }
+
+      .back-to-login:hover {
+        color: #1D2951;
+      }
+
+      .lock-icon {
+        display: block;
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 50px;
+        color: #1D2951;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg-wrapper">
+      <div class="blur-overlay">
+        <div class="login-container">
+          <section class="login-area">
+            <div class="login-content">
+              <div class="lock-icon">
+                <i class="fas fa-lock"></i>
+              </div>
+              <h2>Forgot Password?</h2>
+              <p>
+                Enter your email address and we'll send you a link to reset your
+                password.
+              </p>
+
+              <form class="login-form" action="/forgot" method="post">
+                <div class="form-group">
+                  <input
+                    type="email"
+                    class="form-control"
+                    placeholder="Enter your email address"
+                    name="email"
+                    required
+                  />
                 </div>
+
+                <button type="submit" class="default-btn">
+                  Send OTP
+                </button>
+
+                <a href="/login" class="back-to-login">Back to Login</a>
+              </form>
             </div>
+          </section>
         </div>
-        <!-- Hiraola's Breadcrumb Area End Here -->
-        <!-- Begin Hiraola's Login Register Area -->
-        <div class="hiraola-login-register_area">
-            <div class="container">
-                <div class="row d-flex justify-content-center">
-                    <div class="col-sm-12 col-md-12 col-xs-12 col-lg-6">
-                        <!-- Forgot Password Email Verification Form -->
-                        <form action="/forgot" method="post" id="forgotPasswordForm" onsubmit="return validateForm()">
-                            <div class="login-form">
-                                <h4 class="login-title">Forgot Password</h4>
-                                <div class="row">
-                                    <div class="col-md-12 col-12 mb-3">
-                                        <p class="text-center">Enter your email address to receive an OTP for password reset.</p>
-                                    </div>
-                                    <div class="col-md-12 col-12">
-                                        <label>Email Address*</label>
-                                        <input 
-                                            type="email" 
-                                            class="form-control" 
-                                            name="email" 
-                                            id="email"
-                                            required
-                                            pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-                                            oninput="validateEmail(this)"
-                                        >
-                                        <small id="emailError" class="text-danger"></small>
-                                    </div>
-                                    <div class="col-md-12 mt-4">
-                                        <button type="submit" class="hiraola-login_btn" id="submitBtn">Send OTP</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+      </div>
+    </div>
 
-
-
-        <script>
-            function validateEmail(input) {
-                const email = input.value;
-                const emailError = document.getElementById('emailError');
-                const submitBtn = document.getElementById('submitBtn');
-                
-                // Regular expression for email validation
-                const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-                
-                if (email.trim() === '') {
-                    emailError.textContent = 'Email is required';
-                    input.classList.add('is-invalid');
-                    submitBtn.disabled = true;
-                    return false;
-                }
-                
-                if (!emailRegex.test(email)) {
-                    emailError.textContent = 'Please enter a valid email address';
-                    input.classList.add('is-invalid');
-                    submitBtn.disabled = true;
-                    return false;
-                }
-                
-                emailError.textContent = '';
-                input.classList.remove('is-invalid');
-                input.classList.add('is-valid');
-                submitBtn.disabled = false;
-                return true;
-            }
-            
-            function validateForm() {
-                const email = document.getElementById('email');
-                
-                // Check if email is valid before submitting
-                if (!validateEmail(email)) {
-                    return false;
-                }
-                
-                // Add loading state to button
-                const submitBtn = document.getElementById('submitBtn');
-                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sending...';
-                submitBtn.disabled = true;
-                
-                return true;
-            }
-            
-            // Add some CSS for validation styles
-            document.head.insertAdjacentHTML('beforeend', `
-                <style>
-                    .is-invalid {
-                        border-color: #dc3545 !important;
-                        background-color: #fff !important;
-                    }
-                    
-                    .is-valid {
-                        border-color: #198754 !important;
-                        background-color: #fff !important;
-                    }
-                    
-                    .text-danger {
-                        color: #dc3545;
-                        font-size: 0.875rem;
-                        margin-top: 0.25rem;
-                        display: block;
-                    }
-                    
-                    .form-control:focus {
-                        box-shadow: none;
-                        border-width: 2px;
-                    }
-                </style>
-            `);
-            </script>
-
-
-        
-        <!-- Hiraola's Login Register Area  End Here -->
-        <%- include('../partials/user/footer') %>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

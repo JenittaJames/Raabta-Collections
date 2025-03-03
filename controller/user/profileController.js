@@ -16,16 +16,16 @@ const profile = async (req,res) => {
 
 const updateProfile = async (req, res) => {
   try {
-    const { firstName, phone, email } = req.body;
+    const { userName, phone, email } = req.body;
     const userId = req.session.userId;
 
-    if (!firstName || !phone || !email) {
+    if (!userName || !phone || !email) {
       return res.status(400).json({ status: 'error', message: "All fields are required" });
     }
     const updatedUser = await userModel.findByIdAndUpdate(
       userId,
       {
-        firstName : firstName,
+        userName : userName,
         phone,
         email,
       },

@@ -117,24 +117,21 @@ const loadLogin = async (req, res) => {
 
 const login = async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !/\S+@\S+\.\S+/.test(email)) {
-    return res.status(400).json({ error: "Invalid email address." });
-  }
-  if (!password || password.length < 6) {
-    return res
-      .status(400)
-      .json({ error: "Password must be at least 6 characters." });
-  }
+  
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ error: "User not found." });
+      req.flash('error_msg',"User not found !!!")
+      return res.redirect("/login")
+
     }
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(400).json({ error: "Invalid password." });
+      req.flash('error_msg',"Invalid password")
+      return res.redirect("/login")
     }
     if(!user.status){
+      req.flash('error_msg',"Your account has been blocked. Please contact support")
       return res.redirect("/login")
     }
     req.session.userId = user._id.toString();  
@@ -143,7 +140,6 @@ const login = async (req, res) => {
     res.redirect("/");
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({ error: "An error occurred during login." });
   }
 };
 
@@ -478,5 +474,5 @@ module.exports = {
   verifyOtp,
   verifyForgotPasswordOtp,
   resetPassword,
-  logout
+  logout,
 };

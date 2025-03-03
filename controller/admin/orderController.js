@@ -58,7 +58,6 @@ const orderDetails = async (req, res) => {
             })
             .populate('userId');
 
-            console.log("order nte detail para",order)
         
         if (!order) {
             return res.status(404).render('error', { message: 'Order not found' });
@@ -69,8 +68,6 @@ const orderDetails = async (req, res) => {
             ? order.deliveryAddress[0] 
             : await addressModel.findOne({ userId: order.userId });
 
-
-            console.log("addressum para",address);
         
         res.render('admin/orderdetails', { order, address });
     } catch (error) {

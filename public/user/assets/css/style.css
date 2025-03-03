@@ -45,7 +45,7 @@ INDEX:
 ******************************/
 /*
     Body Background Color:    #ffffff;
-    Primary Color:            #cda557;
+    Primary Color:            #1D2951;
     Primary Color 2:           #be8658;
     Body Font Family:         'Lato', sans-serif
 
@@ -144,11 +144,11 @@ a {
   text-decoration: none;
 }
 a:hover {
-  color: #cda557 !important;
+  color: #1D2951 !important;
   text-decoration: none;
 }
 a:not([href]):not([tabindex]):hover {
-  color: #cda557;
+  color: #1D2951;
 }
 
 a,
@@ -491,7 +491,7 @@ button {
   display: inline-block;
 }
 .hiraola-paginatoin-area .hiraola-pagination-box li.active > a {
-  background-color: #cda557;
+  background-color: #1D2951;
   color: #ffffff !important;
 }
 .hiraola-paginatoin-area .hiraola-pagination-box li > a {
@@ -500,7 +500,7 @@ button {
   display: block;
 }
 .hiraola-paginatoin-area .hiraola-pagination-box li:hover > a {
-  background-color: #cda557;
+  background-color: #1D2951;
   color: #ffffff !important;
 }
 .hiraola-paginatoin-area .product-select-box {
@@ -682,7 +682,7 @@ button, .global-overlay, .quantity .cart-plus-minus > .qtybutton {
   height: 100%;
 }
 .price-filter .ui-slider-handle {
-  background: #cda557;
+  background: #1D2951;
   border: none;
   content: "";
   display: block;
@@ -708,7 +708,7 @@ button, .global-overlay, .quantity .cart-plus-minus > .qtybutton {
           transform: translate(-100%, -50%);
 }
 .price-filter .ui-slider-handle:before {
-  background: #cda557;
+  background: #1D2951;
   content: "";
   display: inline-block;
   height: 5px;
@@ -921,7 +921,7 @@ button, .global-overlay, .quantity .cart-plus-minus > .qtybutton {
   font-size: 20px;
 }
 .popup_wrapper .test .popup_off:hover {
-  background-color: #cda557;
+  background-color: #1D2951;
 }
 .popup_wrapper .subscribe_area {
   display: -webkit-box;
@@ -1002,7 +1002,7 @@ button, .global-overlay, .quantity .cart-plus-minus > .qtybutton {
 }
 .popup_wrapper .subscribe_area .subscribe-form-group form.subscribe-form button {
   font-weight: 700;
-  background: #cda557;
+  background: #1D2951;
   color: #333333;
   top: 0;
   right: 0;
@@ -1015,7 +1015,7 @@ button, .global-overlay, .quantity .cart-plus-minus > .qtybutton {
   text-transform: uppercase;
 }
 .popup_wrapper .subscribe_area .subscribe-form-group form.subscribe-form button:hover {
-  background-color: #cda557;
+  background-color: #1D2951;
   color: #ffffff !important;
 }
 .popup_wrapper .subscribe_area .subscribe-bottom {
@@ -1086,49 +1086,49 @@ button, .global-overlay, .quantity .cart-plus-minus > .qtybutton {
   /* ---Single Product Gallery Outline Color--- */
 }
 .template-color-1 a.hiraola-btn {
-  background-color: #cda557;
+  background-color: #1D2951;
 }
 .template-color-1 a.hiraola-btn:hover {
   background-color: #d5b473;
   color: #ffffff !important;
 }
 .template-color-1 a:hover {
-  color: #cda557 !important;
+  color: #1D2951 !important;
 }
 .template-color-1 .hiraola-group_btn > ul > li > a.add-to_cart:hover {
-  background-color: #cda557 !important;
+  background-color: #1D2951 !important;
   color: #ffffff !important;
 }
 .template-color-1 .hiraola-group_btn > ul > li > a:hover {
-  border-color: #cda557 !important;
+  border-color: #1D2951 !important;
 }
 .template-color-1 .popup_wrapper .test .popup_off:hover {
-  background: #cda557;
+  background: #1D2951;
 }
 .template-color-1 .popup_wrapper .subscribe_area .subscribe-form-group form button:hover {
-  background: #cda557;
+  background: #1D2951;
   color: #ffffff;
 }
 .template-color-1 .hb-menu > nav > ul > li:hover > a {
-  color: #cda557 !important;
+  color: #1D2951 !important;
 }
 .template-color-1 .hb-menu > nav > ul > li > ul > li.active > a {
-  color: #cda557 !important;
+  color: #1D2951 !important;
 }
 .template-color-1 .hm-dropdown > li.active > a {
-  color: #cda557 !important;
+  color: #1D2951 !important;
 }
 .template-color-1 .header-right_area > ul > li > a:hover {
   color: #ffffff !important;
 }
 .template-color-1 .header-top_area .ht-menu > ul > li:hover > a {
-  color: #cda557;
+  color: #1D2951;
 }
 .template-color-1 .header-top_area .ht-menu > ul > li .ht-dropdown > li.active a {
-  color: #cda557;
+  color: #1D2951;
 }
 .template-color-1 .header-top_area .ht-menu > ul > li .ht-dropdown > li:hover a {
-  color: #cda557;
+  color: #1D2951;
 }
 .template-color-1 .header-top_area .ht-right_area {
   display: -webkit-box;
@@ -1162,22 +1162,22 @@ button, .global-overlay, .quantity .cart-plus-minus > .qtybutton {
   border-left: 1px solid #e5e5e5;
 }
 .template-color-1 .hiraola-section_title > h4:before {
-  background-color: #cda557;
+  background-color: #1D2951;
 }
 .template-color-1 .sticker {
-  background: #cda557;
+  background: #1D2951;
 }
 .template-color-1 .sticker:before {
-  border-color: #cda557 transparent transparent transparent;
+  border-color: #1D2951 transparent transparent transparent;
 }
 .template-color-1 .offcanvas-menu_wrapper .offcanvas-menu-inner .btn-close:hover {
-  color: #cda557;
+  color: #1D2951;
 }
 .template-color-1 .offcanvas-menu_wrapper .offcanvas-menu-inner .offcanvas-component_menu > li.active > a {
-  color: #cda557;
+  color: #1D2951;
 }
 .template-color-1 .offcanvas-minicart_wrapper .offcanvas-menu-inner .btn-close:hover {
-  color: #cda557;
+  color: #1D2951;
 }
 .template-color-1 .offcanvas-minicart_wrapper .offcanvas-menu-inner .minicart-btn_area {
   padding-bottom: 15px;
@@ -1186,29 +1186,29 @@ button, .global-overlay, .quantity .cart-plus-minus > .qtybutton {
   background-color: #333333;
 }
 .template-color-1 .offcanvas-search_wrapper .offcanvas-menu-inner .offcanvas-search .hm-searchbox > .search_btn:hover {
-  color: #cda557;
+  color: #1D2951;
 }
 .template-color-1 .mobile-menu_wrapper .btn-close:hover {
-  background-color: #cda557;
+  background-color: #1D2951;
   color: #ffffff !important;
 }
 .template-color-1 .offcanvas-navigation .mobile-menu li:hover > a {
-  color: #cda557 !important;
+  color: #1D2951 !important;
 }
 .template-color-1 .offcanvas-navigation .mobile-menu li:hover > .menu-expand {
-  color: #cda557 !important;
+  color: #1D2951 !important;
 }
 .template-color-1 .img-hover_effect a:before {
-  background: #cda557;
+  background: #1D2951;
 }
 .template-color-1 .img-hover_effect a:after {
-  background: #cda557;
+  background: #1D2951;
 }
 .template-color-1 .main-slider .slider-content span {
-  color: #cda557;
+  color: #1D2951;
 }
 .template-color-1 .main-slider .slick-arrow {
-  color: #cda557;
+  color: #1D2951;
 }
 .template-color-1 .hiraola-slider_area-3 .main-slider .slider-content .hiraola-btn-ps_left .hiraola-btn {
   color: #ffffff;
@@ -1219,12 +1219,12 @@ button, .global-overlay, .quantity .cart-plus-minus > .qtybutton {
 .template-color-1 .hiraola-product_slider .slide-item .single_product .product-img .add-actions > ul > li > a:hover,
 .template-color-1 .hiraola-product_slider-2 .slide-item .single_product .product-img .add-actions > ul > li > a:hover,
 .template-color-1 .hiraola-trending-product_slider .slide-item .single_product .product-img .add-actions > ul > li > a:hover {
-  background-color: #cda557;
+  background-color: #1D2951;
 }
 .template-color-1 .hiraola-product_slider .slick-arrow:hover,
 .template-color-1 .hiraola-product_slider-2 .slick-arrow:hover,
 .template-color-1 .hiraola-trending-product_slider .slick-arrow:hover {
-  color: #cda557;
+  color: #1D2951;
 }
 .template-color-1 .hiraola-product_slider .slide-item .single_product,
 .template-color-1 .hiraola-product-tab_slider-2 .slide-item .single_product,
@@ -1240,7 +1240,7 @@ button, .global-overlay, .quantity .cart-plus-minus > .qtybutton {
 .template-color-1 .hiraola-product_slider-3 .slide-item .single_product:hover,
 .template-color-1 .latest-blog_slider .slide-item .single_product:hover,
 .template-color-1 .shop-product-wrap .slide-item .single_product:hover {
-  border-color: #cda557;
+  border-color: #1D2951;
 }
 .template-color-1 .hiraola-product_slider .slide-item .single_product .product-img .add-actions > ul > li > a:hover,
 .template-color-1 .hiraola-product-tab_slider-2 .slide-item .single_product .product-img .add-actions > ul > li > a:hover,
@@ -1248,7 +1248,7 @@ button, .global-overlay, .quantity .cart-plus-minus > .qtybutton {
 .template-color-1 .hiraola-product_slider-3 .slide-item .single_product .product-img .add-actions > ul > li > a:hover,
 .template-color-1 .latest-blog_slider .slide-item .single_product .product-img .add-actions > ul > li > a:hover,
 .template-color-1 .shop-product-wrap .slide-item .single_product .product-img .add-actions > ul > li > a:hover {
-  background-color: #cda557;
+  background-color: #1D2951;
 }
 .template-color-1 .hiraola-product_slider .list-slide_item .single_product,
 .template-color-1 .hiraola-product-tab_slider-2 .list-slide_item .single_product,
@@ -1264,7 +1264,7 @@ button, .global-overlay, .quantity .cart-plus-minus > .qtybutton {
 .template-color-1 .hiraola-product_slider-3 .list-slide_item .single_product:hover,
 .template-color-1 .latest-blog_slider .list-slide_item .single_product:hover,
 .template-color-1 .shop-product-wrap .list-slide_item .single_product:hover {
-  border-color: #cda557;
+  border-color: #1D2951;
 }
 .template-color-1 .hiraola-product_slider .slick-arrow,
 .template-color-1 .hiraola-product-tab_slider-2 .slick-arrow,
@@ -1280,32 +1280,32 @@ button, .global-overlay, .quantity .cart-plus-minus > .qtybutton {
 .template-color-1 .hiraola-product_slider-3 .slick-arrow:hover,
 .template-color-1 .latest-blog_slider .slick-arrow:hover,
 .template-color-1 .shop-product-wrap .slick-arrow:hover {
-  color: #cda557;
+  color: #1D2951;
 }
 .template-color-1 .hiraola-testimonial_slider .slick-arrow:hover,
 .template-color-1 .hiraola-brand_slider .slick-arrow:hover {
-  color: #cda557;
+  color: #1D2951;
 }
 .template-color-1 .product-tab > ul > li > a.active {
-  color: #cda557;
+  color: #1D2951;
 }
 .template-color-1 .rating-box > ul > li > i {
-  color: #cda557;
+  color: #1D2951;
 }
 .template-color-1 .widgets-essential_stuff > ul > li > i {
-  color: #cda557;
+  color: #1D2951;
 }
 .template-color-1 .newsletter-form_wrap .subscribe-form .newsletter-btn {
-  background-color: #cda557;
+  background-color: #1D2951;
 }
 .template-color-1 .hiraola-social_link > ul > li > a:hover {
-  background-color: #cda557;
+  background-color: #1D2951;
 }
 .template-color-1 .footer-bottom_area .footer-bottom_nav .copyright > span > a {
-  color: #cda557;
+  color: #1D2951;
 }
 .template-color-1 #scrollUp {
-  background-color: #cda557;
+  background-color: #1D2951;
   color: #ffffff;
 }
 .template-color-1 #scrollUp:hover {
@@ -1313,38 +1313,38 @@ button, .global-overlay, .quantity .cart-plus-minus > .qtybutton {
   color: #ffffff !important;
 }
 .template-color-1 .tooltip.bs-tooltip-top .tooltip-arrow:before {
-  border-top-color: #cda557;
+  border-top-color: #1D2951;
 }
 .template-color-1 .tooltip.bs-tooltip-bottom .tooltip-arrow:before {
-  border-bottom-color: #cda557;
+  border-bottom-color: #1D2951;
 }
 .template-color-1 .tooltip.bs-tooltip-start .tooltip-arrow:before {
-  border-left-color: #cda557;
+  border-left-color: #1D2951;
 }
 .template-color-1 .tooltip.bs-tooltip-end .tooltip-arrow:before {
-  border-right-color: #cda557;
+  border-right-color: #1D2951;
 }
 .template-color-1 .tooltip-inner {
-  background-color: #cda557;
+  background-color: #1D2951;
 }
 .template-color-1 .shop-product-wrap.grid .slide-item .single_product > .product-img > .add-actions > ul > li > a:hover {
-  background-color: #cda557;
+  background-color: #1D2951;
 }
 .template-color-1 .loading .middle .lds-ellipsis div {
-  background: #cda557;
+  background: #1D2951;
 }
 .template-color-1 .color-list .single-color.active {
-  border-color: #cda557;
+  border-color: #1D2951;
 }
 .template-color-1 .modal-body .close:hover {
-  color: #cda557;
+  color: #1D2951;
 }
 .template-color-1 .sp-area .sp-nav .sp-content .sp-essential_stuff > ul > li > a {
-  color: #cda557;
+  color: #1D2951;
 }
 .template-color-1 .sp-area .sp-nav .sp-content .qty-btn_area > ul li > a:hover {
-  border: 1px solid #cda557;
-  color: #cda557;
+  border: 1px solid #1D2951;
+  color: #1D2951;
 }
 .template-color-1 .sp-area .sp-nav .sp-content .qty-btn_area > ul li > a.qty-cart_btn {
   background-color: #333333;
@@ -1352,35 +1352,35 @@ button, .global-overlay, .quantity .cart-plus-minus > .qtybutton {
   border: 0;
 }
 .template-color-1 .sp-area .sp-nav .sp-content .qty-btn_area > ul li > a.qty-cart_btn:hover {
-  background-color: #cda557;
+  background-color: #1D2951;
   color: #ffffff !important;
 }
 .template-color-1 .hiraola-product_area-4 .hiraola-product_slider-2 .slide-item .single_product {
   border: 1px solid #e5e5e5;
 }
 .template-color-1 .hiraola-product_area-4 .hiraola-product_slider-2 .slide-item .single_product:hover {
-  border-color: #cda557;
+  border-color: #1D2951;
 }
 .template-color-1 .hiraola-product_area-5 .hiraola-product_slider-3 .slide-item .single_product .product-img .add-actions > ul > li > a:hover {
-  background-color: #cda557;
+  background-color: #1D2951;
 }
 .template-color-1 .hiraola-product_area-5 .hiraola-product_slider-3 .slick-arrow {
-  color: #cda557;
+  color: #1D2951;
 }
 .template-color-1 .sp-slider .slide-item .single_product {
   border: 1px solid #e5e5e5;
 }
 .template-color-1 .sp-slider .slide-item .single_product:hover {
-  border-color: #cda557;
+  border-color: #1D2951;
 }
 .template-color-1 .sp-slider .slick-arrow {
-  color: #cda557;
+  color: #1D2951;
 }
 .template-color-1 .sp-gallery_area .sp-nav .sp-gallery .lg-image {
   outline: 1px solid #e5e5e5;
 }
 .template-color-1 .sp-gallery_area .sp-nav .sp-gallery .lg-image:hover {
-  outline: 1px solid #cda557;
+  outline: 1px solid #1D2951;
 }
 
 .template-color-2 {
@@ -1661,7 +1661,7 @@ button, .global-overlay, .quantity .cart-plus-minus > .qtybutton {
 }
 .template-color-2 .sp-area .sp-nav .sp-content .qty-btn_area > ul li > a:hover {
   border: 1px solid #be8658;
-  color: #cda557;
+  color: #1D2951;
 }
 .template-color-2 .sp-area .sp-nav .sp-content .qty-btn_area > ul li > a.qty-cart_btn {
   background-color: #333333;
@@ -1978,7 +1978,7 @@ button, .global-overlay, .quantity .cart-plus-minus > .qtybutton {
 }
 .template-color-3 .sp-area .sp-nav .sp-content .qty-btn_area > ul li > a:hover {
   border: 1px solid #b76e79;
-  color: #cda557;
+  color: #1D2951;
 }
 .template-color-3 .sp-area .sp-nav .sp-content .qty-btn_area > ul li > a.qty-cart_btn {
   background-color: #333333;
@@ -2295,7 +2295,7 @@ button, .global-overlay, .quantity .cart-plus-minus > .qtybutton {
 }
 .template-color-4 .sp-area .sp-nav .sp-content .qty-btn_area > ul li > a:hover {
   border: 1px solid #58d173;
-  color: #cda557;
+  color: #1D2951;
 }
 .template-color-4 .sp-area .sp-nav .sp-content .qty-btn_area > ul li > a.qty-cart_btn {
   background-color: #333333;
@@ -2339,7 +2339,7 @@ button, .global-overlay, .quantity .cart-plus-minus > .qtybutton {
 /*----------------------------------------*/
 button.li-btn {
   border: none;
-  background: #cda557;
+  background: #1D2951;
   color: #ffffff;
   font-size: 18px;
   width: 45px;
@@ -2367,7 +2367,7 @@ button.li-btn:hover {
   color: #888888;
 }
 .hiraola-search_btn:hover {
-  color: #cda557;
+  color: #1D2951;
 }
 
 /* ---Hiraola's Button Position--- */
@@ -2431,7 +2431,7 @@ button.li-btn:hover {
 
 /* ---Hiraola's Button With Color Variation--- */
 .hiraola-btn-bondi_blue {
-  background-color: #cda557;
+  background-color: #1D2951;
   color: #ffffff;
 }
 .hiraola-btn-bondi_blue:hover {
@@ -2450,7 +2450,7 @@ button.li-btn:hover {
 }
 
 .hiraola-btn_limerick {
-  background-color: #cda557;
+  background-color: #1D2951;
   color: #ffffff;
   width: 120px;
   height: 40px;
@@ -2484,7 +2484,7 @@ button.li-btn:hover {
 }
 
 .hiraola-compare_btn {
-  background: #cda557;
+  background: #1D2951;
   color: #ffffff;
   height: 40px;
   line-height: 43px;
@@ -2515,7 +2515,7 @@ button.li-btn:hover {
   padding-right: 10px;
 }
 .fb-filter-btn_area .hiraola-filter_btn:hover {
-  background-color: #cda557;
+  background-color: #1D2951;
 }
 
 /*----------------------------------------*/
@@ -2833,7 +2833,7 @@ button.li-btn:hover {
   height: 50px;
   line-height: 50px;
   display: block;
-  color: #cda557;
+  color: #1D2951;
   text-align: center;
   position: absolute;
   z-index: 8;
@@ -2906,7 +2906,7 @@ button.li-btn:hover {
 .hiraola-product-tab_slider-3 .slick-arrow:hover,
 .arrow-type-two .slick-arrow:hover,
 .latest-blog_slider .slick-arrow:hover {
-  color: #cda557;
+  color: #1D2951;
 }
 .hiraola-product_slider .slick-arrow.slick-next,
 .hiraola-product-tab_slider-3 .slick-arrow.slick-next,
@@ -3608,7 +3608,7 @@ button.li-btn:hover {
   }
 }
 .category-menu .category-heading {
-  background: #cda557;
+  background: #1D2951;
   position: relative;
   cursor: pointer;
   padding: 19px 0;
@@ -3681,7 +3681,7 @@ button.li-btn:hover {
   visibility: visible;
 }
 .category-menu .category-menu-list > ul > li:hover > a {
-  color: #cda557;
+  color: #1D2951;
 }
 .category-menu .category-menu-list > ul > li:last-child > a:before {
   display: none;
@@ -3732,7 +3732,7 @@ button.li-btn:hover {
   width: 640px;
   padding: 30px;
   overflow: hidden;
-  border-top: 2px solid #cda557;
+  border-top: 2px solid #1D2951;
 }
 @media (max-width: 991px) {
   .cat-mega-menu {
@@ -4398,7 +4398,7 @@ button.li-btn:hover {
   max-width: 460px;
 }
 .mailchimp-submitting {
-  color: #cda557;
+  color: #1D2951;
 }
 .mailchimp-success {
   color: green;
@@ -4758,7 +4758,7 @@ button.li-btn:hover {
   font-size: 18px;
 }
 .modal-wrapper .modal-dialog .modal-content .modal-body .modal-inner-area .sp-content .hiraola-group_btn > ul > li > a:hover {
-  border-color: #cda557;
+  border-color: #1D2951;
 }
 .modal-wrapper .modal-dialog .modal-content .modal-body .modal-inner-area .sp-content .hiraola-tag-line {
   display: -webkit-box;
@@ -5204,7 +5204,7 @@ button.li-btn:hover {
 
 /* ---Header Bottom Area--- */
 .header-bottom_area {
-  background-color: #cda557;
+  background-color: #1D2951;
 }
 .header-bottom_area > .container {
   position: relative;
@@ -5546,13 +5546,13 @@ button.li-btn:hover {
   color: #000;
 }
 .header-bottom_area.header-bottom_area-2 .container-fliud .main-menu_area > nav > ul > li:hover > a {
-  color: #cda557 !important;
+  color: #1D2951 !important;
 }
 .header-bottom_area.header-bottom_area-2 .container-fliud .main-menu_area > nav > ul > li:hover > a:before {
-  color: #cda557;
+  color: #1D2951;
 }
 .header-bottom_area.header-bottom_area-2 .container-fliud .main-menu_area > nav > ul > li:hover > a:after {
-  color: #cda557;
+  color: #1D2951;
 }
 .header-bottom_area.header-bottom_area-2 .container-fliud .main-menu_area > nav > ul > li.megamenu-holder > ul {
   left: 10%;
@@ -5575,12 +5575,12 @@ button.li-btn:hover {
   }
 }
 .header-bottom_area.header-bottom_area-2 .container-fliud .header-right_area > ul > li > a:hover {
-  color: #cda557 !important;
+  color: #1D2951 !important;
 }
 
 /* ---Header Sticky--- */
 .header-main_area .header-sticky.sticky {
-  background: #cda557;
+  background: #1D2951;
   -webkit-box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.2);
           box-shadow: 0px 1px 5px 0px rgba(0, 0, 0, 0.2);
   left: 0;
@@ -5602,7 +5602,7 @@ button.li-btn:hover {
   animation: 800ms ease-in-out 0s normal none 1 running slideInDown;
 }
 .header-main_area .header-sticky.sticky.header-sticky:hover {
-  background: #cda557;
+  background: #1D2951;
 }
 .header-main_area.header-main_area-2 .header-sticky.sticky {
   background-color: #ffffff;
@@ -5881,7 +5881,7 @@ button.li-btn:hover {
 }
 .hiraola-sidebar-catagories_area .hiraola-sidebar_categories .hiraola-categories_title:before {
   content: "";
-  background-color: #cda557;
+  background-color: #1D2951;
   width: 70px;
   height: 2px;
   position: absolute;
@@ -5907,7 +5907,7 @@ button.li-btn:hover {
   padding: 0;
 }
 .hiraola-sidebar-catagories_area .hiraola-sidebar_categories.category-module .category-module_heading {
-  background-color: #cda557;
+  background-color: #1D2951;
   padding: 15px;
 }
 .hiraola-sidebar-catagories_area .hiraola-sidebar_categories.category-module .category-module_heading > h5 {
@@ -5991,7 +5991,7 @@ button.li-btn:hover {
   font-size: 18px;
 }
 .shop-toolbar .product-view-mode > a.active {
-  color: #cda557;
+  color: #1D2951;
 }
 .shop-toolbar .product-item-selection_area {
   display: -webkit-box;
@@ -6293,7 +6293,7 @@ button.li-btn:hover {
   }
 }
 .shop-product-wrap.listview > [class*=col-] .list-slide_item .single_product .hiraola-product_content .add-actions > ul > li > a:hover {
-  background-color: #cda557;
+  background-color: #1D2951;
   color: #ffffff !important;
 }
 .shop-product-wrap.listview > [class*=col-] .list-slide_item .single_product .hiraola-product_content .add-actions > ul > li:first-child .hiraola-add_cart {
@@ -6301,7 +6301,7 @@ button.li-btn:hover {
   color: #ffffff;
 }
 .shop-product-wrap.listview > [class*=col-] .list-slide_item .single_product .hiraola-product_content .add-actions > ul > li:first-child .hiraola-add_cart:hover {
-  background-color: #cda557;
+  background-color: #1D2951;
   color: #ffffff !important;
 }
 .shop-product-wrap.listview > [class*=col-] .slide-item {
@@ -6494,7 +6494,7 @@ button.li-btn:hover {
   display: block;
 }
 .sp-affiliate_area .sp-content .qty-btn_area a.qty-buy_btn:hover {
-  background-color: #cda557;
+  background-color: #1D2951;
   color: #ffffff !important;
 }
 
@@ -6769,10 +6769,10 @@ button.li-btn:hover {
   font-size: 16px;
 }
 .sp-product-tab_area .sp-product-tab_nav .tab-content .form-horizontal .form-group .your-opinion span .br-wrapper .br-widget a.br-active:after {
-  color: #cda557;
+  color: #1D2951;
 }
 .sp-product-tab_area .sp-product-tab_nav .tab-content .form-horizontal .form-group .your-opinion span .br-wrapper .br-widget a.br-selected:after {
-  color: #cda557;
+  color: #1D2951;
 }
 
 /* ---Single Product Slider Area--- */
@@ -6918,8 +6918,8 @@ button.li-btn:hover {
   border: 1px solid #595959;
 }
 .hiraola-sidebar-search-form .hiraola-search-btn:hover {
-  background: #cda557;
-  border-color: #cda557;
+  background: #1D2951;
+  border-color: #1D2951;
 }
 .hiraola-sidebar-search-form .hiraola-search-btn i {
   font-size: 20px;
@@ -6955,7 +6955,7 @@ button.li-btn:hover {
   height: 2px;
   bottom: -26px;
   left: 0;
-  background-color: #cda557;
+  background-color: #1D2951;
   content: "";
   position: absolute;
 }
@@ -7009,8 +7009,8 @@ button.li-btn:hover {
 }
 .hiraola-blog-sidebar-wrapper .hiraola-blog-sidebar .hiraola-blog-tags li a:hover {
   color: #ffffff !important;
-  background-color: #cda557;
-  border-color: #cda557;
+  background-color: #1D2951;
+  border-color: #1D2951;
 }
 
 /* ---Blog Grid View--- */
@@ -7208,7 +7208,7 @@ button.li-btn:hover {
 }
 .hiraola-blog-details .hiraola-blog-blockquote blockquote p:before {
   content: "";
-  background: #cda557;
+  background: #1D2951;
   position: absolute;
   width: 5px;
   height: 100%;
@@ -7234,7 +7234,7 @@ button.li-btn:hover {
   font-size: 16px;
 }
 .hiraola-blog-details .hiraola-tag-line a:hover {
-  color: #cda557;
+  color: #1D2951;
 }
 .hiraola-blog-details .hiraola-social_link {
   padding-top: 30px;
@@ -7327,7 +7327,7 @@ button.li-btn:hover {
   float: right;
 }
 .hiraola-blog-details .hiraola-comment-section ul li .comment-body .reply-btn a {
-  color: #cda557;
+  color: #1D2951;
   font-size: 12px;
   display: inline-block;
   width: 60px;
@@ -7336,11 +7336,11 @@ button.li-btn:hover {
   text-align: center;
   border-radius: 20px;
   text-transform: capitalize;
-  border: 1px solid #cda557;
+  border: 1px solid #1D2951;
 }
 .hiraola-blog-details .hiraola-comment-section ul li .comment-body .reply-btn a:hover {
   color: #ffffff !important;
-  background-color: #cda557;
+  background-color: #1D2951;
 }
 .hiraola-blog-details .hiraola-comment-section ul .comment-children {
   margin-left: 40px;
@@ -7385,7 +7385,7 @@ button.li-btn:hover {
   padding-top: 30px;
 }
 .hiraola-blog-details .hiraola-blog-comment-wrapper form .comment-post-box .comment-btn_wrap .hiraola-post-btn_area .hiraola-post_btn {
-  background-color: #cda557;
+  background-color: #1D2951;
   color: #ffffff;
   width: 140px;
   height: 40px;
@@ -7439,15 +7439,15 @@ button.li-btn:hover {
   padding: 10px 20px;
 }
 .account-page-area .myaccount-tab-trigger li a.active {
-  background: #cda557;
-  border-color: #cda557;
+  background: #1D2951;
+  border-color: #1D2951;
   color: #ffffff;
 }
 .account-page-area .myaccount-tab-trigger li a.active:hover {
   color: #ffffff !important;
 }
 .account-page-area .myaccount-tab-trigger li a:hover {
-  color: #cda557;
+  color: #1D2951;
 }
 
 .myaccount-tab-content {
@@ -7466,7 +7466,7 @@ button.li-btn:hover {
   margin-bottom: 0;
 }
 .myaccount-orders .table .account-order-id:hover {
-  color: #cda557;
+  color: #1D2951;
 }
 .myaccount-orders .table.table-hover tbody tr:hover {
   background-color: rgba(0, 0, 0, 0.02);
@@ -7571,7 +7571,7 @@ button.li-btn:hover {
 }
 .hiraola-form .hiraola-form-inner a:hover,
 .hiraola-form-boxed .hiraola-form-inner a:hover {
-  color: #cda557;
+  color: #1D2951;
 }
 
 /*----------------------------------------*/
@@ -7702,7 +7702,7 @@ button.li-btn:hover {
 }
 .hiraola-login_btn:hover,
 .hiraola-register_btn:hover {
-  background: #cda557;
+  background: #1D2951;
 }
 
 .hiraola-register_btn {
@@ -7768,7 +7768,7 @@ button.li-btn:hover {
   font-size: 20px;
 }
 .table-content table td.hiraola-product_remove > a:hover i {
-  color: #cda557;
+  color: #1D2951;
 }
 .table-content table td.hiraola-product_remove > a > i {
   font-size: 14px;
@@ -7787,7 +7787,7 @@ button.li-btn:hover {
   font-weight: 700;
 }
 .table-content table td.hiraola-product-stock-status span.in-stock, .table-content table td.hiraola-product-stock-status span.out-stock {
-  color: #cda557;
+  color: #1D2951;
   font-size: 12px;
   text-transform: capitalize;
 }
@@ -7806,7 +7806,7 @@ button.li-btn:hover {
   display: inline-block;
 }
 .table-content table td.hiraola-cart_btn a:hover {
-  background: #cda557;
+  background: #1D2951;
   color: #ffffff !important;
 }
 .table-content .table > :not(:last-child) > :last-child > * {
@@ -7868,7 +7868,7 @@ button.li-btn:hover {
 }
 .coupon-all .coupon input.button:hover,
 .coupon-all .coupon2 input.button:hover {
-  background: #cda557;
+  background: #1D2951;
 }
 .coupon-all .coupon.coupon2,
 .coupon-all .coupon2.coupon2 {
@@ -7917,8 +7917,8 @@ button.li-btn:hover {
   text-transform: capitalize;
 }
 .cart-page-total a:hover {
-  background: #cda557;
-  border-color: #cda557;
+  background: #1D2951;
+  border-color: #1D2951;
   color: #ffffff !important;
 }
 
@@ -7931,7 +7931,7 @@ button.li-btn:hover {
 
 .coupon-accordion h3 {
   background-color: #f4f4f4;
-  border-top: 3px solid #cda557;
+  border-top: 3px solid #1D2951;
   font-size: 14px;
   font-weight: 400;
   list-style: outside none none;
@@ -7942,7 +7942,7 @@ button.li-btn:hover {
   text-transform: none;
 }
 .coupon-accordion h3:before {
-  color: #cda557;
+  color: #1D2951;
   content: "\f133";
   display: inline-block;
   font-family: "Font Awesome 5 Free";
@@ -7956,7 +7956,7 @@ button.li-btn:hover {
   text-transform: none;
 }
 .coupon-accordion span:hover {
-  color: #cda557;
+  color: #1D2951;
 }
 .coupon-accordion .coupon-content {
   border: 1px solid #e5e5e5;
@@ -8004,7 +8004,7 @@ button.li-btn:hover {
   width: inherit;
 }
 .coupon-accordion .coupon-content .coupon-info p.form-row input[type=submit]:hover {
-  background: #cda557;
+  background: #1D2951;
 }
 .coupon-accordion .coupon-content .coupon-info p.form-row input[type=checkbox] {
   height: inherit;
@@ -8016,13 +8016,13 @@ button.li-btn:hover {
   margin-top: 7px;
 }
 .coupon-accordion .coupon-content .coupon-info p.checkout-coupon input[type=submit] {
-  background: #cda557;
+  background: #1D2951;
 }
 .coupon-accordion .coupon-content .coupon-info p.lost-password {
   margin-top: 15px;
 }
 .coupon-accordion .coupon-content .coupon-info p.lost-password a:hover {
-  color: #cda557;
+  color: #1D2951;
 }
 
 .coupon-checkout-content {
@@ -8055,7 +8055,7 @@ button.li-btn:hover {
   width: inherit;
 }
 .coupon-checkout-content .coupon-info .checkout-coupon input[type=submit]:hover {
-  background: #cda557;
+  background: #1D2951;
 }
 @media (max-width: 479px) {
   .coupon-checkout-content .coupon-info .checkout-coupon .coupon-inner_btn {
@@ -8118,7 +8118,7 @@ button.li-btn:hover {
   display: block;
 }
 .checkbox-form .country-select label span.required, .checkbox-form.checkout-form-list label span.required {
-  color: #cda557;
+  color: #1D2951;
   display: inline-block;
   font-size: 24px;
   line-height: 16px;
@@ -8247,7 +8247,7 @@ button.li-btn:hover {
   cursor: pointer;
 }
 .payment-method .payment-accordion .panel-title a:hover {
-  color: #cda557 !important;
+  color: #1D2951 !important;
 }
 
 .order-button-payment input {
@@ -8265,7 +8265,7 @@ button.li-btn:hover {
   cursor: pointer;
 }
 .order-button-payment input:hover {
-  background: #cda557;
+  background: #1D2951;
 }
 
 /*----------------------------------------*/
@@ -8318,7 +8318,7 @@ button.li-btn:hover {
   transition-property: color;
 }
 .compare-table .table tbody tr td .compare-product-name a:hover {
-  color: #cda557;
+  color: #1D2951;
 }
 .compare-table .table tbody tr td .rating-box > ul > li {
   display: inline-block;
@@ -8436,9 +8436,9 @@ button.li-btn:hover {
   text-transform: uppercase;
 }
 .contact-main-page .contact-form-content .contact-form .form-group .hiraola-contact-form_btn:hover {
-  background-color: #cda557;
+  background-color: #1D2951;
   color: #ffffff;
-  border-color: #cda557;
+  border-color: #1D2951;
 }
 
 /*----------------------------------------*/
@@ -8476,7 +8476,7 @@ button.li-btn:hover {
   }
 }
 .about-us-area .overview-content > h2 span {
-  color: #cda557;
+  color: #1D2951;
 }
 .about-us-area .overview-content > h2:before {
   background-color: #f4f4f4;
@@ -8492,7 +8492,7 @@ button.li-btn:hover {
   position: absolute;
   bottom: 0;
   left: 0;
-  background: #cda557;
+  background: #1D2951;
   height: 2px;
   width: 170px;
 }
@@ -8508,7 +8508,7 @@ button.li-btn:hover {
   }
 }
 .about-us-area .overview-content .hiraola-about-us_btn-area .about-us_btn {
-  background: #cda557;
+  background: #1D2951;
   color: #ffffff;
   display: block;
   float: left;
@@ -8540,7 +8540,7 @@ button.li-btn:hover {
   display: inline-block;
 }
 .project-count-area .single-count .count-title h2 {
-  color: #cda557;
+  color: #1D2951;
   font-size: 40px;
   font-weight: bold;
   letter-spacing: 0.2px;
@@ -8650,7 +8650,7 @@ button.li-btn:hover {
   font-size: 14px;
 }
 .frequently-area .frequently-accordion .actives {
-  border: 1px solid #cda557;
+  border: 1px solid #1D2951;
 }
 .frequently-area .frequently-accordion .card {
   border-radius: 0;
@@ -8671,7 +8671,7 @@ button.li-btn:hover {
   text-transform: capitalize;
 }
 .frequently-area .frequently-accordion .card-header a:hover {
-  color: #cda557 !important;
+  color: #1D2951 !important;
 }
 .frequently-area .frequently-accordion .card-header a.collapsed:before {
   content: "\f067";
@@ -8709,7 +8709,7 @@ button.li-btn:hover {
   padding: 60px 0 80px;
 }
 .error404-area .search-error-wrapper h1 {
-  color: #cda557;
+  color: #1D2951;
   font-size: 120px;
   margin-bottom: 0;
   padding-bottom: 22px;
@@ -8747,10 +8747,10 @@ button.li-btn:hover {
   top: 0;
 }
 .error404-area .search-error-wrapper .error-search_btn:hover {
-  color: #cda557;
+  color: #1D2951;
 }
 .error404-area .search-error-wrapper .hiraola-error_btn {
-  background: #cda557;
+  background: #1D2951;
   -webkit-box-shadow: none;
   box-shadow: none;
   color: #ffffff;
