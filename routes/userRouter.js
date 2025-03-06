@@ -68,6 +68,11 @@ router.get("/address", ifLogged, profileController.addressDetails);
 router.get("/changepassword", ifLogged, profileController.changePassword);
 router.post("/changepassword", ifLogged, profileController.changePasswordPost);
 
+
+router.get('/verify-email-update', ifLogged, profileController.verifyEmailUpdate);
+router.post('/verify-email-otp', ifLogged, profileController.verifyEmailOtp);
+router.post('/resend-email-otp', ifLogged, profileController.resendEmailOtp);
+
 router.get("/orders", ifLogged, orderController.orders);
 router.get("/orderdetails/:orderId", ifLogged, orderController.orderDetails);
 router.get("/confirmorder", ifLogged, orderController.placeOrder)

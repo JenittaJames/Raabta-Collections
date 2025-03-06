@@ -254,48 +254,58 @@
 <script>
 
 async function updateProfile(event) {
-        event.preventDefault();
+    event.preventDefault();
+    
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    try {
+        const response = await fetch('/updateprofile', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(Object.fromEntries(formData))
+        });
         
-        const form = event.target;
-        const formData = new FormData(form);
+        const result = await response.json();
         
-        try {
-            const response = await fetch('/updateprofile', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(Object.fromEntries(formData))
+        if (result.status === 'success') {
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: result.message,
+                confirmButtonColor: '#595959'
+            }).then(() => {
+                window.location.reload();
             });
-            
-            const result = await response.json();
-            
-            if (result.status === 'success') {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: result.message,
-                    confirmButtonColor: '#595959'
-                }).then(() => {
-                    window.location.reload();
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: result.message,
-                    confirmButtonColor: '#595959'
-                });
-            }
-        } catch (error) {
+        } else if (result.status === 'verify') {
+            // Redirect to email verification page
+            Swal.fire({
+                icon: 'info',
+                title: 'Verification Required',
+                text: result.message,
+                confirmButtonColor: '#595959'
+            }).then(() => {
+                window.location.href = '/verify-email-update';
+            });
+        } else {
             Swal.fire({
                 icon: 'error',
                 title: 'Oops...',
-                text: 'Something went wrong!',
+                text: result.message,
                 confirmButtonColor: '#595959'
             });
         }
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'Something went wrong!',
+            confirmButtonColor: '#595959'
+        });
     }
+}
 
     function toggleEdit() {
         const viewMode = document.getElementById('viewMode');
