@@ -9140,3 +9140,28 @@ button.li-btn:hover {
   color: red;
   font-size: 0.75rem;
 }
+
+
+.hm-searchbox {
+  position: relative;
+}
+
+.search-cancel-icon {
+  position: absolute;
+  right: 50px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #999;
+  transition: color 0.3s;
+  z-index: 10;
+}
+
+.search-cancel-icon:hover {
+  color: #333;
+}
+
+/* For mobile search */
+.offcanvas-inner_search .search-cancel-icon {
+  right: 45px;
+}

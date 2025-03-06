@@ -1,8 +1,6 @@
 <!doctype html>
 <html class="no-js" lang="en">
 
-
-<!-- Mirrored from template.hasthemes.com/hiraola/hiraola/single-product.html by HTTrack Website Copier/3.x [XR&CO'2014], Sat, 25 Jan 2025 12:57:15 GMT -->
 <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
@@ -39,19 +37,42 @@
     <link rel="stylesheet" href="/public/user/assets/css/style.css">
 
     <!-- Add this in your head tag -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/elevatezoom/2.2.3/jquery.elevatezoom.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/elevatezoom/2.2.3/jquery.elevatezoom.min.css">
 
-<!-- sweet alert -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-</head>
+    <!-- sweet alert -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
     .header-right_area i {
-    font-size: 24px;
-}
+        font-size: 24px;
+    }
+
+    .hm-searchbox {
+        position: relative;
+    }
+
+    .search-cancel-icon {
+        position: absolute;
+        right: 50px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #999;
+        transition: color 0.3s;
+        z-index: 10;
+    }
+
+    .search-cancel-icon:hover {
+        color: #333;
+    }
+
+    /* For mobile search */
+    .offcanvas-inner_search .search-cancel-icon {
+        right: 45px;
+    }
 </style>
+</head>
 
 <body class="template-color-1">
 
@@ -71,8 +92,9 @@
                         </div>
                         <div class="col-lg-9">
                             <div class="hm-form_area">
-                                <form action="#" class="hm-searchbox">
-                                    <input type="text" placeholder="Enter your search key ...">
+                                <form action="/search" class="hm-searchbox">
+                                    <input type="text" id="desktop-search" placeholder="Enter your search key ..." name="query" value="<%= locals.searchQuery || "" %>">
+                                    <span class="search-cancel-icon" style="display: none;"><i class="fa fa-times"></i></span>
                                     <button class="li-btn" type="submit"><i class="fa fa-search"></i></button>
                                 </form>
                             </div>
@@ -202,8 +224,9 @@
                     <div class="container">
                         <a href="#" class="btn-close"><i class="ion-android-close"></i></a>
                         <div class="offcanvas-inner_search">
-                            <form action="#" class="hm-searchbox">
-                                <input type="text" placeholder="Search for item...">
+                            <form action="/search" class="hm-searchbox">
+                                <input type="text" id="mobile-search" placeholder="Search for item..." name="query" value="<%= locals.searchQuery || "" %>">
+                                <span class="search-cancel-icon" style="display: none;"><i class="fa fa-times"></i></span>
                                 <button class="search_btn" type="submit"><i class="ion-ios-search-strong"></i></button>
                             </form>
                         </div>
@@ -216,13 +239,6 @@
                                     <a href="/shop">
                                         <span class="mm-text">Shop</span>
                                     </a>
-                                    <!-- <ul class="sub-menu">
-                                        <li class="menu-item-has-children">
-                                            <a href="#">
-                                                <span class="mm-text">Single Product Type</span>
-                                            </a>
-                                            </li>
-                                    </ul> -->
                                 </li>
                                 <li class="menu-item-has-children">
                                     <a href="#">
@@ -320,3 +336,51 @@
             </div>
         </header>
         <!-- Hiraola's Header Main Area End Here -->
+        
+        <!-- Script for search cancel functionality -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // For desktop search
+                const desktopInput = document.getElementById('desktop-search');
+                const desktopCancelIcon = desktopInput.parentElement.querySelector('.search-cancel-icon');
+                
+                // For mobile search
+                const mobileInput = document.getElementById('mobile-search');
+                const mobileCancelIcon = mobileInput.parentElement.querySelector('.search-cancel-icon');
+                
+                // Function to setup search behavior
+                function setupSearch(input, cancelIcon) {
+                    // Show cancel icon when text is entered or when there's an initial value
+                    if (input.value) {
+                        cancelIcon.style.display = 'block';
+                    }
+                    
+                    input.addEventListener('input', function() {
+                        cancelIcon.style.display = this.value ? 'block' : 'none';
+                    });
+                    
+                    // Clear search and redirect to shop page to display all products when cancel icon is clicked
+                    cancelIcon.addEventListener('click', function(e) {
+                        // Prevent form submission
+                        e.preventDefault();
+                        
+                        // Clear the input
+                        input.value = '';
+                        cancelIcon.style.display = 'none';
+                        
+                        // Redirect to shop page to display all products
+                        window.location.href = '/shop';
+                    });
+                }
+                
+                // Setup both search fields
+                if (desktopInput && desktopCancelIcon) {
+                    setupSearch(desktopInput, desktopCancelIcon);
+                }
+                
+                if (mobileInput && mobileCancelIcon) {
+                    setupSearch(mobileInput, mobileCancelIcon);
+                }
+            });
+        </script>
+        

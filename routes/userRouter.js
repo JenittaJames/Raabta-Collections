@@ -77,5 +77,6 @@ router.get("/orders", ifLogged, orderController.orders);
 router.get("/orderdetails/:orderId", ifLogged, orderController.orderDetails);
 router.get("/confirmorder", ifLogged, orderController.placeOrder)
 router.post('/orders/:orderId/cancel', ifLogged, orderController.cancelOrder);
+router.get("/search",userController.loadShop)
 
 module.exports = router;

@@ -1,27 +1,40 @@
 const catModel = require("../../models/categorySchema")
 
-const categoriesPage = async (req,res) => {
+const categoriesPage = async (req, res) => {
     try {
+        const { query } = req.query;
+        const searchQuery = query || "";
+        
+        const searchFilter = {};
+        
+        if (searchQuery) {
+            searchFilter.$or = [
+                { name: { $regex: searchQuery, $options: "i" } },
+                { description: { $regex: searchQuery, $options: "i" } }
+            ];
+        }
+        
         const page = parseInt(req.query.page) || 1; 
         const limit = 4; 
         const skip = (page - 1) * limit; 
 
-        const totalCategory = await catModel.countDocuments(); 
+        const totalCategory = await catModel.countDocuments(searchFilter); 
         const totalPages = Math.ceil(totalCategory / limit); 
 
-        const categories = await catModel.find()
+        const categories = await catModel.find(searchFilter)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
 
         res.render("admin/categories", {
             categories,
+            searchQuery,
             currentPage: page,
             totalPages: totalPages
         });
 
     } catch (error) {
-        console.log("users page error", error);
+        console.log("categories page error", error);
         res.status(500).send("Internal Server Error");
     }
 }

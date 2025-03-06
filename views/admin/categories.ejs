@@ -9,9 +9,36 @@
         <button class="add-category-btn" onclick="window.location.href='/admin/addcategory'">+ Add Category</button>
     </div>
 
+    <!-- Search Container -->
+    <div class="search-container" style="margin-bottom: 20px;">
+        <form action="/admin/categories" method="GET">
+            <div style="display: flex; max-width: 500px;">
+                <input 
+                    type="text" 
+                    name="query" 
+                    placeholder="Search by category name or description..." 
+                    style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 5px 0 0 5px;"
+                    value="<%= locals.searchQuery || '' %>"
+                >
+                <button 
+                    type="submit" 
+                    style="background-color: #000000; color: white; padding: 8px 15px; border: none; border-radius: 0 5px 5px 0; cursor: pointer;"
+                >
+                    Search
+                </button>
+                <% if (locals.searchQuery) { %>
+                    <a 
+                        href="/admin/categories" 
+                        style="background-color: #f8f8f8; color: #333; padding: 8px 15px; border: 1px solid #ddd; border-left: none; text-decoration: none; display: flex; align-items: center;"
+                    >
+                        Clear
+                    </a>
+                <% } %>
+            </div>
+        </form>
+    </div>
 
     <style>
-
         .add-category-btn{
             background-color: #000000;
             color: white; 
@@ -124,15 +151,15 @@
 
     <div class="pagination">
         <% if (currentPage > 1) { %>
-            <a href="/admin/categories?page=<%= currentPage - 1 %>" class="page-link">←</a>
+            <a href="/admin/categories?page=<%= currentPage - 1 %><%= locals.searchQuery ? '&query=' + searchQuery : '' %>" class="page-link">←</a>
         <% } %>
 
         <% for (let i = 1; i <= totalPages; i++) { %>
-            <a href="/admin/categories?page=<%= i %>" class="page-link <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+            <a href="/admin/categories?page=<%= i %><%= locals.searchQuery ? '&query=' + searchQuery : '' %>" class="page-link <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
         <% } %>
 
         <% if (currentPage < totalPages) { %>
-            <a href="/admin/categories?page=<%= currentPage + 1 %>" class="page-link">→</a>
+            <a href="/admin/categories?page=<%= currentPage + 1 %><%= locals.searchQuery ? '&query=' + searchQuery : '' %>" class="page-link">→</a>
         <% } %>
     </div>
 
@@ -157,5 +184,4 @@
             }
         });
     }
-
 </script>

@@ -374,21 +374,38 @@ const pageNotFound = async (req, res) => {
 
 const loadShop = async (req, res) => {
   try {
+
+    const {query}=req.query;
+
+    const searchQuery = query || "";
+
+    const searchFilter = {
+      status: true,
+    };
+
+    if (searchQuery) {
+      searchFilter.$or = [
+        { productName: { $regex: searchQuery, $options: "i" } },
+        { description: { $regex: searchQuery, $options: "i" } },
+      ];
+    }
+
     const page = parseInt(req.query.page) || 1;
     const limit = 9;
     const skip = (page - 1) * limit;
     
-    const totalProducts = await productModel.countDocuments({ status: true });
+    const totalProducts = await productModel.countDocuments(searchFilter);
     const totalPages = Math.ceil(totalProducts / limit);
     
-    const products = await productModel.find({ status: true })
+    const products = await productModel.find(searchFilter)
       .skip(skip)
       .limit(limit);
     
     const categories = await catModel.find({});
     
     res.render("user/shop", { 
-      products, 
+      products,
+      searchQuery : searchQuery, 
       categories,
       currentPage: page,
       totalPages,

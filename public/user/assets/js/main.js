@@ -1773,3 +1773,38 @@ $(function () {
 });
 
 })(jQuery);
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    // For desktop search
+    const desktopInput = document.getElementById('desktop-search');
+    const desktopCancelIcon = desktopInput.parentElement.querySelector('.search-cancel-icon');
+    
+    // For mobile search
+    const mobileInput = document.getElementById('mobile-search');
+    const mobileCancelIcon = mobileInput.parentElement.querySelector('.search-cancel-icon');
+    
+    // Function to setup search behavior
+    function setupSearch(input, cancelIcon) {
+        // Show cancel icon when text is entered
+        input.addEventListener('input', function() {
+            cancelIcon.style.display = this.value ? 'block' : 'none';
+        });
+        
+        // Clear search when cancel icon is clicked
+        cancelIcon.addEventListener('click', function() {
+            input.value = '';
+            cancelIcon.style.display = 'none';
+            input.focus();
+        });
+    }
+    
+    // Setup both search fields
+    if (desktopInput && desktopCancelIcon) {
+        setupSearch(desktopInput, desktopCancelIcon);
+    }
+    
+    if (mobileInput && mobileCancelIcon) {
+        setupSearch(mobileInput, mobileCancelIcon);
+    }
+});
