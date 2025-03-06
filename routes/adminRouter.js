@@ -38,9 +38,10 @@ router.get("/editimage/:productId",adminAuth,productController.editImage);
 router.post("/editimage/:productId",adminAuth,upload.array("images"),productController.editImagePost);
 
 
-
 router.get("/orders", adminAuth, orderController.orders)
 router.get('/orders/:orderId',adminAuth, orderController.orderDetails);
+router.post('/orders/verify-return',adminAuth, orderController.verifyReturnRequest);
+
 
 
 module.exports = router;

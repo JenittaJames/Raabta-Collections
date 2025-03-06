@@ -67,6 +67,8 @@ router.post("/address/default/:id", ifLogged, profileController.setDefaultAddres
 router.get("/address", ifLogged, profileController.addressDetails);
 router.get("/changepassword", ifLogged, profileController.changePassword);
 router.post("/changepassword", ifLogged, profileController.changePasswordPost);
+router.get('/wallet/history',ifLogged, profileController. walletHistory);
+router.post('/orders/:orderId/return', ifLogged, profileController.requestReturn);
 
 
 router.get('/verify-email-update', ifLogged, profileController.verifyEmailUpdate);

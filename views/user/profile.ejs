@@ -41,6 +41,13 @@
                 </div>
                 <div class="col-lg-9">
                     <div class="tab-content myaccount-tab-content" id="account-page-tab-content">
+                        <div class="welcome-section">
+                            <div class="wallet-section">
+                                <h3>Wallet Balance</h3>
+                                <p>Your current wallet balance: ₹<%= user.wallet %></p>
+                                <a href="/wallet/history" class="btn-view-history">View Wallet History</a>
+                            </div>
+                        </div>
                         <!-- Personal Information Section -->
                         <div class="personal-info">
                             <div class="info-header">

@@ -391,6 +391,54 @@ const changePasswordPost = async (req, res) => {
   }
 }
 
+
+const walletHistory = async (req, res) => {
+  try {
+      const user = await userModel.findById(req.session.userId);
+      if (!user) {
+          return res.status(404).render('error', { message: 'User not found' });
+      }
+      res.render('user/walletHistory', { walletHistory: user.walletHistory });
+  } catch (error) {
+      console.error('Error fetching wallet history:', error);
+      res.status(500).render('error', { message: 'Failed to load wallet history' });
+  }
+};
+
+
+const requestReturn = async (req, res) => {
+  try {
+      const { orderId } = req.params;
+      const { productId } = req.body;
+      
+      const order = await ordersModel.findById(orderId);
+      if (!order) {
+          return res.status(404).json({ success: false, message: 'Order not found' });
+      }
+      
+      const orderItem = order.orderedItem.find(item => item._id.toString() === productId);
+      if (!orderItem) {
+          return res.status(404).json({ success: false, message: 'Product not found in this order' });
+      }
+      
+      if (orderItem.productStatus !== 'Delivered') {
+          return res.status(400).json({ success: false, message: 'Product is not delivered' });
+      }
+      
+      orderItem.productStatus = 'Return Requested';
+      await order.save();
+      
+      return res.json({ success: true, message: 'Return request submitted successfully' });
+  } catch (error) {
+      console.error('Error processing return request:', error);
+      return res.status(500).json({ success: false, message: 'Failed to process return request' });
+  }
+};
+
+
+
+
+
 module.exports = {
   profile,
   createAddress,
@@ -403,4 +451,6 @@ module.exports = {
   setDefaultAddress,
   changePassword,
   changePasswordPost,
+  walletHistory,
+  requestReturn,
 };

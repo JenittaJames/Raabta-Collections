@@ -15,6 +15,11 @@ const orderSchema = new Schema({
         ref: "Address",
         required: true
     },
+    orderNumber : {
+        type : String,
+        required : true,
+        unique: true
+    },
     orderedItem : [{
         productId : {
             type :  mongoose.Schema.ObjectId,

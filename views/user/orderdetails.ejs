@@ -9,8 +9,8 @@
         <li><a href="/">Home</a></li>
         <li><a href="/orders">My Orders</a></li>
         <li class="active">
-          Order #<%= order && order._id ? order._id.toString().substring(0, 8) :
-          'N/A' %>
+          Order <%= order && order.orderNumber?
+          order.orderNumber.toString().substring(0, 8) : 'N/A' %>
         </li>
       </ul>
     </div>
@@ -35,7 +35,7 @@
           <div class="order-summary-content">
             <div class="detail-row">
               <span class="detail-label">Order ID:</span>
-              <span class="detail-value"><%= order._id %></span>
+              <span class="detail-value"><%= order.orderNumber%></span>
             </div>
             <div class="detail-row">
               <span class="detail-label">Order Status:</span>
@@ -139,6 +139,9 @@
                 >
                   <%= item.productStatus %>
                 </div>
+                <% if (item.productStatus === 'Delivered') { %>
+    <button class="btn-return" data-order-id="<%= order._id %>" data-product-id="<%= item._id %>">Request Return</button>
+<% } %>
               </div>
             </div>
             <% }); %> <% } else { %>
@@ -182,8 +185,14 @@
 
         <div class="order-actions-section">
           <a href="/orders" class="btn-back">Back to Orders</a>
-          <button id="cancelOrderBtn" data-order-id="<%= order._id %>" class="cancel-order-btn">Cancel Order</button>
-          <a href="#" class="btn-contact">Contact Support</a>
+          <button
+            id="cancelOrderBtn"
+            data-order-id="<%= order._id %>"
+            class="btn-back"
+          >
+            Cancel Order
+          </button>
+          <a href="#" class="btn-back">Contact Support</a>
         </div>
       </div>
     </div>
@@ -517,28 +526,50 @@
       text-align: center;
     }
   }
+
+
+  .wallet-section {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.btn-return {
+    background-color: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-return:hover {
+    background-color: #ffcdd2;
+}
+
 </style>
 
 <%- include('../partials/user/footer') %>
 
-
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const cancelButtons = document.querySelectorAll('.cancel-order-btn');
-    
-    cancelButtons.forEach(button => {
-      button.addEventListener('click', function() {
-        const orderId = this.getAttribute('data-order-id');
-        
+  document.addEventListener("DOMContentLoaded", function () {
+    const cancelButtons = document.querySelectorAll(".cancel-order-btn");
+
+    cancelButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        const orderId = this.getAttribute("data-order-id");
+
         // Show SweetAlert confirmation
         Swal.fire({
-          title: 'Cancel Order?',
-          text: 'Are you sure you want to cancel this order?',
-          icon: 'warning',
+          title: "Cancel Order?",
+          text: "Are you sure you want to cancel this order?",
+          icon: "warning",
           showCancelButton: true,
-          confirmButtonColor: '#d33',
-          cancelButtonColor: '#3085d6',
-          confirmButtonText: 'Yes, cancel it!'
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "Yes, cancel it!",
         }).then((result) => {
           if (result.isConfirmed) {
             // User confirmed, send request to server
@@ -547,43 +578,100 @@
         });
       });
     });
-    
+
     function cancelOrder(orderId) {
       fetch(`/orders/${orderId}/cancel`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
-        }
+          "Content-Type": "application/json",
+        },
       })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          // Show success message
-          Swal.fire(
-            'Cancelled!',
-            'Your order has been cancelled.',
-            'success'
-          ).then(() => {
-            // Redirect or reload page
-            window.location.href = '/orders';
-          });
-        } else {
-          // Show error message
-          Swal.fire(
-            'Error!',
-            data.message || 'Failed to cancel order',
-            'error'
-          );
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        Swal.fire(
-          'Error!',
-          'Something went wrong',
-          'error'
-        );
-      });
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            // Show success message
+            Swal.fire(
+              "Cancelled!",
+              "Your order has been cancelled.",
+              "success"
+            ).then(() => {
+              // Redirect or reload page
+              window.location.href = "/orders";
+            });
+          } else {
+            // Show error message
+            Swal.fire(
+              "Error!",
+              data.message || "Failed to cancel order",
+              "error"
+            );
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          Swal.fire("Error!", "Something went wrong", "error");
+        });
     }
   });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const returnButtons = document.querySelectorAll('.btn-return');
+    
+    returnButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const orderId = this.getAttribute('data-order-id');
+            const productId = this.getAttribute('data-product-id');
+            
+            Swal.fire({
+                title: 'Request Return?',
+                text: 'Are you sure you want to request a return for this product?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, request return!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    requestReturn(orderId, productId);
+                }
+            });
+        });
+    });
+    
+    function requestReturn(orderId, productId) {
+        fetch(`/orders/${orderId}/return`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ productId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire(
+                    'Return Requested!',
+                    'Your return request has been submitted.',
+                    'success'
+                ).then(() => {
+                    window.location.reload();
+                });
+            } else {
+                Swal.fire(
+                    'Error!',
+                    data.message || 'Failed to request return',
+                    'error'
+                );
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire(
+                'Error!',
+                'Something went wrong',
+                'error'
+            );
+        });
+    }
+});
 </script>

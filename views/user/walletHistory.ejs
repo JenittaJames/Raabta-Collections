@@ -1,0 +1,93 @@
+<%- include('../partials/user/header') %>
+
+<!-- Begin Breadcrumb Area -->
+<div class="breadcrumb-area">
+  <div class="container">
+    <div class="breadcrumb-content">
+      <h2>Wallet History</h2>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li class="active">Wallet History</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- Begin Wallet History Content Area -->
+<main class="page-content">
+  <div class="wallet-history-area">
+    <div class="container">
+      <div class="wallet-history-container">
+        <h3>Wallet Transactions</h3>
+        <% if (walletHistory && walletHistory.length > 0) { %>
+          <table class="wallet-history-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Type</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% walletHistory.forEach(transaction => { %>
+                <tr>
+                  <td><%= new Date(transaction.date).toLocaleDateString() %></td>
+                  <td><%= transaction.description %></td>
+                  <td><span class="transaction-type <%= transaction.type %>"><%= transaction.type %></span></td>
+                  <td>₹<%= transaction.amount %></td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        <% } else { %>
+          <p>No wallet transactions found.</p>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</main>
+
+<style>
+  .wallet-history-container {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .wallet-history-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+
+  .wallet-history-table th,
+  .wallet-history-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+
+  .wallet-history-table th {
+    background-color: #f8f9fa;
+  }
+
+  .transaction-type {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+  }
+
+  .transaction-type.credit {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  .transaction-type.debit {
+    background-color: #ffebee;
+    color: #c62828;
+  }
+</style>
+
+<%- include('../partials/user/footer') %>

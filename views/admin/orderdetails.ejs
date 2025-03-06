@@ -62,11 +62,12 @@
                                     <th>Quantity</th>
                                     <th>Status</th>
                                     <th>Total</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <% order.orderedItem.forEach(item => { %>
-                                    <tr>
+                                    <tr data-product-id="<%= item._id %>">
                                         <td>
                                             <% if (item.productId) { %>
                                                 <%= item.productId.productName %>
@@ -76,8 +77,29 @@
                                         </td>
                                         <td>₹<%= item.productPrice.toFixed(2) %></td>
                                         <td><%= item.quantity %></td>
-                                        <td><%= item.productStatus %></td>
+                                        <td>
+                                            <span class="product-status"><%= item.productStatus %></span>
+                                            <% if (item.productStatus === 'Return Requested') { %>
+                                                <span class="badge bg-warning">Pending Verification</span>
+                                            <% } else if (item.productStatus === 'Return Approved') { %>
+                                                <span class="badge bg-success">Return Approved</span>
+                                            <% } else if (item.productStatus === 'Return Rejected') { %>
+                                                <span class="badge bg-danger">Return Rejected</span>
+                                            <% } %>
+                                        </td>
                                         <td>₹<%= item.totalProductPrice.toFixed(2) %></td>
+                                        <td>
+                                            <% if (item.productStatus === 'Return Requested') { %>
+                                                <div class="btn-group">
+                                                    <button class="btn btn-success btn-sm approve-return" data-product-id="<%= item._id %>">
+                                                        Approve Return
+                                                    </button>
+                                                    <button class="btn btn-danger btn-sm reject-return" data-product-id="<%= item._id %>">
+                                                        Reject
+                                                    </button>
+                                                </div>
+                                            <% } %>
+                                        </td>
                                     </tr>
                                 <% }) %>
                             </tbody>
@@ -85,6 +107,7 @@
                                 <tr>
                                     <th colspan="4" class="text-end">Order Total:</th>
                                     <th>₹<%= order.orderAmount.toFixed(2) %></th>
+                                    <th></th>
                                 </tr>
                             </tfoot>
                         </table>
@@ -154,6 +177,32 @@
                                 </div>
                             </li>
                         <% } %>
+
+                        <% 
+                        // Check for return requests in any order item
+                        const returnItems = order.orderedItem.filter(item => 
+                            item.productStatus === 'Return Requested' || 
+                            item.productStatus === 'Return Approved' || 
+                            item.productStatus === 'Return Rejected'
+                        );
+                        
+                        for (const item of returnItems) { 
+                        %>
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <strong>Return <%= 
+                                            item.productStatus === 'Return Requested' ? 'Requested' : 
+                                            item.productStatus === 'Return Approved' ? 'Approved' : 'Rejected' 
+                                        %></strong>
+                                        <p class="mb-0">
+                                            Product: <%= item.productId ? item.productId.productName : 'Product' %>
+                                        </p>
+                                    </div>
+                                    <small><%= new Date(item.updatedAt || order.updatedAt).toLocaleString() %></small>
+                                </div>
+                            </li>
+                        <% } %>
                     </ul>
                 </div>
             </div>
@@ -198,6 +247,56 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('An error occurred while updating order status');
         });
     });
+
+    // Handle return approval
+    document.querySelectorAll('.approve-return').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            const orderId = '<%= order._id %>';
+            
+            verifyReturn(orderId, productId, 'Return Approved');
+        });
+    });
+
+    // Handle return rejection
+    document.querySelectorAll('.reject-return').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            const orderId = '<%= order._id %>';
+            
+            verifyReturn(orderId, productId, 'Return Rejected');
+        });
+    });
+
+    // Function to verify return request
+    function verifyReturn(orderId, productId, status) {
+        fetch('/admin/orders/verify-return', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                orderId: orderId,
+                productId: productId,
+                status: status
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                alert(data.message);
+                // Reload the page to reflect the changes
+                window.location.reload();
+            } else {
+                alert('Failed to process return: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while processing the return request');
+        });
+    }
 });
 </script>
 

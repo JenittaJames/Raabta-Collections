@@ -58,11 +58,15 @@ const placeOrder = async (req, res) => {
                 totalProductPrice: itemTotal
             };
         });
+
+
+        const orderNumber = 'ORD' + Math.floor(Math.random() * 1000000);
         
         // Create a new order
         const newOrder = new ordersModel({
             userId: userId,
             cartId: cart._id,
+            orderNumber : orderNumber,
             orderedItem: orderedItems,
             deliveryAddress: address,
             orderAmount: totalAmount,
@@ -75,8 +79,7 @@ const placeOrder = async (req, res) => {
         await newOrder.save();
         
         await cartModel.deleteOne({user : userId});
-        
-        const orderNumber = 'ORD' + Math.floor(Math.random() * 1000000);
+
         
         res.render('user/confirmorder', { 
             order: {

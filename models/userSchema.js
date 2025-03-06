@@ -28,6 +28,22 @@ const userSchema = new Schema({
         type: Boolean,
         default: false
     },
+    wallet: {
+        type: Number,
+        default: 0
+    },
+    walletHistory: [{
+        amount: Number,
+        type: {
+            type: String,
+            enum: ['credit', 'debit']
+        },
+        description: String,
+        date: {
+            type: Date,
+            default: Date.now
+        }
+    }]
 },{timestamps:true});
 
 
