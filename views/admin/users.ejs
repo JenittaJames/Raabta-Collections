@@ -7,6 +7,35 @@
             <p>Users Management</p>
         </div>
     </div>
+    
+    <!-- Search Container -->
+    <div class="search-container" style="margin-bottom: 20px;">
+        <form action="/admin/users" method="GET">
+            <div style="display: flex; max-width: 500px;">
+                <input 
+                    type="text" 
+                    name="query" 
+                    placeholder="Search by username, email or phone..." 
+                    style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 5px 0 0 5px;"
+                    value="<%= locals.searchQuery || '' %>"
+                >
+                <button 
+                    type="submit" 
+                    style="background-color: #000000; color: white; padding: 8px 15px; border: none; border-radius: 0 5px 5px 0; cursor: pointer;"
+                >
+                    Search
+                </button>
+                <% if (locals.searchQuery) { %>
+                    <a 
+                        href="/admin/users" 
+                        style="background-color: #f8f8f8; color: #333; padding: 8px 15px; border: 1px solid #ddd; border-left: none; text-decoration: none; display: flex; align-items: center;"
+                    >
+                        Clear
+                    </a>
+                <% } %>
+            </div>
+        </form>
+    </div>
 
     <style>
         .users-table {
@@ -30,7 +59,6 @@
             border-bottom: 1px solid #000000;
         }
         
-      
         .action-btn {
             padding: 6px 12px;
             border: none;
@@ -65,62 +93,69 @@
             color: white;
             border-color: #4a90e2;
         }
+        
+        .no-data {
+            text-align: center;
+            font-weight: bold;
+            margin-top: 20px;
+            font-size: 18px;
+            color: #555;
+        }
     </style>
 
-  <% if (users.length>0) { %>
-    <table class="users-table">
-        <thead>
-            <tr>
-                <th>SL.No</th>
-                <th>User Name</th>
-                <th>Email</th>
-                <th>Contact</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <% users.forEach((user, index) => { %>
-            <tr>
-                <td><%= index + 1 %></td>
-                <td><%= user.userName %></td>
-                <td><%= user.email %></td>
-                <td><%= user.phone %></td>
-                <td><%= user.status ? "Active" : "Inactive" %></td>
-                <td>
-                    <button onclick="confirmBlock('<%= user.id %>')" class="action-btn delete-btn">
-                        <%= user.status ? "Block" : "UnBlock" %>
-                    </button>
-                </td>
-            </tr>
-            <% }) %>
-        </tbody>
-    </table>
-  <% } else { %>
-    <p class="no-data">No Users found</p>
-<% } %>
-
-
+    <% if (users.length>0) { %>
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>SL.No</th>
+                    <th>User Name</th>
+                    <th>Email</th>
+                    <th>Contact</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% users.forEach((user, index) => { %>
+                <tr>
+                    <td><%= index + 1 %></td>
+                    <td><%= user.userName %></td>
+                    <td><%= user.email %></td>
+                    <td><%= user.phone %></td>
+                    <td><%= user.status ? "Active" : "Inactive" %></td>
+                    <td>
+                        <button onclick="confirmBlock('<%= user.id %>')" class="action-btn delete-btn">
+                            <%= user.status ? "Block" : "UnBlock" %>
+                        </button>
+                    </td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <p class="no-data">No Users found</p>
+    <% } %>
+    
     <div class="pagination">
         <% if (currentPage > 1) { %>
-            <a href="/admin/users?page=<%= currentPage - 1 %>" class="page-link">←</a>
+            <a href="/admin/users?page=<%= currentPage - 1 %><%= locals.searchQuery ? '&query=' + searchQuery : '' %>" class="page-link">←</a>
         <% } %>
-    
+        
         <% for (let i = 1; i <= totalPages; i++) { %>
-            <a href="/admin/users?page=<%= i %>" class="page-link <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+            <a href="/admin/users?page=<%= i %><%= locals.searchQuery ? '&query=' + searchQuery : '' %>" class="page-link <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
         <% } %>
-    
+        
         <% if (currentPage < totalPages) { %>
-            <a href="/admin/users?page=<%= currentPage + 1 %>" class="page-link">→</a>
+            <a href="/admin/users?page=<%= currentPage + 1 %><%= locals.searchQuery ? '&query=' + searchQuery : '' %>" class="page-link">→</a>
         <% } %>
     </div>
     
 </section>
+
 <%- include('../partials/admin/footer') %>
 
 <script>
     function confirmBlock(userId) {
-
         Swal.fire({
             title: `Are you sure?`,
             text: `Do you want to continue?`,
@@ -136,4 +171,4 @@
             }
         });
     }
-    </script>
+</script>

@@ -3,21 +3,35 @@ const catModel = require("../../models/categorySchema");
 
 const productPage = async (req, res) => {
   try {
+    const { query } = req.query;
+    const searchQuery = query || "";
+    
+    const searchFilter = {};
+    
+    if (searchQuery) {
+      searchFilter.$or = [
+        { productName: { $regex: searchQuery, $options: "i" } },
+        { description: { $regex: searchQuery, $options: "i" } }
+      ];
+    }
+    
     const perPage = 10;
     const page = parseInt(req.query.page) || 1;
-    const totalProducts = await productModel.countDocuments();
+    
+    const totalProducts = await productModel.countDocuments(searchFilter);
     const totalPages = Math.ceil(totalProducts / perPage);
-
+    
     const products = await productModel
-      .find()
+      .find(searchFilter)
       .populate("category", "name")
       .skip((page - 1) * perPage)
       .limit(perPage);
-
+    
     console.log("products:", products);
-
+    
     res.render("admin/product", {
       products,
+      searchQuery,
       currentPage: page,
       totalPages: totalPages,
     });

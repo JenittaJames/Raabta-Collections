@@ -64,20 +64,34 @@ const adminLogout = async (req,res) => {
 
 const usersPage = async (req, res) => {
     try {
+        const { query } = req.query;
+        const searchQuery = query || "";
+        
+        const searchFilter = { isAdmin: false };
+        
+        if (searchQuery) {
+            searchFilter.$or = [
+                { userName: { $regex: searchQuery, $options: "i" } },
+                { email: { $regex: searchQuery, $options: "i" } },
+                { phone: { $regex: searchQuery, $options: "i" } }
+            ];
+        }
+        
         const page = parseInt(req.query.page) || 1; 
         const limit = 8; 
         const skip = (page - 1) * limit; 
 
-        const totalUsers = await adminModel.countDocuments({ isAdmin: false }); 
+        const totalUsers = await adminModel.countDocuments(searchFilter); 
         const totalPages = Math.ceil(totalUsers / limit); 
 
-        const userList = await adminModel.find({ isAdmin: false })
+        const userList = await adminModel.find(searchFilter)
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
 
         res.render("admin/users", {
             users: userList,
+            searchQuery,
             currentPage: page,
             totalPages: totalPages
         });
@@ -87,7 +101,6 @@ const usersPage = async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 };
-
 
 
 
