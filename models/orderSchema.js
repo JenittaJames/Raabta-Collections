@@ -35,13 +35,18 @@ const orderSchema = new Schema({
         },
         productStatus : {
             type : String,
-            default : "pending",
+            enum: ["Pending", "Shipped", "Delivered", "Cancelled", "Returned","Return Requested", "Return Approved", "Return Rejected"],
+            default : "Pending",
             required : true
         },
         totalProductPrice : {
             type : Number,
             required : true
         },
+        refunded: {
+            type: Boolean,
+            default: false
+        }
     }],
     orderAmount : {
         type : Number,
@@ -63,7 +68,7 @@ const orderSchema = new Schema({
     },
     orderStatus: { 
         type: String,
-        enum: ["Pending", "Confirmed", "Shipped", "Delivered", "Cancelled"], 
+        enum: ["Pending", "Shipped", "Delivered", "Cancelled", "Returned"], 
         default: "Pending" 
     }
 },{ timestamps : true });

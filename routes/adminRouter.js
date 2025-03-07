@@ -41,6 +41,8 @@ router.post("/editimage/:productId",adminAuth,upload.array("images"),productCont
 router.get("/orders", adminAuth, orderController.orders)
 router.get('/orders/:orderId',adminAuth, orderController.orderDetails);
 router.post('/orders/verify-return',adminAuth, orderController.verifyReturnRequest);
+router.post('/orders/update-status',adminAuth, orderController.updateOrderStatus);
+router.post('/orders/update-product-status', orderController.updateProductStatus);
 
 
 

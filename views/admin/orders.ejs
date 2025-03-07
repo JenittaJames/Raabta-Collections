@@ -58,10 +58,10 @@
                                     <td>
                                         <select class="form-select form-select-sm order-status-select">
                                             <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
-                                            <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
                                             <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
                                             <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
                                             <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                            <option value="Returned" <%= order.status === 'Returned' ? 'selected' : '' %>>Returned</option>
                                         </select>
                                     </td>
                                     <td>
@@ -70,6 +70,7 @@
                                             <option value="paid" <%= order.paymentStatus === 'paid' ? 'selected' : '' %>>Paid</option>
                                             <option value="failed" <%= order.paymentStatus === 'failed' ? 'selected' : '' %>>Failed</option>
                                             <option value="refunded" <%= order.paymentStatus === 'refunded' ? 'selected' : '' %>>Refunded</option>
+                                            <option value="partially-refunded" <%= order.paymentStatus === 'partially-refunded' ? 'selected' : '' %>>Partially Refunded</option>
                                         </select>
                                     </td>
                                     <td>
@@ -136,8 +137,7 @@
 
 <!-- Add JavaScript for AJAX status updates -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Status update function
+   document.addEventListener('DOMContentLoaded', function() {
     function updateOrderStatus(orderId, statusType, statusValue) {
         const updateData = {
             orderId: orderId
@@ -148,7 +148,8 @@ document.addEventListener('DOMContentLoaded', function() {
         } else if (statusType === 'payment') {
             updateData.paymentStatus = statusValue;
         }
-        
+
+        // Updated endpoint to match the controller route
         fetch('/admin/orders/update-status', {
             method: 'POST',
             headers: {
@@ -159,19 +160,34 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Show success message
-                alert('Status updated successfully');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Status updated successfully',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.reload();
+                });
             } else {
-                alert('Failed to update status: ' + data.message);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Failed!',
+                    text: 'Failed to update status: ' + data.message,
+                    confirmButtonText: 'OK'
+                });
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred while updating status');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'An error occurred while updating status',
+                confirmButtonText: 'OK'
+            });
         });
     }
     
-    // Order status change event
     document.querySelectorAll('.order-status-select').forEach(select => {
         select.addEventListener('change', function() {
             const orderId = this.closest('tr').dataset.orderId;
@@ -179,7 +195,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Payment status change event
     document.querySelectorAll('.payment-status-select').forEach(select => {
         select.addEventListener('change', function() {
             const orderId = this.closest('tr').dataset.orderId;
@@ -187,6 +202,5 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
-</script>
-
+    </script>
 <%- include('../partials/admin/footer') %>

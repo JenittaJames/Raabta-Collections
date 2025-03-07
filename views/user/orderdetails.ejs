@@ -140,8 +140,14 @@
                   <%= item.productStatus %>
                 </div>
                 <% if (item.productStatus === 'Delivered') { %>
-    <button class="btn-return" data-order-id="<%= order._id %>" data-product-id="<%= item._id %>">Request Return</button>
-<% } %>
+                <button
+                  class="btn-return"
+                  data-order-id="<%= order._id %>"
+                  data-product-id="<%= item._id %>"
+                >
+                  Request Return
+                </button>
+                <% } %>
               </div>
             </div>
             <% }); %> <% } else { %>
@@ -527,28 +533,26 @@
     }
   }
 
-
   .wallet-section {
     background: #fff;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
-}
+  }
 
-.btn-return {
+  .btn-return {
     background-color: #ffebee;
     color: #c62828;
     border: 1px solid #ffcdd2;
     padding: 5px 10px;
     border-radius: 4px;
     cursor: pointer;
-}
+  }
 
-.btn-return:hover {
+  .btn-return:hover {
     background-color: #ffcdd2;
-}
-
+  }
 </style>
 
 <%- include('../partials/user/footer') %>
@@ -614,64 +618,60 @@
     }
   });
 
-  document.addEventListener('DOMContentLoaded', function() {
-    const returnButtons = document.querySelectorAll('.btn-return');
-    
-    returnButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const orderId = this.getAttribute('data-order-id');
-            const productId = this.getAttribute('data-product-id');
-            
-            Swal.fire({
-                title: 'Request Return?',
-                text: 'Are you sure you want to request a return for this product?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Yes, request return!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    requestReturn(orderId, productId);
-                }
-            });
+  document.addEventListener("DOMContentLoaded", function () {
+    const returnButtons = document.querySelectorAll(".btn-return");
+
+    returnButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        const orderId = this.getAttribute("data-order-id");
+        const productId = this.getAttribute("data-product-id");
+
+        Swal.fire({
+          title: "Request Return?",
+          text: "Are you sure you want to request a return for this product?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#d33",
+          cancelButtonColor: "#3085d6",
+          confirmButtonText: "Yes, request return!",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            requestReturn(orderId, productId);
+          }
         });
+      });
     });
-    
+
     function requestReturn(orderId, productId) {
-        fetch(`/orders/${orderId}/return`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ productId })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                Swal.fire(
-                    'Return Requested!',
-                    'Your return request has been submitted.',
-                    'success'
-                ).then(() => {
-                    window.location.reload();
-                });
-            } else {
-                Swal.fire(
-                    'Error!',
-                    data.message || 'Failed to request return',
-                    'error'
-                );
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
+      fetch(`/orders/${orderId}/return`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ productId }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
             Swal.fire(
-                'Error!',
-                'Something went wrong',
-                'error'
+              "Return Requested!",
+              "Your return request has been submitted.",
+              "success"
+            ).then(() => {
+              window.location.reload();
+            });
+          } else {
+            Swal.fire(
+              "Error!",
+              data.message || "Failed to request return",
+              "error"
             );
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          Swal.fire("Error!", "Something went wrong", "error");
         });
     }
-});
+  });
 </script>
