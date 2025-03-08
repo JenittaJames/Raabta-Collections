@@ -137,6 +137,7 @@ const login = async (req, res) => {
     req.session.userId = user._id.toString();  
     req.session.user = user.email;
     req.session.isAuth = true;
+    req.flash('success_msg',"Logged in successfully")
     res.redirect("/");
   } catch (error) {
     console.error("Login error:", error);
@@ -212,7 +213,7 @@ const verifyOtp = async (req, res) => {
       req.session.userOtp = null;
       req.session.userId = null;
       req.session.email = null;
-      req.flash('success', 'register successfully');
+      req.flash('success_msg', 'Register successfully');
       return res.redirect("/login");
     } else {
       return res.status(400).send({
@@ -233,7 +234,6 @@ const verifyOtp = async (req, res) => {
 
 const loadForgot = async (req, res) => {
   try {
-    console.log("Rendering password forgot page......");
     return res.render("user/forgot");
   } catch (error) {
     console.log("Forgot password page not found",error);
@@ -261,7 +261,7 @@ const forgot = async (req, res) => {
     }
     req.session.forgotPasswordOtp = otp;
     req.session.forgotPasswordEmail = email;
-    console.log("OTP Sent to mail for forgot password otp: ", otp);
+    req.flash('success_msg',"Email verified and OTP sent")
     return res.redirect("/forgot-otp");
   } catch (error) {
     console.error("Forgot password error:", error);
@@ -351,6 +351,7 @@ const resetPassword = async (req, res) => {
     );
     req.session.resetToken = null;
     req.session.forgotPasswordEmail = null;
+    req.flash('success_msg','Password changed successfully')
     return res.redirect("/login");
   } catch (error) {
     console.error("Password reset error:", error);

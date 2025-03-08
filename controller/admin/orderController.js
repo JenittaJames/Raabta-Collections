@@ -13,12 +13,9 @@ const orders = async (req, res) => {
         const limit = 10;
         const skip = (page - 1) * limit;
         
-        // Prepare the search filter
         let filter = {};
         
         if (searchQuery) {
-            // We'll need to search in the related data
-            // First, find user IDs that match the search query
             const matchingUsers = await require('mongoose').model('User').find({
                 userName: { $regex: searchQuery, $options: 'i' }
             }).select('_id');
@@ -45,7 +42,6 @@ const orders = async (req, res) => {
             .populate('userId', 'userName');
         
         const order = ordersData.map(order => {
-            // Check if any products have return requests
             const hasReturnRequest = order.orderedItem.some(item => 
                 item.productStatus === 'Return Requested'
             );
@@ -101,7 +97,6 @@ const orderDetails = async (req, res) => {
             return res.status(404).render('error', { message: 'Order not found' });
         }
         
-        // Get the delivery address from the order
         const address = order.deliveryAddress && order.deliveryAddress.length > 0 
             ? order.deliveryAddress[0] 
             : await addressModel.findOne({ userId: order.userId });
@@ -161,9 +156,18 @@ const verifyReturnRequest = async (req, res) => {
             if (allItemsReturned) {
                 order.paymentStatus = 'Refunded';
             } else {
-                // For partial refunds
                 order.paymentStatus = 'partially-refunded';
             }
+
+            for (const item of order.orderedItem) {
+                const product = await productModel.findById(item.productId);
+                if (product) {
+                    product.totalStock += item.quantity; 
+                    await product.save();
+                }
+            }
+
+
         }
         
         await order.save();
@@ -247,7 +251,6 @@ const updateProductStatus = async (req, res) => {
             });
         }
 
-        // Validate productStatus
         const validStatuses = ["Pending", "Shipped", "Delivered", "Cancelled", "Returned","Return Requested", "Return Approved", "Return Rejected"];
         if (!validStatuses.includes(productStatus)) {
             return res.status(400).json({ 
@@ -272,22 +275,15 @@ const updateProductStatus = async (req, res) => {
             });
         }
 
-        // Log the current and new status for debugging
-        console.log("Current product status:", product.productStatus);
-        console.log("Updating product status to:", productStatus);
-        
         order.orderedItem.forEach(item => {
-            // Convert all statuses to the correct case format
             if (item.productStatus === "pending") {
-              item.productStatus = "Pending"; // Convert to proper case
+              item.productStatus = "Pending";
             }
-            // For the item being updated
             if (productStatus) {
               item.productStatus = productStatus;
             }
           });
 
-        // Save the updated order
         await order.save();
 
         return res.json({ 

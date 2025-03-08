@@ -52,7 +52,6 @@ const adminLogout = async (req,res) => {
     try {
         req.session.destroy();
         res.redirect("/admin")
-        console.log("logout successfully");
     } catch (error) {
         console.log("admin logout error",error);
     }
@@ -110,7 +109,6 @@ const blockUser = async (req,res) => {
         const id = req.params.userId;
 
         const user = await adminModel.findById(id)
-        console.log(user);
 
         const val = !user.status
 

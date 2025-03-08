@@ -1,0 +1,268 @@
+<%- include('../partials/user/header') %>
+<!-- Begin Hiraola's Breadcrumb Area -->
+<div class="breadcrumb-area">
+    <div class="container">
+        <div class="breadcrumb-content">
+            <h2>Edit Address</h2>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/profile">My Account</a></li>
+                <li><a href="/address">Addresses</a></li>
+                <li class="active">Edit Address</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- Hiraola's Breadcrumb Area End Here -->
+
+<!-- Begin Hiraola's Page Content Area -->
+<main class="page-content">
+    <!-- Begin Hiraola's Account Page Area -->
+    <div class="account-page-area">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3">
+                    <ul class="nav myaccount-tab-trigger" id="account-page-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link" id="account-dashboard-tab" href="/profile" aria-controls="account-dashboard" aria-selected="false">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="account-orders-tab" href="/orders" aria-controls="account-orders" aria-selected="false">Orders</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" id="account-address-tab" href="/address" aria-controls="account-address" aria-selected="true">Addresses</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="account-details-tab" href="/changepassword" aria-controls="account-details" aria-selected="false">Change Password</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="account-logout-tab" href="/logout" role="tab" aria-selected="false">Logout</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-lg-9">
+                    <div class="tab-content myaccount-tab-content" id="account-page-tab-content">
+                        <div class="tab-pane fade show active" id="account-address" role="tabpanel" aria-labelledby="account-address-tab">
+                            <div class="address-edit-wrapper">
+                                <div class="address-form-header">
+                                    <h4 class="address-form-title">Edit Address</h4>
+                                </div>
+                                
+                                <form action="/address/update/<%= addressId %>" method="POST" class="address-form">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="name">Full Name <span class="required">*</span></label>
+                                                <input type="text" id="name" name="name" value="<%= address.name %>" class="form-control" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="mobile">Mobile Number <span class="required">*</span></label>
+                                                <input type="tel" id="mobile" name="mobile" value="<%= address.mobile %>" class="form-control" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="email">Email Address <span class="required">*</span></label>
+                                                <input type="email" id="email" name="email" value="<%= address.email %>" class="form-control" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="pincode">Pincode <span class="required">*</span></label>
+                                                <input type="text" id="pincode" name="pincode" value="<%= address.pincode %>" class="form-control" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="houseName">House Name/Number <span class="required">*</span></label>
+                                                <input type="text" id="houseName" name="houseName" value="<%= address.houseName %>" class="form-control" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="street">Street/Road <span class="required">*</span></label>
+                                                <input type="text" id="street" name="street" value="<%= address.street %>" class="form-control" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="city">City <span class="required">*</span></label>
+                                                <input type="text" id="city" name="city" value="<%= address.city %>" class="form-control" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="state">State <span class="required">*</span></label>
+                                                <input type="text" id="state" name="state" value="<%= address.state %>" class="form-control" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="country">Country <span class="required">*</span></label>
+                                                <input type="text" id="country" name="country" value="<%= address.country %>" class="form-control" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="saveAs">Address Type <span class="required">*</span></label>
+                                                <select id="saveAs" name="saveAs" class="form-control" required>
+                                                    <option value="Home" <%= address.saveAs === 'Home' ? 'selected' : '' %>>Home</option>
+                                                    <option value="Work" <%= address.saveAs === 'Work' ? 'selected' : '' %>>Work</option>
+                                                    <option value="Other" <%= address.saveAs === 'Other' ? 'selected' : '' %>>Other</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group form-check">
+                                        <input type="checkbox" class="form-check-input" id="isDefault" name="isDefault" <%= address.isDefault ? 'checked' : '' %>>
+                                        <label class="form-check-label" for="isDefault">Make this my default address</label>
+                                    </div>
+                                    
+                                    <div class="form-actions">
+                                        <button type="submit" class="save-address-btn">Update Address</button>
+                                        <a href="/address" class="cancel-btn">Cancel</a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Hiraola's Account Page Area End Here -->
+</main>
+<!-- Hiraola's Page Content Area End Here -->
+
+<style>
+/* Address Form Styles */
+.address-edit-wrapper {
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 25px;
+}
+
+.address-form-header {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.address-form-title {
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0;
+    color: #333;
+}
+
+.address-form .form-group {
+    margin-bottom: 20px;
+}
+
+.address-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #555;
+    font-size: 14px;
+}
+
+.address-form .required {
+    color: #F44336;
+}
+
+.address-form .form-control {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.address-form .form-control:focus {
+    border-color: #333;
+    outline: none;
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.form-check-input {
+    margin-right: 8px;
+}
+
+.form-check-label {
+    font-size: 14px;
+    color: #555;
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+}
+
+.save-address-btn {
+    padding: 10px 20px;
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.save-address-btn:hover {
+    background-color: #222;
+}
+
+.cancel-btn {
+    padding: 10px 20px;
+    background-color: #f0f0f0;
+    color: #555;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.cancel-btn:hover {
+    background-color: #e0e0e0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .save-address-btn, .cancel-btn {
+        width: 100%;
+    }
+}
+</style>
+
+<%- include('../partials/user/footer') %>

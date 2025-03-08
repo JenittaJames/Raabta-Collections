@@ -94,94 +94,424 @@
     color: #666;
     margin-top: 0.25rem;
   }
+  
+  /* Added CSS for form validation */
+  .error-text {
+    color: #dc3545;
+    font-size: 11px;
+    margin-top: 5px;
+    display: none;
+  }
+
+  .form-group input.is-invalid,
+  .form-group select.is-invalid,
+  .form-group textarea.is-invalid {
+    border-color: #dc3545;
+  }
 </style>
-<form action="/address" method="post">
-<div class="address-container">
-  <div class="address-card">
-    <h2>Add Shipping Details</h2>
 
-    <!-- Contact Details -->
-    <div class="form-group">
-      <label for="name">Name *</label>
-      <input type="text" id="name" name="name" placeholder="Enter your name" required>
-    </div>
+<form action="/address" method="post" id="addressForm">
+  <div class="address-container">
+    <div class="address-card">
+      <h2>Add Shipping Details</h2>
 
-    <div class="form-group">
-      <label for="email">Email *</label>
-      <input type="email" id="email" name="email" placeholder="Enter your email" required>
-    </div>
-
-    <div class="form-group">
-      <label for="contact-number">Contact Number *</label>
-      <div style="display: flex; gap: 0.5rem;">
-        <select style="flex: 0 0 80px;">
-          <option value="+91">+91</option>
-          <!-- Add more country codes if needed -->
-        </select>
-        <input type="tel" id="contact-number" name="mobile" placeholder="Enter your contact number" required>
+      <!-- Contact Details -->
+      <div class="form-group">
+        <label for="name">Name *</label>
+        <input type="text" id="name" name="name" placeholder="Enter your name" required>
       </div>
-    </div>
 
-    <!-- Address Details -->
-    <div class="form-group">
-      <label for="country">Country *</label>
-      <select id="country" name="country" required>
-        <option value="IN">India</option>
-        <!-- Add more countries if needed -->
-      </select>
-    </div>
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+      </div>
 
-    <div class="form-group">
-      <label for="pincode">Pincode *</label>
-      <input type="text" id="pincode" name="pincode" placeholder="Enter your pincode" required>
-    </div>
+      <div class="form-group">
+        <label for="contact-number">Contact Number *</label>
+        <div style="display: flex; gap: 0.5rem;">
+          <select style="flex: 0 0 80px;">
+            <option value="+91">+91</option>
+            <!-- Add more country codes if needed -->
+          </select>
+          <input type="tel" id="contact-number" name="mobile" placeholder="Enter your contact number" required>
+        </div>
+      </div>
 
-    <div class="form-group">
-      <label for="city">City *</label>
-      <input type="text" id="city" name="city" placeholder="Enter your city" required>
-    </div>
+      <!-- Address Details -->
+      <div class="form-group">
+        <label for="country">Country *</label>
+        <select id="country" name="country" required>
+          <option value="IN">India</option>
+          <!-- Add more countries if needed -->
+        </select>
+      </div>
 
-    <div class="form-group">
-      <label for="state">State *</label>
-      <input type="text" id="state" name="state" placeholder="Enter your state" required>
-    </div>
+      <div class="form-group">
+        <label for="pincode">Pincode *</label>
+        <input type="text" id="pincode" name="pincode" placeholder="Enter your pincode" required>
+      </div>
 
-    <div class="form-group">
+      <div class="form-group">
+        <label for="city">City *</label>
+        <input type="text" id="city" name="city" placeholder="Enter your city" required>
+      </div>
+
+      <div class="form-group">
+        <label for="state">State *</label>
+        <input type="text" id="state" name="state" placeholder="Enter your state" required>
+      </div>
+
+      <div class="form-group">
         <label for="houseNo">House No., Building *</label>
         <input type="text" id="houseNo" name="houseName" placeholder="Enter your house number or building name" required />
       </div>
-      
+        
       <div class="form-group">
         <label for="street">Street, Area *</label>
         <input type="text" id="street" name="street" placeholder="Enter your street and area" required />
       </div>
 
-    <!-- Save Address As -->
-    <div class="save-address-as">
-      <label>
-        <input type="radio" name="saveAs" value="Home"> Home
-      </label>
-      <label>
-        <input type="radio" name="saveAs" value="Work"> Work
-      </label>
-      <label>
-        <input type="radio" name="saveAs" value="Other"> Other
-      </label>
+      <!-- Save Address As -->
+      <div class="save-address-as">
+        <label>
+          <input type="radio" name="saveAs" value="Home"> Home
+        </label>
+        <label>
+          <input type="radio" name="saveAs" value="Work"> Work
+        </label>
+        <label>
+          <input type="radio" name="saveAs" value="Other"> Other
+        </label>
+      </div>
+
+      <!-- Make Default Address -->
+      <div class="form-group make-default">
+        <label>
+          <input type="checkbox" name="isDefault" id="isDefault"> 
+          Make this my default address
+        </label>
+      </div>
+
+      <!-- Submit Button -->
+      <button class="submit-btn">Save Address</button>
     </div>
-
-    <!-- Make Default Address -->
-   <!-- Replace the problematic form with this -->
-<div class="form-group make-default">
-  <label>
-      <input type="checkbox" name="isDefault" id="isDefault"> 
-      Make this my default address
-  </label>
-</div>
-
-    <!-- Submit Button -->
-    <button class="submit-btn">Save Address</button>
   </div>
-</div>
 </form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('addressForm');
+    const name = document.getElementById('name');
+    const email = document.getElementById('email');
+    const contactNumber = document.getElementById('contact-number');
+    const pincode = document.getElementById('pincode');
+    const city = document.getElementById('city');
+    const state = document.getElementById('state');
+    const houseNo = document.getElementById('houseNo');
+    const street = document.getElementById('street');
+    const saveAsOptions = document.querySelectorAll('input[name="saveAs"]');
+    
+    // Add error elements for each field
+    function addErrorElement(input, message) {
+        if (!input.parentNode.querySelector('.error-text')) {
+            const errorElement = document.createElement('small');
+            errorElement.className = 'error-text';
+            errorElement.style.color = '#dc3545';
+            errorElement.style.fontSize = '11px';
+            errorElement.style.marginTop = '5px';
+            errorElement.style.display = 'none';
+            errorElement.textContent = message;
+            
+            // Special case for contact number which is inside a div
+            if (input.id === 'contact-number') {
+                input.parentNode.parentNode.appendChild(errorElement);
+            } else {
+                input.parentNode.appendChild(errorElement);
+            }
+            return errorElement;
+        }
+        return input.parentNode.querySelector('.error-text');
+    }
+    
+    // Add error elements for all fields
+    const nameError = addErrorElement(name, 'Name is required');
+    const emailError = addErrorElement(email, 'Please enter a valid email address');
+    const contactNumberError = addErrorElement(contactNumber, 'Please enter a valid 10 digit phone number');
+    const pincodeError = addErrorElement(pincode, 'Please enter a valid 6 digit pincode');
+    const cityError = addErrorElement(city, 'City is required');
+    const stateError = addErrorElement(state, 'State is required');
+    const houseNoError = addErrorElement(houseNo, 'House No. is required');
+    const streetError = addErrorElement(street, 'Street is required');
+    
+    // Create error element for address type (radio buttons)
+    const addressTypeContainer = document.querySelector('.save-address-as');
+    const saveAsError = document.createElement('small');
+    saveAsError.className = 'error-text';
+    saveAsError.style.color = '#dc3545';
+    saveAsError.style.fontSize = '11px';
+    saveAsError.style.display = 'none';
+    saveAsError.textContent = 'Please select an address type';
+    addressTypeContainer.appendChild(saveAsError);
+    
+    // Function to validate email
+    function isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+    
+    // Function to validate phone number
+    function isValidPhoneNumber(phone) {
+        const phoneRegex = /^\d{10}$/;
+        return phoneRegex.test(phone);
+    }
+    
+    // Function to validate pincode
+    function isValidPincode(pincode) {
+        const pincodeRegex = /^\d{6}$/;
+        return pincodeRegex.test(pincode);
+    }
+    
+    // Function to show error
+    function showError(input, errorElement, message) {
+        input.style.borderColor = '#dc3545';
+        errorElement.style.display = 'block';
+        errorElement.textContent = message;
+    }
+    
+    // Function to hide error
+    function hideError(input, errorElement) {
+        input.style.borderColor = '#ddd';
+        errorElement.style.display = 'none';
+    }
+    
+    // Name validation
+    name.addEventListener('blur', function() {
+        if (name.value.trim() === '') {
+            showError(name, nameError, 'Name is required');
+        } else if (name.value.trim().length < 3) {
+            showError(name, nameError, 'Name must be at least 3 characters');
+        } else {
+            hideError(name, nameError);
+        }
+    });
+    
+    // Email validation
+    email.addEventListener('blur', function() {
+        if (email.value.trim() === '') {
+            showError(email, emailError, 'Email is required');
+        } else if (!isValidEmail(email.value)) {
+            showError(email, emailError, 'Please enter a valid email address');
+        } else {
+            hideError(email, emailError);
+        }
+    });
+    
+    // Contact number validation
+    contactNumber.addEventListener('blur', function() {
+        if (contactNumber.value.trim() === '') {
+            showError(contactNumber, contactNumberError, 'Contact number is required');
+        } else if (!isValidPhoneNumber(contactNumber.value)) {
+            showError(contactNumber, contactNumberError, 'Please enter a valid 10 digit phone number');
+        } else {
+            hideError(contactNumber, contactNumberError);
+        }
+    });
+    
+    // Pincode validation
+    pincode.addEventListener('blur', function() {
+        if (pincode.value.trim() === '') {
+            showError(pincode, pincodeError, 'Pincode is required');
+        } else if (!isValidPincode(pincode.value)) {
+            showError(pincode, pincodeError, 'Please enter a valid 6 digit pincode');
+        } else {
+            hideError(pincode, pincodeError);
+        }
+    });
+    
+    // City validation
+    city.addEventListener('blur', function() {
+        if (city.value.trim() === '') {
+            showError(city, cityError, 'City is required');
+        } else {
+            hideError(city, cityError);
+        }
+    });
+    
+    // State validation
+    state.addEventListener('blur', function() {
+        if (state.value.trim() === '') {
+            showError(state, stateError, 'State is required');
+        } else {
+            hideError(state, stateError);
+        }
+    });
+    
+    // House No validation
+    houseNo.addEventListener('blur', function() {
+        if (houseNo.value.trim() === '') {
+            showError(houseNo, houseNoError, 'House No. is required');
+        } else {
+            hideError(houseNo, houseNoError);
+        }
+    });
+    
+    // Street validation
+    street.addEventListener('blur', function() {
+        if (street.value.trim() === '') {
+            showError(street, streetError, 'Street is required');
+        } else {
+            hideError(street, streetError);
+        }
+    });
+    
+    // Address type validation (radio buttons)
+    function validateAddressType() {
+        let isSelected = false;
+        saveAsOptions.forEach(option => {
+            if (option.checked) {
+                isSelected = true;
+            }
+        });
+        
+        if (!isSelected) {
+            saveAsError.style.display = 'block';
+            return false;
+        } else {
+            saveAsError.style.display = 'none';
+            return true;
+        }
+    }
+    
+    // Clear errors when inputs change
+    name.addEventListener('input', function() {
+        hideError(name, nameError);
+    });
+    
+    email.addEventListener('input', function() {
+        hideError(email, emailError);
+    });
+    
+    contactNumber.addEventListener('input', function() {
+        hideError(contactNumber, contactNumberError);
+    });
+    
+    pincode.addEventListener('input', function() {
+        hideError(pincode, pincodeError);
+    });
+    
+    city.addEventListener('input', function() {
+        hideError(city, cityError);
+    });
+    
+    state.addEventListener('input', function() {
+        hideError(state, stateError);
+    });
+    
+    houseNo.addEventListener('input', function() {
+        hideError(houseNo, houseNoError);
+    });
+    
+    street.addEventListener('input', function() {
+        hideError(street, streetError);
+    });
+    
+    saveAsOptions.forEach(option => {
+        option.addEventListener('change', function() {
+            validateAddressType();
+        });
+    });
+    
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        // Validate name
+        if (name.value.trim() === '') {
+            showError(name, nameError, 'Name is required');
+            isValid = false;
+        } else if (name.value.trim().length < 3) {
+            showError(name, nameError, 'Name must be at least 3 characters');
+            isValid = false;
+        } else {
+            hideError(name, nameError);
+        }
+        
+        // Validate email
+        if (email.value.trim() === '') {
+            showError(email, emailError, 'Email is required');
+            isValid = false;
+        } else if (!isValidEmail(email.value)) {
+            showError(email, emailError, 'Please enter a valid email address');
+            isValid = false;
+        } else {
+            hideError(email, emailError);
+        }
+        
+        // Validate contact number
+        if (contactNumber.value.trim() === '') {
+            showError(contactNumber, contactNumberError, 'Contact number is required');
+            isValid = false;
+        } else if (!isValidPhoneNumber(contactNumber.value)) {
+            showError(contactNumber, contactNumberError, 'Please enter a valid 10 digit phone number');
+            isValid = false;
+        } else {
+            hideError(contactNumber, contactNumberError);
+        }
+        
+        // Validate pincode
+        if (pincode.value.trim() === '') {
+            showError(pincode, pincodeError, 'Pincode is required');
+            isValid = false;
+        } else if (!isValidPincode(pincode.value)) {
+            showError(pincode, pincodeError, 'Please enter a valid 6 digit pincode');
+            isValid = false;
+        } else {
+            hideError(pincode, pincodeError);
+        }
+        
+        // Validate city
+        if (city.value.trim() === '') {
+            showError(city, cityError, 'City is required');
+            isValid = false;
+        } else {
+            hideError(city, cityError);
+        }
+        
+        // Validate state
+        if (state.value.trim() === '') {
+            showError(state, stateError, 'State is required');
+            isValid = false;
+        } else {
+            hideError(state, stateError);
+        }
+        
+        // Validate house no
+        if (houseNo.value.trim() === '') {
+            showError(houseNo, houseNoError, 'House No. is required');
+            isValid = false;
+        } else {
+            hideError(houseNo, houseNoError);
+        }
+        
+        // Validate street
+        if (street.value.trim() === '') {
+            showError(street, streetError, 'Street is required');
+            isValid = false;
+        } else {
+            hideError(street, streetError);
+        }
+        
+        // Validate address type
+        if (!validateAddressType()) {
+            isValid = false;
+        }
+        
+        // Prevent form submission if validation fails
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
 
 <%- include('../partials/user/footer') %>

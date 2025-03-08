@@ -27,7 +27,6 @@ const productPage = async (req, res) => {
       .skip((page - 1) * perPage)
       .limit(perPage);
     
-    console.log("products:", products);
     
     res.render("admin/product", {
       products,
@@ -44,7 +43,6 @@ const productPage = async (req, res) => {
 const addProduct = async (req, res) => {
   try {
     const categoryData = await catModel.find();
-    console.log("categoryData", categoryData);
     res.render("admin/addproduct", { categoryData });
   } catch (error) {
     console.log("Add product error", error);
@@ -53,16 +51,12 @@ const addProduct = async (req, res) => {
 
 const addProductPost = async (req, res) => {
   try {
-    console.log("rendering to add-product page by admin");
 
     const { name, description, category, price, stock } = req.body;
-    console.log(req.body);
-
     const categoryData = await catModel.findOne({ name: category });
 
     const imagePath = req.files.map((val) => val.path);
 
-    console.log("imagePath:", imagePath);
 
     const product = new productModel({
       productName: name,
@@ -73,7 +67,6 @@ const addProductPost = async (req, res) => {
       productImage: imagePath,
     });
 
-    console.log("product", product);
 
     await product.save();
 
@@ -90,7 +83,6 @@ const blockProduct = async (req, res) => {
 
     const product = await productModel.findById(id);
 
-    console.log("product", product);
 
     const val = !product.status;
 
@@ -152,10 +144,8 @@ const editProductPost = async (req, res) => {
 
 const editImage = async (req, res) => {
   try {
-    console.log("entering to the editImage rendering page");
     const productId = req.params.productId;
     const product = await productModel.findOne({ _id: productId });
-    console.log("product:", product);
     res.render("admin/editimage", { product });
   } catch (error) {}
 };
@@ -163,9 +153,7 @@ const editImage = async (req, res) => {
 
 const editImagePost = async (req, res) => {
     try {
-        console.log('updating the product images from admin side');
         const productId = req.params.productId;
-        console.log("productId:", productId);
 
         // Get indices of the images being updated
         const imageIndices = req.body.imageIndices || [];
@@ -173,7 +161,6 @@ const editImagePost = async (req, res) => {
 
         // Find the product
         const product = await productModel.findById(productId);
-        console.log("product:", product);
 
         // Initialize productImage array if it doesn't exist
         if (!product.productImage) {

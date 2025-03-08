@@ -75,7 +75,6 @@ const blockCategory = async (req,res) => {
 
         const category = await catModel.findById(id)
 
-        console.log("category");
 
         const val = !category.status
 
@@ -106,9 +105,8 @@ const editCategory = async (req,res) => {
 const editCategoryPost = async (req, res) => {
     try {
         const { name, description } = req.body;
-        const categoryId = req.params.id || req.body.id; // Try getting ID from both params and body
+        const categoryId = req.params.id || req.body.id;
 
-        console.log("Category ID:", categoryId); // Debugging
 
         if (!categoryId) {
             return res.status(400).send("Invalid Request: Category ID is missing");

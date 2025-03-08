@@ -16,7 +16,6 @@ const loadCart = async (req, res) => {
 // controller function for adding the product to cart
 const addCart = async (req, res) => {
   try {
-    console.log("entering the add to cart controller");
     const { productId, quantity } = req.body;
     const userId = req.session.userId;
 
@@ -25,6 +24,10 @@ const addCart = async (req, res) => {
     }
 
     const product = await productModel.findById(productId);
+
+    if (product.totalStock <= 0 || product.totalStock < quantity) {
+      return res.status(400).json({ message: "Out of stock" });
+  }
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -110,7 +113,7 @@ const removeCart = async (req, res) => {
 
     updatedCart.cartTotal = updatedCartTotal;
 
-    await updatedCart.save()
+    await updatedCart.save();
 
     res.redirect("/cart");
   } catch (error) {
@@ -119,43 +122,38 @@ const removeCart = async (req, res) => {
   }
 };
 
-
 const updateCartQuantity = async (req, res) => {
   const { productId, quantity } = req.body;
 
-  console.log("req.bodyeeeeee",req.body);
-
-  const userId = req.session.userId
+  const userId = req.session.userId;
 
   try {
     // Find the cart item and update the quantity
-    
-    const cart = await cartModel.findOne({ user : userId });
 
-    console.log("carteeeeeeeeeee",cart);
+    const cart = await cartModel.findOne({ user: userId });
 
     if (!cart) {
-      return res.status(404).json({ message: 'Cart item not found' });
+      return res.status(404).json({ message: "Cart item not found" });
     }
 
     // Update the quantity for the specific product
-    
-    const cartItem = cart.cartItem.find(item => item.productId.toString() === productId);
 
-    console.log("caritemeeeeeeeee", cartItem);
+    const cartItem = cart.cartItem.find(
+      (item) => item.productId.toString() === productId
+    );
 
     if (cartItem) {
       cartItem.quantity = quantity;
-      cartItem.total = cartItem.price * quantity // Update total price
+      cartItem.total = cartItem.price * quantity; // Update total price
       cart.cartTotal = cart.cartItem.reduce((acc, item) => acc + item.total, 0); // Update cart total
     }
 
     await cart.save();
 
-    res.status(200).json({ message: 'Cart updated successfully', cart });
+    res.status(200).json({ message: "Cart updated successfully", cart });
   } catch (error) {
-    console.error('Error updating cart:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("Error updating cart:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 

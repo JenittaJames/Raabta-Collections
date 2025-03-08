@@ -50,37 +50,37 @@
                                 
                                 <% if (address && address.length > 0) { %>
                                     <div class="address-list">
-                                        <% address.forEach(function(address, index) { %>
+                                        <% address.forEach(function(address) { %>
                                             <div class="address-card <%= address.isDefault ? 'default-address' : '' %>">
-                                                <% if (address.isDefault) { %>
-                                                    <div class="default-badge">Default Address</div>
-                                                <% } %>
-                                                
-                                                <div class="address-details">
+                                                <div class="address-content">
+                                                    <% if (address.isDefault) { %>
+                                                        <span class="default-badge">Default</span>
+                                                    <% } %>
                                                     <h5 class="address-name"><%= address.name %></h5>
-                                                    <p class="address-phone"><%= address.mobile %></p>
-                                                    <p class="address-text">
-                                                        <% if (address.houseName && address.houseName.trim() !== '') { %><%= address.houseName %>, <% } %>
-                                                        <% if (address.street && address.street.trim() !== '') { %><%= address.street %>, <% } %><br>
-                                                        <% if (address.city && address.city.trim() !== '') { %><%= address.city %>, <% } %>
-                                                        <% if (address.state && address.state.trim() !== '') { %><%= address.state %>, <% } %><br>
-                                                        <% if (address.pincode && address.pincode.trim() !== '') { %><%= address.pincode %>, <% } %>
-                                                        <% if (address.country && address.country.trim() !== '') { %><%= address.country %><% } %>
-                                                    </p>
-                                                    <span class="address-type"><%= address.saveAs %></span>
+                                                    <div class="address-details">
+                                                        <p>
+                                                            <% if (address.houseName && address.houseName.trim() !== '') { %><%= address.houseName %>, <% } %>
+                                                            <% if (address.street && address.street.trim() !== '') { %><%= address.street %>, <% } %>
+                                                            <% if (address.city && address.city.trim() !== '') { %><%= address.city %>, <% } %>
+                                                            <% if (address.state && address.state.trim() !== '') { %><%= address.state %>, <% } %>
+                                                            <% if (address.pincode && address.pincode.trim() !== '') { %><%= address.pincode %>, <% } %>
+                                                            <% if (address.country && address.country.trim() !== '') { %><%= address.country %><% } %>
+                                                        </p>
+                                                        <p class="address-phone"><i class="fa fa-phone"></i> <%= address.mobile %></p>
+                                                        <span class="address-type"><%= address.saveAs %></span>
+                                                    </div>
                                                 </div>
-                                                
                                                 <div class="address-actions">
-                                                    <a href="/address/edit/<%= address._id %>" class="edit-address">
-                                                        <i class="fa fa-pencil"></i>
+                                                    <a href="/address/edit/<%= address._id %>" class="action-btn edit-btn" title="Edit">
+                                                        <i class="fas fa-pencil-alt" aria-hidden="true"></i> Edit
                                                     </a>
                                                     <% if (!address.isDefault) { %>
-                                                        <form action="/address/delete/<%= address._id %>" method="POST" class="delete-address-form">
-                                                            <button type="submit" class="delete-address-btn">
-                                                                <i class="fa fa-trash"></i>
+                                                        <form action="/address/delete/<%= address._id %>" method="POST" class="action-form">
+                                                            <button type="submit" class="action-btn delete-btn" title="Delete">
+                                                                <i class="fa fa-trash" aria-hidden="true"></i> Delete
                                                             </button>
                                                         </form>
-                                                        <form action="/address/default/<%= address._id %>" method="POST" class="set-default-form">
+                                                        <form action="/address/default/<%= address._id %>" method="POST" class="action-form">
                                                             <button type="submit" class="set-default-btn">Set as Default</button>
                                                         </form>
                                                     <% } %>
@@ -106,12 +106,12 @@
 <!-- Hiraola's Page Content Area End Here -->
 
 <style>
-/* Address Book Styles */
+/* Address Book Styles - Refined */
 .address-book-wrapper {
     background: #fff;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.05);
-    padding: 20px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 25px;
 }
 
 .address-book-header {
@@ -120,12 +120,14 @@
     align-items: center;
     margin-bottom: 20px;
     padding-bottom: 15px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #eaeaea;
 }
 
 .address-title {
     font-size: 18px;
-    margin-bottom: 0;
+    font-weight: 500;
+    margin: 0;
+    color: #333;
 }
 
 .add-address-btn {
@@ -133,63 +135,80 @@
     padding: 8px 16px;
     background-color: #333;
     color: #fff;
-    border-radius: 4px;
+    font-size: 14px;
+    border-radius: 3px;
     text-decoration: none;
-    transition: all 0.3s;
+    transition: all 0.2s;
 }
 
 .add-address-btn:hover {
-    background-color: #000;
-    color: #fff;
+    background-color: #222;
 }
 
 .address-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 15px;
 }
 
 .address-card {
     position: relative;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 20px;
-    transition: all 0.3s;
+    border: 1px solid #eaeaea;
+    border-radius: 4px;
+    background-color: #fafafa;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .address-card:hover {
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 .default-address {
-    border: 2px solid #4CAF50;
+    border-color: #4CAF50;
+    background-color: #f8fff8;
+}
+
+.address-content {
+    padding: 16px;
+    position: relative;
 }
 
 .default-badge {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 16px;
+    right: 16px;
     background: #4CAF50;
     color: white;
-    padding: 3px 8px;
+    padding: 2px 8px;
     font-size: 12px;
     border-radius: 3px;
+    font-weight: 500;
 }
 
 .address-name {
     font-size: 16px;
     font-weight: 600;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    padding-right: 60px;
+    color: #333;
+}
+
+.address-details {
+    color: #555;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.address-details p {
+    margin-bottom: 8px;
 }
 
 .address-phone {
     color: #666;
-    margin-bottom: 10px;
-}
-
-.address-text {
-    margin-bottom: 10px;
-    line-height: 1.5;
+    margin-bottom: 8px;
 }
 
 .address-type {
@@ -198,62 +217,90 @@
     background: #f0f0f0;
     border-radius: 3px;
     font-size: 12px;
-    margin-bottom: 10px;
+    color: #666;
+    margin-top: 5px;
 }
 
 .address-actions {
     display: flex;
-    gap: 10px;
-    margin-top: 15px;
     align-items: center;
+    padding: 12px 16px;
+    background-color: #f5f5f5;
+    border-top: 1px solid #eaeaea;
+    border-radius: 0 0 4px 4px;
 }
 
-.edit-address, .delete-address-btn {
+.action-form {
+    margin: 0;
+    display: inline;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
     background: none;
     border: none;
-    color: #333;
+    color: #555;
     cursor: pointer;
-    padding: 5px;
-    transition: all 0.3s;
+    padding: 6px 10px;
+    font-size: 14px;
+    border-radius: 3px;
+    transition: all 0.2s;
+    margin-right: 10px;
+    text-decoration: none;
 }
 
-.edit-address:hover, .delete-address-btn:hover {
-    color: #000;
+.action-btn i {
+    margin-right: 5px;
+    font-size: 14px;
+}
+
+.edit-btn:hover {
+    color: #2196F3;
+    background-color: rgba(33, 150, 243, 0.1);
+}
+
+.delete-btn:hover {
+    color: #F44336;
+    background-color: rgba(244, 67, 54, 0.1);
 }
 
 .set-default-btn {
+    margin-left: auto;
     background: #f0f0f0;
-    border: none;
+    border: 1px solid #ddd;
     padding: 5px 10px;
     border-radius: 3px;
     cursor: pointer;
-    transition: all 0.3s;
-    font-size: 12px;
+    transition: all 0.2s;
+    font-size: 13px;
+    color: #555;
 }
 
 .set-default-btn:hover {
     background: #e0e0e0;
+    border-color: #ccc;
 }
 
 .no-address-message {
     text-align: center;
-    padding: 30px 0;
+    padding: 40px 0;
+    color: #666;
 }
 
 .add-first-address {
     display: inline-block;
+    margin-top: 15px;
     padding: 10px 20px;
     background-color: #333;
     color: #fff;
-    border-radius: 4px;
-    margin-top: 15px;
+    border-radius: 3px;
     text-decoration: none;
-    transition: all 0.3s;
+    transition: all 0.2s;
 }
 
 .add-first-address:hover {
-    background-color: #000;
-    color: #fff;
+    background-color: #222;
 }
 
 /* Responsive adjustments */
@@ -264,8 +311,8 @@
     
     .address-book-header {
         flex-direction: column;
-        gap: 15px;
         align-items: flex-start;
+        gap: 10px;
     }
 }
 </style>

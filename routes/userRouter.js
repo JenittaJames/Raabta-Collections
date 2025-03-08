@@ -69,6 +69,8 @@ router.get("/changepassword", ifLogged, profileController.changePassword);
 router.post("/changepassword", ifLogged, profileController.changePasswordPost);
 router.get('/wallet/history',ifLogged, profileController. walletHistory);
 router.post('/orders/:orderId/return', ifLogged, profileController.requestReturn);
+router.get('/address/edit/:id', ifLogged, profileController.editAddress);
+router.post('/address/update/:id', ifLogged, profileController.updateAddress);
 
 
 router.get('/verify-email-update', ifLogged, profileController.verifyEmailUpdate);

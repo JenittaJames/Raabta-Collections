@@ -81,6 +81,16 @@ const placeOrder = async (req, res) => {
         await cartModel.deleteOne({user : userId});
 
         
+       
+        for (let i = 0; i < orderedItems.length; i++) {
+            const item = orderedItems[i];
+            await productModel.updateOne(
+                { _id: item.productId },
+                { $inc: { totalStock: -item.quantity } }
+            );
+        }
+
+        
         res.render('user/confirmorder', { 
             order: {
                 customerName: user.username || user.name || 'Customer',
@@ -130,9 +140,7 @@ const orderDetails = async (req, res) => {
 const cancelOrder = async (req, res) => {
     try {
         const orderId = req.params.orderId || req.body.orderId || req.query.orderId;
-        console.log("Final orderId:", orderId);
       
-        // Find the order without modifying it first
         const order = await ordersModel.findById(orderId);
         
         if (!order) {
@@ -147,11 +155,11 @@ const cancelOrder = async (req, res) => {
             item.productStatus = 'Cancelled';
         });
         
-        // Update inventory
+        
         for (const item of order.orderedItem) {
             const product = await productModel.findById(item.productId);
             if (product) {
-                product.stock += item.quantity; // Increase the stock by the quantity ordered
+                product.totalStock += item.quantity; 
                 await product.save();
             }
         }
