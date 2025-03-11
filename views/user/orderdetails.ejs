@@ -191,9 +191,21 @@
 
         <div class="order-actions-section">
           <a href="/orders" class="btn-back">Back to Orders</a>
-          <button class="cancel-order-btn" data-order-id="<%= order._id %>" class="btn-back">
-  Cancel Order
-</button>
+          
+          <% if (order.orderStatus === 'Pending' || order.orderStatus === 'Shipped') { %>
+          <button class="cancel-order-btn" data-order-id="<%= order._id %>">
+            Cancel Order
+          </button>
+          <% } else { %>
+          <button class="cancel-order-btn disabled" disabled>
+            Cancel Order
+          </button>
+          <% } %>
+          
+          <button class="download-invoice-btn" data-order-id="<%= order._id %>">
+            Download Invoice
+          </button>
+          
           <a href="#" class="btn-back">Contact Support</a>
         </div>
       </div>
@@ -455,7 +467,8 @@
   }
 
   .btn-back,
-  .btn-cancel,
+  .cancel-order-btn,
+  .download-invoice-btn,
   .btn-contact {
     display: inline-block;
     padding: 10px 20px;
@@ -463,6 +476,7 @@
     text-decoration: none;
     font-weight: 500;
     transition: all 0.3s;
+    cursor: pointer;
   }
 
   .btn-back {
@@ -475,14 +489,31 @@
     background-color: #eee;
   }
 
-  .btn-cancel {
+  .cancel-order-btn {
     background-color: #ffebee;
     color: #c62828;
     border: 1px solid #ffcdd2;
   }
 
-  .btn-cancel:hover {
+  .cancel-order-btn:hover {
     background-color: #ffcdd2;
+  }
+
+  .cancel-order-btn.disabled {
+    background-color: #f5f5f5;
+    color: #aaa;
+    border: 1px solid #ddd;
+    cursor: not-allowed;
+  }
+
+  .download-invoice-btn {
+    background-color: #e3f2fd;
+    color: #1976d2;
+    border: 1px solid #bbdefb;
+  }
+
+  .download-invoice-btn:hover {
+    background-color: #bbdefb;
   }
 
   .btn-contact {
@@ -522,7 +553,8 @@
     }
 
     .btn-back,
-    .btn-cancel,
+    .cancel-order-btn,
+    .download-invoice-btn,
     .btn-contact {
       width: 100%;
       text-align: center;
@@ -555,7 +587,8 @@
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    const cancelButtons = document.querySelectorAll(".cancel-order-btn");
+    // Cancel Order Functionality
+    const cancelButtons = document.querySelectorAll(".cancel-order-btn:not(.disabled)");
 
     cancelButtons.forEach((button) => {
       button.addEventListener("click", function () {
@@ -612,9 +645,8 @@
           Swal.fire("Error!", "Something went wrong", "error");
         });
     }
-  });
 
-  document.addEventListener("DOMContentLoaded", function () {
+    // Return Request Handling
     const returnButtons = document.querySelectorAll(".btn-return");
 
     returnButtons.forEach((button) => {
@@ -622,29 +654,85 @@
         const orderId = this.getAttribute("data-order-id");
         const productId = this.getAttribute("data-product-id");
 
+        // Show return reason selection dialog
         Swal.fire({
-          title: "Request Return?",
-          text: "Are you sure you want to request a return for this product?",
-          icon: "warning",
+          title: "Request Return",
+          html: `
+            <div class="return-reason-form">
+              <label for="return-reason" class="swal2-label">Please select a reason for return:</label>
+              <select id="return-reason" class="swal2-select" required>
+                <option value="">-- Select a reason --</option>
+                <option value="Damaged product">Damaged product</option>
+                <option value="Wrong item received">Wrong item received</option>
+                <option value="Product not as described">Product not as described</option>
+                <option value="Quality issues">Quality issues</option>
+                <option value="Size/fit issues">Size/fit issues</option>
+                <option value="Other">Other</option>
+              </select>
+              <div id="other-reason-container" style="display: none; margin-top: 10px;">
+                <label for="other-reason" class="swal2-label">Please specify:</label>
+                <textarea id="other-reason" class="swal2-textarea" placeholder="Enter your reason here"></textarea>
+              </div>
+            </div>
+          `,
           showCancelButton: true,
           confirmButtonColor: "#d33",
           cancelButtonColor: "#3085d6",
-          confirmButtonText: "Yes, request return!",
+          confirmButtonText: "Submit Return Request",
+          focusConfirm: false,
+          didOpen: () => {
+            const reasonSelect = document.getElementById('return-reason');
+            const otherReasonContainer = document.getElementById('other-reason-container');
+            
+            reasonSelect.addEventListener('change', function() {
+              if (this.value === 'Other') {
+                otherReasonContainer.style.display = 'block';
+              } else {
+                otherReasonContainer.style.display = 'none';
+              }
+            });
+          },
+          preConfirm: () => {
+            const reasonSelect = document.getElementById('return-reason');
+            const otherReason = document.getElementById('other-reason');
+            
+            if (!reasonSelect.value) {
+              Swal.showValidationMessage('Please select a reason for return');
+              return false;
+            }
+            
+            if (reasonSelect.value === 'Other' && !otherReason.value.trim()) {
+              Swal.showValidationMessage('Please specify your reason');
+              return false;
+            }
+            
+            return {
+              reason: reasonSelect.value,
+              otherReason: reasonSelect.value === 'Other' ? otherReason.value.trim() : ''
+            };
+          }
         }).then((result) => {
           if (result.isConfirmed) {
-            requestReturn(orderId, productId);
+            const returnReason = result.value.reason === 'Other' 
+              ? result.value.otherReason 
+              : result.value.reason;
+              
+            requestReturn(orderId, productId, returnReason);
           }
         });
       });
     });
 
-    function requestReturn(orderId, productId) {
+    function requestReturn(orderId, productId, returnReason) {
       fetch(`/orders/${orderId}/return`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ productId }),
+        body: JSON.stringify({ 
+          productId, 
+          returnReason 
+        }),
       })
         .then((response) => response.json())
         .then((data) => {
@@ -669,5 +757,71 @@
           Swal.fire("Error!", "Something went wrong", "error");
         });
     }
+
+    // Invoice Download Functionality
+    const downloadInvoiceButtons = document.querySelectorAll(".download-invoice-btn");
+
+downloadInvoiceButtons.forEach((button) => {
+  button.addEventListener("click", function() {
+    const orderId = this.getAttribute("data-order-id");
+    downloadInvoice(orderId);
+  });
+});
+
+function downloadInvoice(orderId) {
+  // Show loading indicator
+  Swal.fire({
+    title: 'Generating Invoice',
+    html: 'Please wait...',
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+
+  // Create a temporary anchor element for download
+  const link = document.createElement('a');
+  link.href = `/orders/${orderId}/invoice`;
+  link.target = '_blank';
+  link.download = `invoice-${orderId}.pdf`;
+  
+  // Directly trigger the download using a separate window to avoid redirect issues
+  fetch(link.href)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.blob();
+    })
+    .then(blob => {
+      Swal.close();
+      
+      // Create a URL for the blob and trigger download
+      const url = window.URL.createObjectURL(blob);
+      link.href = url;
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(link);
+      }, 100);
+      
+      Swal.fire(
+        'Success!',
+        'Invoice downloaded successfully',
+        'success'
+      );
+    })
+    .catch(error => {
+      console.error("Error:", error);
+      Swal.fire(
+        'Error!',
+        'Failed to download invoice. Please try again.',
+        'error'
+      );
+    });
+}
   });
 </script>

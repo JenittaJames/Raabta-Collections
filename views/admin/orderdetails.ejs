@@ -11,7 +11,7 @@
         <div class="col-md-8">
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">Order #<%= order._id.toString().slice(-6).toUpperCase() %></h4>
+                    <h4 class="mb-0">Order <%= order.orderNumber %></h4>
                     <span class="badge bg-<%= order.orderStatus === 'Delivered' ? 'success' : order.orderStatus === 'Cancelled' ? 'danger' : 'warning' %>">
                         <%= order.orderStatus %>
                     </span>
@@ -79,11 +79,28 @@
                                         <td><%= item.quantity %></td>
                                         <td>
                                             <select class="form-select product-status-dropdown" data-order-id="<%= order._id %>" data-product-id="<%= item._id %>">
-                                                <option value="Pending" <%= item.productStatus === 'Pending' ? 'selected' : '' %>>Pending</option>
-                                                <option value="Shipped" <%= item.productStatus === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-                                                <option value="Delivered" <%= item.productStatus === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                                                <option value="Cancelled" <%= item.productStatus === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
-                                                <option value="Returned" <%= item.productStatus === 'Returned' ? 'selected' : '' %>>Returned</option>
+                                                <% 
+                                                // Define which options should be disabled based on current product status
+                                                const isProductDelivered = item.productStatus === 'Delivered';
+                                                const isProductCancelledOrReturned = item.productStatus === 'Cancelled' || item.productStatus === 'Returned';
+                                                
+                                                // Helper function to determine if an option should be disabled
+                                                function isProductOptionDisabled(optionValue) {
+                                                    if (isProductDelivered && optionValue !== 'Returned') {
+                                                        return true;
+                                                    }
+                                                    if (isProductCancelledOrReturned) {
+                                                        return true;
+                                                    }
+                                                    return false;
+                                                }
+                                                %>
+                                                
+                                                <option value="Pending" <%= item.productStatus === 'Pending' ? 'selected' : '' %> <%= isProductOptionDisabled('Pending') ? 'disabled' : '' %>>Pending</option>
+                                                <option value="Shipped" <%= item.productStatus === 'Shipped' ? 'selected' : '' %> <%= isProductOptionDisabled('Shipped') ? 'disabled' : '' %>>Shipped</option>
+                                                <option value="Delivered" <%= item.productStatus === 'Delivered' ? 'selected' : '' %> <%= isProductOptionDisabled('Delivered') ? 'disabled' : '' %>>Delivered</option>
+                                                <option value="Cancelled" <%= item.productStatus === 'Cancelled' ? 'selected' : '' %> <%= isProductOptionDisabled('Cancelled') ? 'disabled' : '' %>>Cancelled</option>
+                                                <option value="Returned" <%= item.productStatus === 'Returned' ? 'selected' : '' %> <%= isProductOptionDisabled('Returned') ? 'disabled' : '' %>>Returned</option>
                                             </select>
                                         </td>
                                         <td>₹<%= item.totalProductPrice.toFixed(2) %></td>
@@ -96,6 +113,14 @@
                                                     <button class="btn btn-danger btn-sm reject-return" data-product-id="<%= item._id %>">
                                                         Reject
                                                     </button>
+                                                </div>
+                                                <div class="mt-2 alert alert-warning">
+                                                    <strong>Return Reason:</strong> 
+                                                    <% if (item.returnReason && item.returnReason.trim()) { %>
+                                                        <%= item.returnReason %>
+                                                    <% } else { %>
+                                                        <em>No reason provided</em>
+                                                    <% } %>
                                                 </div>
                                             <% } %>
                                         </td>
@@ -127,22 +152,61 @@
                         <div class="mb-3">
                             <label for="orderStatus" class="form-label">Order Status</label>
                             <select class="form-select" id="orderStatus" name="orderStatus">
-                                <option value="Pending" <%= order.orderStatus === 'Pending' ? 'selected' : '' %>>Pending</option>
-                                <option value="Shipped" <%= order.orderStatus === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-                                <option value="Delivered" <%= order.orderStatus === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                                <option value="Cancelled" <%= order.orderStatus === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
-                                <option value="Returned" <%= order.orderStatus === 'Returned' ? 'selected' : '' %>>Returned</option>
+                                <% 
+                                // Define which options should be disabled based on current order status
+                                const isDelivered = order.orderStatus === 'Delivered';
+                                const isCancelledOrReturned = order.orderStatus === 'Cancelled' || order.orderStatus === 'Returned';
+                                
+                                // Helper function to determine if an option should be disabled
+                                function isOptionDisabled(optionValue) {
+                                    if (isDelivered && optionValue !== 'Returned') {
+                                        return true;
+                                    }
+                                    if (isCancelledOrReturned) {
+                                        return true;
+                                    }
+                                    return false;
+                                }
+                                %>
+                                
+                                <option value="Pending" <%= order.orderStatus === 'Pending' ? 'selected' : '' %> <%= isOptionDisabled('Pending') ? 'disabled' : '' %>>Pending</option>
+                                <option value="Shipped" <%= order.orderStatus === 'Shipped' ? 'selected' : '' %> <%= isOptionDisabled('Shipped') ? 'disabled' : '' %>>Shipped</option>
+                                <option value="Delivered" <%= order.orderStatus === 'Delivered' ? 'selected' : '' %> <%= isOptionDisabled('Delivered') ? 'disabled' : '' %>>Delivered</option>
+                                <option value="Cancelled" <%= order.orderStatus === 'Cancelled' ? 'selected' : '' %> <%= isOptionDisabled('Cancelled') ? 'disabled' : '' %>>Cancelled</option>
+                                <option value="Returned" <%= order.orderStatus === 'Returned' ? 'selected' : '' %> <%= isOptionDisabled('Returned') ? 'disabled' : '' %>>Returned</option>
                             </select>
                         </div>
                         
                         <div class="mb-3">
                             <label for="paymentStatus" class="form-label">Payment Status</label>
                             <select class="form-select" id="paymentStatus" name="paymentStatus">
-                                <option value="pending" <%= order.paymentStatus === 'pending' ? 'selected' : '' %>>Pending</option>
-                                <option value="paid" <%= order.paymentStatus === 'paid' ? 'selected' : '' %>>Paid</option>
-                                <option value="failed" <%= order.paymentStatus === 'failed' ? 'selected' : '' %>>Failed</option>
-                                <option value="refunded" <%= order.paymentStatus === 'refunded' ? 'selected' : '' %>>Refunded</option>
-                                <option value="partially-refunded" <%= order.paymentStatus === 'partially-refunded' ? 'selected' : '' %>>Partially Refunded</option>
+                                <% 
+                                // Define which options should be disabled based on current payment status
+                                const isPending = order.paymentStatus === 'pending';
+                                const isPaid = order.paymentStatus === 'paid';
+                                const isFailed = order.paymentStatus === 'failed';
+                                const isRefunded = order.paymentStatus === 'refunded' || order.paymentStatus === 'partially-refunded';
+                                
+                                // Helper function to determine if an option should be disabled
+                                function isDisabled(optionValue) {
+                                    if (isPaid && (optionValue === 'pending' || optionValue === 'failed')) {
+                                        return true;
+                                    }
+                                    if (isFailed && optionValue !== 'failed') {
+                                        return true;
+                                    }
+                                    if (isRefunded && (optionValue !== 'refunded' && optionValue !== 'partially-refunded')) {
+                                        return true;
+                                    }
+                                    return false;
+                                }
+                                %>
+                                
+                                <option value="pending" <%= order.paymentStatus === 'pending' ? 'selected' : '' %> <%= isDisabled('pending') ? 'disabled' : '' %>>Pending</option>
+                                <option value="paid" <%= order.paymentStatus === 'paid' ? 'selected' : '' %> <%= isDisabled('paid') ? 'disabled' : '' %>>Paid</option>
+                                <option value="failed" <%= order.paymentStatus === 'failed' ? 'selected' : '' %> <%= isDisabled('failed') ? 'disabled' : '' %>>Failed</option>
+                                <option value="refunded" <%= order.paymentStatus === 'refunded' ? 'selected' : '' %> <%= isDisabled('refunded') ? 'disabled' : '' %>>Refunded</option>
+                                <option value="partially-refunded" <%= order.paymentStatus === 'partially-refunded' ? 'selected' : '' %> <%= isDisabled('partially-refunded') ? 'disabled' : '' %>>Partially Refunded</option>
                             </select>
                         </div>
                         
@@ -198,6 +262,11 @@
                                         <p class="mb-0">
                                             Product: <%= item.productId ? item.productId.productName : 'Product' %>
                                         </p>
+                                        <% if (item.returnReason) { %>
+                                        <p class="mb-0 text-muted">
+                                            <small>Reason: <%= item.returnReason %></small>
+                                        </p>
+                                        <% } %>
                                     </div>
                                     <small><%= new Date(item.updatedAt || order.updatedAt).toLocaleString() %></small>
                                 </div>
@@ -335,54 +404,84 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('DOMContentLoaded', function() {
     // Handle product status updates
     document.querySelectorAll('.product-status-dropdown').forEach(dropdown => {
-        dropdown.addEventListener('change', function() {
-            const orderId = this.getAttribute('data-order-id');
-            const productId = this.getAttribute('data-product-id');
-            const productStatus = this.value;
+    dropdown.addEventListener('change', function() {
+        const orderId = this.getAttribute('data-order-id');
+        const productId = this.getAttribute('data-product-id');
+        const productStatus = this.value;
 
-            fetch('/admin/orders/update-product-status', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    orderId: orderId,
-                    productId: productId,
-                    productStatus: productStatus
+        // Confirm before making the change
+        Swal.fire({
+            title: 'Update Product Status',
+            text: `Are you sure you want to change this product's status to ${productStatus}?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, update it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('/admin/orders/update-product-status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        orderId: orderId,
+                        productId: productId,  // Make sure this is correctly being passed
+                        productStatus: productStatus
+                    })
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Success!',
-                        text: 'Product status updated successfully',
-                        confirmButtonText: 'OK'
-                    }).then(() => {
-                        // Reload the page to reflect the changes
-                        window.location.reload();
-                    });
-                } else {
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: 'Product status updated successfully',
+                            confirmButtonText: 'OK'
+                        });
+                        
+                        // Update UI for just this product
+                        const productRow = this.closest('tr');
+                        
+                        // Apply the status restrictions without reloading
+                        const allOptions = this.querySelectorAll('option');
+                        const isDelivered = productStatus === 'Delivered';
+                        const isCancelledOrReturned = productStatus === 'Cancelled' || productStatus === 'Returned';
+                        
+                        allOptions.forEach(option => {
+                            if (isDelivered && option.value !== 'Returned') {
+                                option.disabled = true;
+                            } else if (isCancelledOrReturned) {
+                                option.disabled = true;
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Failed',
+                            text: 'Failed to update product status: ' + data.message,
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
                     Swal.fire({
                         icon: 'error',
-                        title: 'Failed',
-                        text: 'Failed to update product status: ' + data.message,
+                        title: 'Error',
+                        text: 'An error occurred while updating product status',
                         confirmButtonText: 'OK'
                     });
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'An error occurred while updating product status',
-                    confirmButtonText: 'OK'
                 });
-            });
+            } else {
+                // Reset the dropdown to its previous value
+                this.value = this.getAttribute('data-original-status') || 'Pending';
+            }
         });
     });
+    
+    // Store original status when the page loads
+    dropdown.setAttribute('data-original-status', dropdown.value);
+});
 });
 
 </script>

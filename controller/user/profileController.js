@@ -439,7 +439,10 @@ const walletHistory = async (req, res) => {
     if (!user) {
       return res.status(404).render("error", { message: "User not found" });
     }
-    res.render("user/walletHistory", { walletHistory: user.walletHistory });
+
+    const sortedWalletHistory = user.walletHistory.sort((a, b) => b.date - a.date);
+
+    res.render("user/walletHistory", { walletHistory: sortedWalletHistory });
   } catch (error) {
     console.error("Error fetching wallet history:", error);
     res
@@ -451,7 +454,13 @@ const walletHistory = async (req, res) => {
 const requestReturn = async (req, res) => {
   try {
     const { orderId } = req.params;
-    const { productId } = req.body;
+    const { productId, returnReason } = req.body;
+
+    if (!returnReason || returnReason.trim() === '') {
+      return res
+        .status(400)
+        .json({ success: false, message: "Return reason is required" });
+    }
 
     const order = await ordersModel.findById(orderId);
     if (!order) {
@@ -476,6 +485,9 @@ const requestReturn = async (req, res) => {
     }
 
     orderItem.productStatus = "Return Requested";
+    orderItem.returnReason = returnReason;
+    orderItem.returnRequestDate = new Date();
+    
     await order.save();
 
     return res.json({
@@ -489,7 +501,6 @@ const requestReturn = async (req, res) => {
       .json({ success: false, message: "Failed to process return request" });
   }
 };
-
 
 const editAddress = async (req, res) => {
   try {
@@ -583,6 +594,29 @@ const updateAddress = async (req, res) => {
 
 
 
+const deleteAddress = async (req, res) => {
+  try {
+    const addressId = req.params.id;
+    const userId = req.session.userId;
+    
+    const deletedAddress = await addressModel.findOneAndDelete({
+      _id: addressId,
+      userId: userId
+    });
+    
+    if (!deletedAddress) {
+      return res.status(404).render("error", { message: "Address not found or could not be deleted" });
+    }
+    
+    req.session.successMessage = "Address deleted successfully";
+    
+    res.redirect("/address");
+  } catch (error) {
+    console.error("Error deleting address:", error);
+    res.status(500).render("error", { message: "Failed to delete address" });
+  }
+};
+
 
 module.exports = {
   profile,
@@ -600,4 +634,5 @@ module.exports = {
   requestReturn,
   editAddress,
   updateAddress,
+  deleteAddress,
 };

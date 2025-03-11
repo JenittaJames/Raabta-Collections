@@ -6,7 +6,7 @@ const cartController = require("../controller/user/cartController");
 const profileController = require("../controller/user/profileController");
 const checkoutController = require("../controller/user/checkoutController");
 const orderController = require("../controller/user/orderController");
-const { verifyUser, ifLogged } = require("../middleware/userMiddleware");
+const { checkProductStatus, ifLogged } = require("../middleware/userMiddleware");
 const passport = require("passport");
 
 router.get("/pageNotFound", userController.pageNotFound);
@@ -49,12 +49,14 @@ router.post("/reset-password", userController.resetPassword);
 
 router.get("/shop", userController.loadShop);
 router.get("/shopbyfilter/:categoryId", userController.shopByFilter)
-router.get("/singleproduct/:id", productController.loadSingleproduct);
+router.get("/singleproduct/:id",checkProductStatus, productController.loadSingleproduct);
 
 router.get("/cart", ifLogged, cartController.loadCart);
 router.post("/addtocart/:productId", ifLogged, cartController.addCart);
 router.get("/remove/:productId", ifLogged, cartController.removeCart);
 router.post("/update-cart", ifLogged, cartController.updateCartQuantity);
+router.get('/get-cart-totals',ifLogged, cartController.getCartTotals);
+router.get('/get-cart-item',ifLogged, cartController.getCartItem);
 
 router.get("/checkout", ifLogged, checkoutController.checkout);
 router.get("/placingorder", ifLogged, checkoutController.placingOrder)
@@ -71,6 +73,7 @@ router.get('/wallet/history',ifLogged, profileController. walletHistory);
 router.post('/orders/:orderId/return', ifLogged, profileController.requestReturn);
 router.get('/address/edit/:id', ifLogged, profileController.editAddress);
 router.post('/address/update/:id', ifLogged, profileController.updateAddress);
+router.post('/address/delete/:id', ifLogged, profileController.deleteAddress);
 
 
 router.get('/verify-email-update', ifLogged, profileController.verifyEmailUpdate);
@@ -81,6 +84,7 @@ router.get("/orders", ifLogged, orderController.orders);
 router.get("/orderdetails/:orderId", ifLogged, orderController.orderDetails);
 router.get("/confirmorder", ifLogged, orderController.placeOrder)
 router.post('/orders/:orderId/cancel', ifLogged, orderController.cancelOrder);
+router.get('/orders/:orderId/invoice', ifLogged, orderController.generateInvoice);
 router.get("/search",userController.loadShop)
 
 module.exports = router;

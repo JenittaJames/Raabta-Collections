@@ -26,6 +26,11 @@
     .file-input-container {
         margin-top: 10px;
     }
+    .error-message {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 5px;
+    }
 </style>
 
 <section class="content-main">
@@ -36,7 +41,7 @@
     </div>
     
     <div class="card-body">
-        <form method="post" action="/admin/editimage/<%= product._id %>" enctype="multipart/form-data">
+        <form method="post" action="/admin/editimage/<%= product._id %>" enctype="multipart/form-data" onsubmit="return validateImages()">
             <div class="row">
                 <% for(let i = 0; i < 3; i++) { %>
                     <div class="col-md-4">
@@ -55,8 +60,9 @@
                                        name="images" 
                                        id="image<%= i %>" 
                                        class="form-control" 
-                                       accept="image/*"
+                                       accept="image/jpeg,image/jpg,image/png"
                                        onchange="previewImage(this,'<%= i %>')">
+                                <div id="imageError<%= i %>" class="error-message"></div>
                             </div>
                         </div>
                     </div>
@@ -64,7 +70,7 @@
             </div>
             
             <div class="d-flex justify-content-end mt-3">
-                <a href="/admin/products" class="btn btn-outline-dark me-2">Cancel</a>
+                <a href="/admin/product" class="btn btn-outline-dark me-2">Cancel</a>
                 <button type="submit" class="btn btn-dark">Save Changes</button>
             </div>
         </form>
@@ -72,19 +78,65 @@
 </section>
 
 <script>
+function validateFileFormat(file) {
+    if (!file) return true; // Skip validation if no file selected
+    
+    const fileName = file.name.toLowerCase();
+    return fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.png');
+}
+
 function previewImage(input, index) {
     const previewBox = document.getElementById(`previewBox${index}`);
+    const errorElement = document.getElementById(`imageError${index}`);
     const file = input.files[0];
     
+    // Clear previous error
+    errorElement.innerHTML = "";
+    
     if (file) {
+        // Validate file format
+        if (!validateFileFormat(file)) {
+            errorElement.innerHTML = "Please upload only JPG, JPEG, or PNG images";
+            // Reset the file input
+            input.value = '';
+            return;
+        }
+        
         const reader = new FileReader();
         reader.onload = function(e) {
             previewBox.innerHTML = `
-                <img src="${e.target.result}" class="preview-image" alt="Preview ${index + 1}">
+                <img src="${e.target.result}" class="preview-image" alt="Preview ${parseInt(index) + 1}">
             `;
         };
         reader.readAsDataURL(file);
     }
+}
+
+function validateImages() {
+    let isValid = true;
+    let hasSelectedFiles = false;
+    
+    // Check each image input
+    for (let i = 0; i < 3; i++) {
+        const input = document.getElementById(`image${i}`);
+        const errorElement = document.getElementById(`imageError${i}`);
+        
+        // Clear previous error
+        errorElement.innerHTML = "";
+        
+        if (input.files.length > 0) {
+            hasSelectedFiles = true;
+            const file = input.files[0];
+            
+            if (!validateFileFormat(file)) {
+                errorElement.innerHTML = "Please upload only JPG, JPEG, or PNG images";
+                isValid = false;
+            }
+        }
+    }
+    
+    // If at least one file is selected and all selected files are valid
+    return isValid;
 }
 </script>
 

@@ -98,13 +98,13 @@
           </div>
 
           <div class="mb-4">
-            <label for="image" class="form-label">Product Images (Exactly 3 required)</label>
+            <label for="image" class="form-label">Product Images (Exactly 3 required, JPG/JPEG/PNG only)</label>
             <input
               type="file"
               class="form-control"
               id="image"
               name="images"
-              accept="image/*"
+              accept="image/jpeg,image/jpg,image/png"
               multiple
               required
             />
@@ -203,12 +203,46 @@
       return false;
     }
 
+    // Validating image format
+    for (let i = 0; i < images.length; i++) {
+      const file = images[i];
+      const fileName = file.name.toLowerCase();
+      
+      if (!fileName.endsWith('.jpg') && !fileName.endsWith('.jpeg') && !fileName.endsWith('.png')) {
+        imageError.innerHTML = "Please upload only JPG, JPEG, or PNG images";
+        return false;
+      }
+    }
+
     return true;
   }
 
 document.getElementById('image').addEventListener('change', function() {
     const files = this.files;
     const previewBoxes = document.querySelectorAll('.preview-box');
+    const imageError = document.getElementById("imageError");
+    
+    // Clear previous error messages
+    imageError.innerHTML = "";
+    
+    // Validate file format first
+    let hasInvalidFormat = false;
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const fileName = file.name.toLowerCase();
+      
+      if (!fileName.endsWith('.jpg') && !fileName.endsWith('.jpeg') && !fileName.endsWith('.png')) {
+        imageError.innerHTML = "Please upload only JPG, JPEG, or PNG images";
+        hasInvalidFormat = true;
+        break;
+      }
+    }
+    
+    if (hasInvalidFormat) {
+      // Reset the file input
+      this.value = '';
+      return;
+    }
     
     // Keep track of existing previews if any
     const existingPreviews = {};

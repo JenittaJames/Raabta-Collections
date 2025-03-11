@@ -56,21 +56,21 @@
                                     <td><%= new Date(order.orderDate).toLocaleDateString() %></td>
                                     <td>₹<%= order.totalAmount ? order.totalAmount.toFixed(2) : '0.00' %></td>
                                     <td>
-                                        <select class="form-select form-select-sm order-status-select">
-                                            <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
-                                            <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-                                            <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                                            <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                        <select class="form-select form-select-sm order-status-select" <%= (order.status === 'Cancelled' || order.status === 'Returned') ? 'disabled' : '' %>>
+                                            <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %> <%= order.status === 'Delivered' ? 'disabled' : '' %>>Pending</option>
+                                            <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %> <%= order.status === 'Delivered' ? 'disabled' : '' %>>Shipped</option>
+                                            <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %> <%= order.status === 'Delivered' ? 'disabled' : '' %>>Delivered</option>
+                                            <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %> <%= order.status === 'Delivered' ? 'disabled' : '' %>>Cancelled</option>
                                             <option value="Returned" <%= order.status === 'Returned' ? 'selected' : '' %>>Returned</option>
                                         </select>
                                     </td>
                                     <td>
-                                        <select class="form-select form-select-sm payment-status-select">
-                                            <option value="pending" <%= order.paymentStatus === 'pending' ? 'selected' : '' %>>Pending</option>
-                                            <option value="paid" <%= order.paymentStatus === 'paid' ? 'selected' : '' %>>Paid</option>
-                                            <option value="failed" <%= order.paymentStatus === 'failed' ? 'selected' : '' %>>Failed</option>
-                                            <option value="refunded" <%= order.paymentStatus === 'refunded' ? 'selected' : '' %>>Refunded</option>
-                                            <option value="partially-refunded" <%= order.paymentStatus === 'partially-refunded' ? 'selected' : '' %>>Partially Refunded</option>
+                                        <select class="form-select form-select-sm payment-status-select" <%= order.paymentStatus === 'failed' ? 'disabled' : '' %>>
+                                            <option value="pending" <%= order.paymentStatus === 'pending' ? 'selected' : '' %> <%= (order.paymentStatus === 'paid' || order.paymentStatus === 'refunded' || order.paymentStatus === 'partially-refunded') ? 'disabled' : '' %>>Pending</option>
+                                            <option value="paid" <%= order.paymentStatus === 'paid' ? 'selected' : '' %> <%= (order.paymentStatus === 'refunded' || order.paymentStatus === 'partially-refunded') ? 'disabled' : '' %>>Paid</option>
+                                            <option value="failed" <%= order.paymentStatus === 'failed' ? 'selected' : '' %> <%= (order.paymentStatus === 'paid' || order.paymentStatus === 'refunded' || order.paymentStatus === 'partially-refunded') ? 'disabled' : '' %>>Failed</option>
+                                            <option value="refunded" <%= order.paymentStatus === 'refunded' ? 'selected' : '' %> <%= (order.paymentStatus !== 'paid' && order.paymentStatus !== 'refunded' && order.paymentStatus !== 'partially-refunded') ? 'disabled' : '' %>>Refunded</option>
+                                            <option value="partially-refunded" <%= order.paymentStatus === 'partially-refunded' ? 'selected' : '' %> <%= (order.paymentStatus !== 'paid' && order.paymentStatus !== 'refunded' && order.paymentStatus !== 'partially-refunded') ? 'disabled' : '' %>>Partially Refunded</option>
                                         </select>
                                     </td>
                                     <td>

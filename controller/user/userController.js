@@ -216,10 +216,8 @@ const verifyOtp = async (req, res) => {
       req.flash('success_msg', 'Register successfully');
       return res.redirect("/login");
     } else {
-      return res.status(400).send({
-        status: "error",
-        message: "Invalid OTP. Please try again.",
-      });
+      req.flash('error_msg','Invalid OTP. Please try again')
+      res.redirect('/otp')
     }
   } catch (error) {
     console.error("OTP verification error:", error);
@@ -380,8 +378,14 @@ const loadShop = async (req, res) => {
 
     const searchQuery = query || "";
 
+    // First, get all active categories
+    const activeCategories = await catModel.find({status:true}).select('_id')
+    const activeCategoriesId = activeCategories.map(cat=>cat._id)
+
+    // Create search filter with both product status and category check
     const searchFilter = {
       status: true,
+      category: { $in: activeCategoriesId } // Only include products from active categories
     };
 
     if (searchQuery) {
@@ -402,7 +406,7 @@ const loadShop = async (req, res) => {
       .skip(skip)
       .limit(limit);
     
-    const categories = await catModel.find({});
+    const categories = await catModel.find({status:true});
     
     res.render("user/shop", { 
       products,

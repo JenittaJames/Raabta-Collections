@@ -44,11 +44,11 @@
                   <th class="hiraola-product-remove">remove</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="cart-items">
                 <% if (cartDetails.length > 0 && cartDetails[0].cartItem &&
                 cartDetails[0].cartItem.length > 0) { %> <% let index = 1; %> <%
                 cartDetails[0].cartItem.forEach(item => { %>
-                <tr>
+                <tr class="cart-item" data-product-id="<%= item.productId._id %>">
                   <td class="hiraola-product-price">
                     <span class="amount"><%= index++ %></span>
                   </td>
@@ -67,7 +67,7 @@
                     >
                   </td>
                   <td class="hiraola-product-price">
-                    <span class="amount"
+                    <span class="amount product-price"
                       ><%= item.productId.price.toFixed(2) %></span
                     >
                   </td>
@@ -78,6 +78,8 @@
                         value="<%= item.quantity %>"
                         type="text"
                         data-product-id="<%= item.productId._id %>"
+                        data-product-stock="<%= item.productId.totalStock %>"
+                        data-product-price="<%= item.productId.price %>"
                       />
                       <div class="dec qtybutton">
                         <i class="fa fa-angle-down"></i>
@@ -88,7 +90,7 @@
                     </div>
                   </td>
                   <td class="product-subtotal">
-                    <span class="amount"><%= item.total.toFixed(2) %></span>
+                    <span class="amount item-total"><%= item.total.toFixed(2) %></span>
                   </td>
                   <td class="hiraola-product-remove">
                     <a
@@ -100,7 +102,7 @@
                   </td>
                 </tr>
                 <% }); %> <% } else { %>
-                <tr>
+                <tr id="empty-cart-row">
                   <td colspan="7" style="text-align: center">
                     Your cart is empty.
                   </td>
@@ -121,14 +123,14 @@
                 <ul>
                   <li>
                     Subtotal
-                    <span>
+                    <span id="cart-subtotal">
                       <%= cartDetails.length > 0 && cartDetails[0].cartTotal ?
                       cartDetails[0].cartTotal.toFixed(2) : '0.00' %>
                     </span>
                   </li>
                   <li>
                     Total
-                    <span>
+                    <span id="cart-total">
                       <%= cartDetails.length > 0 && cartDetails[0].cartTotal ?
                       cartDetails[0].cartTotal.toFixed(2) : '0.00' %>
                     </span>
@@ -167,29 +169,100 @@
 
 <script>
   $(document).ready(function () {
-   // Increment quantity
-$(".inc.qtybutton").off("click").on("click", function () {
-  const input = $(this).siblings(".cart-plus-minus-box");
-  let currentQuantity = parseInt(input.val()) || 0; // Ensure it's a valid number
-  input.val(currentQuantity + 1);
-  updateCart(input);
-});
+    const MAX_QUANTITY = 7; // Matching the server-side value
+    
+    // Initialize loading indicator
+    function showLoading(productId) {
+      $(`.cart-item[data-product-id="${productId}"] .item-total`).html('<i class="fa fa-spinner fa-spin"></i>');
+      $('#cart-subtotal, #cart-total').html('<i class="fa fa-spinner fa-spin"></i>');
+    }
+    
+    // Increment quantity
+    $(".inc.qtybutton").off("click").on("click", function () {
+      const input = $(this).siblings(".cart-plus-minus-box");
+      let currentQuantity = parseInt(input.val()) || 0;
+      const productStock = parseInt(input.data("product-stock")) || 0;
+      const productId = input.data("product-id");
+      
+      // Determine maximum allowed quantity (lower of MAX_QUANTITY or available stock)
+      const maxAllowed = Math.min(MAX_QUANTITY, productStock);
+      
+      // Check if next quantity would exceed limits
+      if (currentQuantity >= maxAllowed) {
+        // Show appropriate error message based on which limit was hit
+        if (currentQuantity >= MAX_QUANTITY) {
+          Swal.fire({
+            icon: "error",
+            title: "Quantity Limit",
+            text: `Maximum quantity per product is ${MAX_QUANTITY}`,
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Stock Limit",
+            text: `Only ${productStock} items available in stock`,
+          });
+        }
+        return;
+      }
+      
+      input.val(currentQuantity + 1);
+      updateCart(input);
+    });
 
-// Decrement quantity
-$(".dec.qtybutton").off("click").on("click", function () {
-  const input = $(this).siblings(".cart-plus-minus-box");
-  let currentQuantity = parseInt(input.val()) || 0;
-  if (currentQuantity > 1) {
-    input.val(currentQuantity - 1);
-    updateCart(input);
-  }
-});
+    // Decrement quantity
+    $(".dec.qtybutton").off("click").on("click", function () {
+      const input = $(this).siblings(".cart-plus-minus-box");
+      let currentQuantity = parseInt(input.val()) || 0;
+      if (currentQuantity > 1) {
+        input.val(currentQuantity - 1);
+        updateCart(input);
+      }
+    });
 
+    // Direct input change
+    $(".cart-plus-minus-box").on("change", function() {
+      const input = $(this);
+      let newQuantity = parseInt(input.val()) || 1;
+      const productStock = parseInt(input.data("product-stock")) || 0;
+      
+      // Enforce minimum of 1
+      if (newQuantity < 1) newQuantity = 1;
+      
+      // Enforce maximum quantity and stock limits
+      const maxAllowed = Math.min(MAX_QUANTITY, productStock);
+      if (newQuantity > maxAllowed) {
+        newQuantity = maxAllowed;
+        
+        // Show appropriate message
+        if (maxAllowed === MAX_QUANTITY) {
+          Swal.fire({
+            icon: "info",
+            title: "Quantity Adjusted",
+            text: `Maximum quantity per product is ${MAX_QUANTITY}`,
+          });
+        } else {
+          Swal.fire({
+            icon: "info",
+            title: "Quantity Adjusted",
+            text: `Only ${productStock} items available in stock`,
+          });
+        }
+      }
+      
+      // Update the input value and send request
+      input.val(newQuantity);
+      updateCart(input);
+    });
 
     // Function to send AJAX request
     function updateCart(input) {
       const productId = input.data("product-id");
-      const quantity = input.val();
+      const quantity = parseInt(input.val());
+      const productPrice = parseFloat(input.data("product-price"));
+      
+      // Show loading indicators
+      showLoading(productId);
 
       $.ajax({
         url: "/update-cart", // Backend endpoint
@@ -197,13 +270,80 @@ $(".dec.qtybutton").off("click").on("click", function () {
         contentType: "application/json",
         data: JSON.stringify({ productId, quantity }),
         success: function (response) {
-          console.log("Cart updated successfully:", response);
-          // Reload the page or update the UI dynamically
-          location.reload(); // Reload the page to reflect changes
+          // Update item total
+          const itemTotal = (quantity * productPrice).toFixed(2);
+          $(`.cart-item[data-product-id="${productId}"] .item-total`).text(itemTotal);
+          
+          // Update cart totals
+          updateCartTotals();
+          
+          // Optional: Show success notification
+          const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 1500,
+            timerProgressBar: true
+          });
+          
+          Toast.fire({
+            icon: 'success',
+            title: 'Cart updated successfully'
+          });
         },
-        error: function (xhr, status, error) {
-          console.error("Error updating cart:", error);
+        error: function (xhr) {
+          // Display error message from server
+          const errorData = xhr.responseJSON || {};
+          Swal.fire({
+            icon: "error",
+            title: "Update Failed",
+            text: errorData.message || "Error updating cart",
+          });
+          // Revert the input value to original quantity
+          $.ajax({
+            url: "/get-cart-item",
+            method: "GET",
+            data: { productId },
+            success: function(data) {
+              input.val(data.quantity);
+              updateCartTotals();
+            },
+            error: function() {
+              // If we can't get the current quantity, reload the page
+              location.reload();
+            }
+          });
+        }
+      });
+    }
+    
+    // Function to update cart totals
+    function updateCartTotals() {
+      $.ajax({
+        url: "/get-cart-totals",
+        method: "GET",
+        success: function(data) {
+          // Update subtotal and total
+          $("#cart-subtotal").text(data.cartTotal.toFixed(2));
+          $("#cart-total").text(data.cartTotal.toFixed(2));
+          
+          // If cart is empty, show empty cart message
+          if (data.cartTotal === 0 || data.itemCount === 0) {
+            if ($("#empty-cart-row").length === 0) {
+              $("#cart-items").html('<tr id="empty-cart-row"><td colspan="7" style="text-align: center">Your cart is empty.</td></tr>');
+            }
+          }
         },
+        error: function() {
+          // If we can't get cart totals, show error
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Could not update cart totals",
+            timer: 2000,
+            showConfirmButton: false
+          });
+        }
       });
     }
   });

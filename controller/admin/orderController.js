@@ -91,7 +91,6 @@ const orderDetails = async (req, res) => {
                 model: 'Product'
             })
             .populate('userId');
-
         
         if (!order) {
             return res.status(404).render('error', { message: 'Order not found' });
@@ -100,7 +99,6 @@ const orderDetails = async (req, res) => {
         const address = order.deliveryAddress && order.deliveryAddress.length > 0 
             ? order.deliveryAddress[0] 
             : await addressModel.findOne({ userId: order.userId });
-
         
         res.render('admin/orderdetails', { order, address });
     } catch (error) {
@@ -126,11 +124,10 @@ const verifyReturnRequest = async (req, res) => {
         orderItem.productStatus = status;
         
         if (status === 'Return Approved') {
-
             if (orderItem.refunded) {
                 return res.status(400).json({ success: false, message: 'This item has already been refunded' });
             }
-
+            
             const user = await userModel.findById(order.userId);
             if (!user) {
                 return res.status(404).json({ success: false, message: 'User not found' });
@@ -144,7 +141,7 @@ const verifyReturnRequest = async (req, res) => {
                 description: `Refund for return of order ${order.orderNumber}`,
                 date: new Date()
             });
-
+            
             orderItem.refunded = true;
             
             await user.save();
@@ -158,22 +155,31 @@ const verifyReturnRequest = async (req, res) => {
             } else {
                 order.paymentStatus = 'partially-refunded';
             }
-
-            for (const item of order.orderedItem) {
-                const product = await productModel.findById(item.productId);
-                if (product) {
-                    product.totalStock += item.quantity; 
-                    await product.save();
+            
+            // Update inventory - add returned items back to stock
+            try {
+                for (const item of order.orderedItem) {
+                    if (item.productStatus === 'Return Approved') {
+                        const product = await productModel.findById(item.productId);
+                        if (product) {
+                            product.totalStock += item.quantity;
+                            await product.save();
+                        }
+                    }
                 }
+            } catch (stockError) {
+                console.error('Error updating product stock:', stockError);
+                // Continue processing even if stock update fails
             }
-
-
         }
+        
+        // Record the return handling timestamp
+        orderItem.updatedAt = new Date();
         
         await order.save();
         
-        return res.json({ 
-            success: true, 
+        return res.json({
+            success: true,
             message: `Return request ${status === 'Return Approved' ? 'approved and refund processed' : 'rejected'}`
         });
     } catch (error) {
@@ -275,14 +281,29 @@ const updateProductStatus = async (req, res) => {
             });
         }
 
-        order.orderedItem.forEach(item => {
-            if (item.productStatus === "pending") {
-              item.productStatus = "Pending";
-            }
-            if (productStatus) {
-              item.productStatus = productStatus;
-            }
-          });
+       product.productStatus = productStatus;
+
+       // Optional: Update overall order status based on product statuses
+const allProductStatuses = order.orderedItem.map(item => item.productStatus);
+
+// If all products are in the same status, update order status accordingly
+if (allProductStatuses.every(status => status === 'Delivered')) {
+    order.orderStatus = 'Delivered';
+} else if (allProductStatuses.every(status => status === 'Cancelled')) {
+    order.orderStatus = 'Cancelled';
+} else if (allProductStatuses.some(status => status === 'Returned')) {
+    // If any product is returned but not all
+    order.orderStatus = 'Returned';
+} else if (allProductStatuses.every(status => status === 'Shipped')) {
+    order.orderStatus = 'Shipped';
+} else if (allProductStatuses.some(status => status === 'Shipped') && 
+           allProductStatuses.every(status => status === 'Shipped' || status === 'Delivered')) {
+    // Some shipped, some delivered
+    order.orderStatus = 'Delivered';
+} else {
+    // Mixed statuses
+    order.orderStatus = 'Pending';
+}
 
         await order.save();
 
@@ -304,10 +325,62 @@ const updateProductStatus = async (req, res) => {
 };
 
 
+
+const submitReturnRequest = async (req, res) => {
+    try {
+        const { orderId, productId, reason } = req.body;
+        
+        const order = await ordersModel.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found' });
+        }
+        
+        // Check if user is authorized to request this return
+        if (order.userId.toString() !== req.session.userId) {
+            return res.status(403).json({ success: false, message: 'Unauthorized' });
+        }
+        
+        const orderItem = order.orderedItem.find(item => item._id.toString() === productId);
+        if (!orderItem) {
+            return res.status(404).json({ success: false, message: 'Product not found in this order' });
+        }
+        
+        // Check if product is eligible for return
+        if (orderItem.productStatus !== 'Delivered') {
+            return res.status(400).json({ success: false, message: 'Only delivered items can be returned' });
+        }
+        
+        const deliveryDate = new Date(orderItem.deliveredAt || order.updatedAt);
+        const currentDate = new Date();
+        const daysSinceDelivery = Math.floor((currentDate - deliveryDate) / (1000 * 60 * 60 * 24));
+        
+        if (daysSinceDelivery > 7) {
+            return res.status(400).json({ success: false, message: 'Return window has expired (7 days)' });
+        }
+        
+        // Update item status and store return reason
+        orderItem.productStatus = 'Return Requested';
+        orderItem.returnReason = reason;
+        orderItem.updatedAt = new Date();
+        
+        await order.save();
+        
+        return res.json({
+            success: true,
+            message: 'Return request submitted successfully'
+        });
+    } catch (error) {
+        console.error('Error submitting return request:', error);
+        return res.status(500).json({ success: false, message: 'Failed to submit return request' });
+    }
+};
+
+
 module.exports = {
     orders,
     orderDetails,
     verifyReturnRequest,
     updateOrderStatus,
     updateProductStatus,
+    submitReturnRequest,
 };

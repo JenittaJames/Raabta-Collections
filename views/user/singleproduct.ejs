@@ -65,6 +65,47 @@
     align-items: center;
     justify-content: center;
   }
+
+
+  .product-description h4, .product-description h5 {
+    margin-bottom: 15px;
+    color: #333;
+  }
+  
+  .product-description p {
+    line-height: 1.6;
+    color: #666;
+    margin-bottom: 20px;
+  }
+  
+  .product-features ul {
+    padding-left: 20px;
+  }
+  
+  .product-features li {
+    margin-bottom: 8px;
+    position: relative;
+    padding-left: 5px;
+  }
+  
+  .product-specs table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  .product-specs td {
+    padding: 10px;
+    border: 1px solid #ddd;
+  }
+  
+  .product-specs tr td:first-child {
+    width: 30%;
+    background-color: #f9f9f9;
+  }
+  
+  .mt-4 {
+    margin-top: 1.5rem;
+  }
 </style>
 
 <!-- Begin Hiraola's Breadcrumb Area -->
@@ -74,7 +115,7 @@
       <h2>Single Product Type</h2>
       <ul>
         <li><a href="/home">Home</a></li>
-        <li class="active">Single Product</li>
+        <li class="active"><%= product.productName %></li>
       </ul>
     </div>
   </div>
@@ -195,6 +236,14 @@
               </ul>
             </div>
 
+            <br>
+            <br>
+            <br>
+            
+            <div class="product-description-container">
+              <h4>About This Silver Anklet</h4>
+              <p><%= product.description %></p>
+              
             <!-- <div class="hiraola-tag-line">
                                     <h6>Tags:</h6>
                                     <a href="javascript:void(0)">Ring</a>,
@@ -261,9 +310,57 @@
           <div class="tab-content hiraola-tab_content">
             <div id="description" class="tab-pane active show" role="tabpanel">
               <div class="product-description">
-                <ul>
-                  <li><%= product.description %></li>
-                </ul>
+                <h4>Product Details</h4>
+                <p><%= product.description %></p>
+                
+                <div class="product-features mt-4">
+                  <h5>Key Features</h5>
+                  <ul>
+                    <% if (product.features && product.features.length > 0) { %>
+                      <% product.features.forEach(feature => { %>
+                        <li><%= feature %></li>
+                      <% }); %>
+                    <% } else { %>
+                      <li>Premium quality</li>
+                      <li>Durable construction</li>
+                      <li>Elegant design</li>
+                    <% } %>
+                  </ul>
+                </div>
+                
+                <div class="product-specs mt-4">
+                  <h5>Specifications</h5>
+                  <table class="table table-bordered">
+                    <tbody>
+                      <% if (product.specifications) { %>
+                        <% Object.entries(product.specifications).forEach(([key, value]) => { %>
+                          <tr>
+                            <td><strong><%= key %></strong></td>
+                            <td><%= value %></td>
+                          </tr>
+                        <% }); %>
+                      <% } else { %>
+                        <tr>
+                          <td><strong>Material</strong></td>
+                          <td>Premium material</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Size</strong></td>
+                          <td>Standard</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Weight</strong></td>
+                          <td>Lightweight</td>
+                        </tr>
+                      <% } %>
+                    </tbody>
+                  </table>
+                </div>
+                
+                <div class="product-care mt-4">
+                  <h5>Care Instructions</h5>
+                  <p><%= product.careInstructions || 'For detailed care instructions, please refer to the product manual.' %></p>
+                </div>
               </div>
             </div>
             <div id="reviews" class="tab-pane" role="tabpanel">
@@ -459,7 +556,6 @@
 
 <%- include('../partials/user/footer') %>
 
-<!-- Replace your existing zoom script with this -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/elevatezoom/2.2.3/jquery.elevatezoom.min.js"></script>
 
@@ -504,82 +600,242 @@
     });
   });
 
+  // Global constant for maximum quantity
+  const MAX_QUANTITY = 7;
+  
   async function addToCart(productId) {
-    console.log("entering to the addtocart method");
-    const quantity = document.querySelector(".cart-plus-minus-box").value;
-    console.log("quantity:", quantity);
+  console.log("entering to the addtocart method");
+  const quantity = document.querySelector(".cart-plus-minus-box").value;
+  console.log("quantity:", quantity);
 
-    try {
-      const response = await fetch("/addtocart/" + productId, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          productId: productId,
-          quantity: quantity,
-        }),
+  try {
+    const response = await fetch("/addtocart/" + productId, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        productId: productId,
+        quantity: quantity,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      // Success message
+      Swal.fire({
+        icon: "success",
+        title: "Success!",
+        text: "Product added to cart successfully!",
+        showConfirmButton: false,
+        timer: 1500,
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        // Success message
-        Swal.fire({
-          icon: "success",
-          title: "Success!",
-          text: "Product added to cart successfully!",
-          showConfirmButton: false,
-          timer: 1500,
-        });
-
-        if (data.cartCount) {
-          const cartCountElement = document.querySelector(".cart-count");
-          if (cartCountElement) {
-            cartCountElement.textContent = data.cartCount;
-          }
+      if (data.cartCount) {
+        const cartCountElement = document.querySelector(".cart-count");
+        if (cartCountElement) {
+          cartCountElement.textContent = data.cartCount;
         }
-      } else {
-        // Error message
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: data.message || "Failed to add product to cart",
-        });
       }
-    } catch (error) {
-      console.error("Error:", error);
+    } else {
+      // Error message with specific server details
+      let errorMessage = data.message || "Failed to add product to cart";
+      
+      // Replace "undefined items available in stock" with "out of stock"
+      if (errorMessage.includes("undefined")) {
+        errorMessage = "This item is out of stock.";
+      }
+      
+      // Handle blocked category case
+      if (errorMessage.includes("blocked") || errorMessage.includes("disabled")) {
+        errorMessage = "This product category is no longer available.";
+      }
+      
       Swal.fire({
-          icon: "warning",
-          title: "Please Login",
-          text: "Please login to continue",
-          showCancelButton: true,
-          confirmButtonText: "Login",
-          cancelButtonText: "Cancel",
-          confirmButtonColor: "#3085d6",
-          cancelButtonColor: "#d33",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            window.location.href = "/login"; 
-          }
-        });
+        icon: "error",
+        title: "Failed to Add to Cart",
+        text: errorMessage,
+      });
     }
+  } catch (error) {
+    console.error("Error:", error);
+    Swal.fire({
+      icon: "warning",
+      title: "Please Login",
+      text: "Please login to continue",
+      showCancelButton: true,
+      confirmButtonText: "Login",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = "/login"; 
+      }
+    });
   }
+}
 
   document.addEventListener("DOMContentLoaded", function () {
     const quantityInput = document.querySelector(".cart-plus-minus-box");
-    document
-      .querySelector(".inc.qtybutton")
-      .addEventListener("click", function () {
-        quantityInput.value = parseInt(quantityInput.value) + 1;
+    const productStock = "<%= product.totalStock %>"; // Get stock from server
+    
+    document.querySelector(".inc.qtybutton").addEventListener("click", function () {
+      const currentVal = parseInt(quantityInput.value);
+      // Check both max quantity and available stock
+      const maxAllowed = Math.min(MAX_QUANTITY, productStock);
+      
+      if (currentVal < maxAllowed) {
+        quantityInput.value = currentVal + 1;
+      } else {
+        // Show appropriate error message
+        if (currentVal >= MAX_QUANTITY) {
+          Swal.fire({
+            icon: "error",
+            title: "Quantity Limit",
+            text: `Maximum quantity per product is ${MAX_QUANTITY}`,
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Stock Limit",
+            text: `Only ${productStock} items available in stock`,
+          });
+        }
+      }
+    });
+
+    document.querySelector(".dec.qtybutton").addEventListener("click", function () {
+      if (parseInt(quantityInput.value) > 1) {
+        quantityInput.value = parseInt(quantityInput.value) - 1;
+      }
+    });
+  });
+
+
+  document.addEventListener("DOMContentLoaded", function() {
+  // Check if we received a JSON response with error status
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('error')) {
+    Swal.fire({
+      icon: "error",
+      title: "Product Unavailable",
+      text: "This product is not available or has been blocked.",
+      confirmButtonText: "OK",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = "/shop";
+      }
+    });
+  }
+  
+  // Also check for productNotFound variable if you're passing it from server
+  if (typeof productNotFound !== 'undefined' && productNotFound) {
+    Swal.fire({
+      icon: "error",
+      title: "Product Unavailable",
+      text: "This product is not available or has been blocked.",
+      confirmButtonText: "OK",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = "/shop";
+      }
+    });
+  }
+});
+
+// Modify your fetch request handling for blocked products
+async function addToCart(productId) {
+  console.log("entering to the addtocart method");
+  const quantity = document.querySelector(".cart-plus-minus-box").value;
+  console.log("quantity:", quantity);
+
+  try {
+    const response = await fetch("/addtocart/" + productId, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        productId: productId,
+        quantity: quantity,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      // Success message
+      Swal.fire({
+        icon: "success",
+        title: "Success!",
+        text: "Product added to cart successfully!",
+        showConfirmButton: false,
+        timer: 1500,
       });
 
-    document
-      .querySelector(".dec.qtybutton")
-      .addEventListener("click", function () {
-        if (parseInt(quantityInput.value) > 1) {
-          quantityInput.value = parseInt(quantityInput.value) - 1;
+      if (data.cartCount) {
+        const cartCountElement = document.querySelector(".cart-count");
+        if (cartCountElement) {
+          cartCountElement.textContent = data.cartCount;
         }
-      });
-  });
+      }
+    } else {
+      // Error message with specific server details
+      let errorMessage = data.message || "Failed to add product to cart";
+      let isProductBlocked = errorMessage.includes("blocked") || 
+                            errorMessage.includes("disabled") || 
+                            errorMessage.includes("not available");
+      
+      // Replace "undefined items available in stock" with "out of stock"
+      if (errorMessage.includes("undefined")) {
+        errorMessage = "This item is out of stock.";
+      }
+      
+      // Handle blocked category case
+      if (isProductBlocked) {
+        errorMessage = "This product is no longer available.";
+        
+        Swal.fire({
+          icon: "error",
+          title: "Product Unavailable",
+          text: errorMessage,
+          confirmButtonText: "OK",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = "/shop";
+          }
+        });
+      } else {
+        // Regular error message
+        Swal.fire({
+          icon: "error",
+          title: "Failed to Add to Cart",
+          text: errorMessage,
+        });
+      }
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    Swal.fire({
+      icon: "warning",
+      title: "Please Login",
+      text: "Please login to continue",
+      showCancelButton: true,
+      confirmButtonText: "Login",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = "/login"; 
+      }
+    });
+  }
+}
+
+  
 </script>
+
+

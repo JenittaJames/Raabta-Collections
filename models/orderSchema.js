@@ -46,7 +46,17 @@ const orderSchema = new Schema({
         refunded: {
             type: Boolean,
             default: false
-        }
+        },
+        returnReason: {
+            type : String,
+        } ,
+      returnRequestDate: Date,
+      returnApproved: {
+        type: Boolean,
+        default: false
+      },
+      returnApprovedDate: Date,
+      returnNotes: String
     }],
     orderAmount : {
         type : Number,
@@ -70,7 +80,8 @@ const orderSchema = new Schema({
         type: String,
         enum: ["Pending", "Shipped", "Delivered", "Cancelled", "Returned"], 
         default: "Pending" 
-    }
+    },
+    
 },{ timestamps : true });
 
 const Orders = mongoose.model("Orders", orderSchema);

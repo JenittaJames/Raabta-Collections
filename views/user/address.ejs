@@ -75,10 +75,10 @@
                                                         <i class="fas fa-pencil-alt" aria-hidden="true"></i> Edit
                                                     </a>
                                                     <% if (!address.isDefault) { %>
-                                                        <form action="/address/delete/<%= address._id %>" method="POST" class="action-form">
-                                                            <button type="submit" class="action-btn delete-btn" title="Delete">
-                                                                <i class="fa fa-trash" aria-hidden="true"></i> Delete
-                                                            </button>
+                                                        <button type="button" class="action-btn delete-btn" title="Delete" onclick="confirmDelete('<%= address._id %>')">
+                                                            <i class="fa fa-trash" aria-hidden="true"></i> Delete
+                                                        </button>
+                                                        <form action="/address/delete/<%= address._id %>" method="POST" id="delete-form-<%= address._id %>" class="action-form" style="display:none;">
                                                         </form>
                                                         <form action="/address/default/<%= address._id %>" method="POST" class="action-form">
                                                             <button type="submit" class="set-default-btn">Set as Default</button>
@@ -316,5 +316,24 @@
     }
 }
 </style>
+
+<script>
+    function confirmDelete(addressId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This address will be permanently deleted!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Submit the form
+                document.getElementById('delete-form-' + addressId).submit();
+            }
+        });
+    }
+</script>
 
 <%- include('../partials/user/footer') %>
