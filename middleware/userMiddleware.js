@@ -1,12 +1,14 @@
 const userModel = require("../models/userSchema");
-const productModel = require("../models/productSchema")
-
+const productModel = require("../models/productSchema");
 
 const ifLogged = async (req, res, next) => {
   try {
-    if (req.session.isAuth) {
+    const user = await userModel.findOne({ _id: req.session.userId });
+    console.log("user:", user);
+    if (req.session.isAuth && user && user.status === true) {
       next();
     } else {
+      req.session.isAuth = false;
       res.redirect("/login");
     }
   } catch (error) {
@@ -14,16 +16,27 @@ const ifLogged = async (req, res, next) => {
   }
 };
 
+const logged = async (req, res, next) => {
+  try {
+    if (req.session.isAuth) {
+      res.redirect("/");
+    } else {
+      next();
+    }
+  } catch (error) {
+    console.log("error form middleware", error);
+  }
+};
 
 const checkProductStatus = async (req, res, next) => {
   try {
     const id = req.params.id;
     const product = await productModel.findOne({ _id: id });
-    
+
     if (!product || !product.status) {
       return res.status(404).render("user/redirect", {
         message: "Product not available or has been blocked",
-        redirectUrl: "/shop"
+        redirectUrl: "/shop",
       });
     }
     next();
@@ -36,4 +49,5 @@ const checkProductStatus = async (req, res, next) => {
 module.exports = {
   ifLogged,
   checkProductStatus,
+  logged
 };

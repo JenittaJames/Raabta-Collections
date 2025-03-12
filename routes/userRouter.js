@@ -6,7 +6,7 @@ const cartController = require("../controller/user/cartController");
 const profileController = require("../controller/user/profileController");
 const checkoutController = require("../controller/user/checkoutController");
 const orderController = require("../controller/user/orderController");
-const { checkProductStatus, ifLogged } = require("../middleware/userMiddleware");
+const { checkProductStatus, ifLogged, logged } = require("../middleware/userMiddleware");
 const passport = require("passport");
 
 router.get("/pageNotFound", userController.pageNotFound);
@@ -32,8 +32,8 @@ router.get(
 
 router.get("/logout", userController.logout);
 
-router.post("/register", userController.register);
-router.get("/login", userController.loadLogin);
+router.post("/register",logged, userController.register);
+router.get("/login",logged, userController.loadLogin);
 router.post("/login", userController.login);
 router.get("/otp", userController.loadOtpPage);
 router.post("/otp", userController.loadLogin);

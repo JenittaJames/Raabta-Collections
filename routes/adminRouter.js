@@ -18,6 +18,7 @@ router.get("/dashboard",adminAuth,adminController.loadDashboard);
 router.get("/logout",adminAuth,adminController.adminLogout);
 router.get("/users",adminAuth,adminController.usersPage)
 router.get("/block/:userId",adminAuth,adminController.blockUser)
+router.post('/api/block/:userId',adminAuth, adminController.blockUserAjax);
 
 router.get("/categories",adminAuth,categoryController.categoriesPage)
 router.get("/addcategory",adminAuth,categoryController.addCategory)
@@ -26,6 +27,7 @@ router.get("/addcategory",adminAuth,categoryController.addCategoryPost)
 router.get("/blockcategory/:categoryId",adminAuth,categoryController.blockCategory);
 router.get("/editcategory/:categoryId",adminAuth,categoryController.editCategory)
 router.post("/editcategory/:categoryId",adminAuth,categoryController.editCategoryPost)
+router.put('/api/blockcategory/:categoryId',adminAuth, categoryController.blockCategoryApi);
 
 
 router.get("/product",adminAuth,productController.productPage)
@@ -36,6 +38,7 @@ router.get("/editproduct/:productId",adminAuth,productController.editProduct);
 router.post("/editproduct/:productId",adminAuth,productController.editProductPost);
 router.get("/editimage/:productId",adminAuth,productController.editImage);
 router.post("/editimage/:productId",adminAuth,upload.array("images"),productController.editImagePost);
+router.post('/api/blockproduct/:productId', adminAuth, productController.blockProductAjax);
 
 
 router.get("/orders", adminAuth, orderController.orders)

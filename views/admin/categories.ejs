@@ -113,10 +113,25 @@
             font-size: 18px;
             color: #555;
         }
+        
+        /* Loading spinner styles */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 
     <% if (categories.length > 0) { %>
-        <table class="users-table">
+        <table class="users-table" id="categories-table">
             <thead>
                 <tr>
                     <th>SL.No</th>
@@ -128,18 +143,18 @@
             </thead>
             <tbody>
                 <% categories.forEach((category, index) => { %>
-                    <tr>
+                    <tr id="category-row-<%= category.id %>">
                         <td><%= index + 1 %></td>
                         <td><%= category.name %></td>
                         <td><%= category.description %></td>
-                        <td><%= category.status ? "Active" : "Inactive" %></td>
+                        <td id="status-<%= category.id %>"><%= category.status ? "Active" : "Inactive" %></td>
                         <td>
-                            <button onclick="confirmBlock('<%= category.id %>')" class="action-btn delete-btn">
+                            <button onclick="confirmBlock('<%= category.id %>', '<%= category.status %>')" id="block-btn-<%= category.id %>" class="action-btn delete-btn">
                                 <%= category.status ? "Block" : "Unblock" %>
                             </button>
-                            <a href="/admin/editcategory/<%= category.id %>"><button  class="action-btn delete-btn">
-                                Edit
-                            </button></a>
+                            <a href="/admin/editcategory/<%= category.id %>">
+                                <button class="action-btn delete-btn">Edit</button>
+                            </a>
                         </td>
                     </tr>
                 <% }) %>
@@ -168,7 +183,7 @@
 <%- include('../partials/admin/footer') %>
 
 <script>
-    function confirmBlock(categoryId) {
+    function confirmBlock(categoryId, currentStatus) {
         Swal.fire({
             title: "Are you sure?",
             text: "Do you want to continue?",
@@ -180,8 +195,60 @@
             cancelButtonText: "No"
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = `/admin/blockcategory/${categoryId}`;
+                updateCategoryStatus(categoryId, currentStatus);
             }
+        });
+    }
+    
+    function updateCategoryStatus(categoryId, currentStatus) {
+        // Change button to loading state
+        const button = document.getElementById(`block-btn-${categoryId}`);
+        const originalText = button.textContent;
+        button.innerHTML = '<div class="loading-spinner"></div>';
+        button.disabled = true;
+        
+        // Send AJAX request
+        fetch(`/admin/api/blockcategory/${categoryId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Update the DOM with new status
+            const statusCell = document.getElementById(`status-${categoryId}`);
+            statusCell.textContent = data.status ? "Active" : "Inactive";
+            
+            // Update button text
+            button.textContent = data.status ? "Block" : "Unblock";
+            button.disabled = false;
+            
+            // Show success notification
+            Swal.fire({
+                title: "Success!",
+                text: `Category ${data.status ? "unblocked" : "blocked"} successfully`,
+                icon: "success",
+                confirmButtonColor: "#000000"
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            button.textContent = originalText;
+            button.disabled = false;
+            
+            // Show error notification
+            Swal.fire({
+                title: "Error!",
+                text: "Something went wrong. Please try again.",
+                icon: "error",
+                confirmButtonColor: "#000000"
+            });
         });
     }
 </script>

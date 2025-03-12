@@ -51,12 +51,10 @@ const addProduct = async (req, res) => {
 
 const addProductPost = async (req, res) => {
   try {
-
     const { name, description, category, price, stock } = req.body;
     const categoryData = await catModel.findOne({ name: category });
 
     const imagePath = req.files.map((val) => val.path);
-
 
     const product = new productModel({
       productName: name,
@@ -67,7 +65,6 @@ const addProductPost = async (req, res) => {
       productImage: imagePath,
     });
 
-
     await product.save();
 
     res.redirect("/admin/product");
@@ -77,13 +74,12 @@ const addProductPost = async (req, res) => {
   }
 };
 
+// Original block product function (non-AJAX)
 const blockProduct = async (req, res) => {
   try {
     const id = req.params.productId;
 
     const product = await productModel.findById(id);
-
-
     const val = !product.status;
 
     await productModel.updateOne({ _id: id }, { $set: { status: val } });
@@ -92,6 +88,32 @@ const blockProduct = async (req, res) => {
   } catch (error) {
     console.log("product blocking error", error);
     res.status(500).send("Internal Server Error");
+  }
+};
+
+// New AJAX block product endpoint
+const blockProductAjax = async (req, res) => {
+  try {
+    const id = req.params.productId;
+
+    const product = await productModel.findById(id);
+    if (!product) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+    
+    const newStatus = !product.status;
+    
+    await productModel.updateOne({ _id: id }, { $set: { status: newStatus } });
+    
+    // Return the updated status
+    return res.status(200).json({ 
+      success: true, 
+      status: newStatus, 
+      message: `Product ${newStatus ? 'unblocked' : 'blocked'} successfully` 
+    });
+  } catch (error) {
+    console.log("AJAX product blocking error", error);
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };
 
@@ -147,9 +169,11 @@ const editImage = async (req, res) => {
     const productId = req.params.productId;
     const product = await productModel.findOne({ _id: productId });
     res.render("admin/editimage", { product });
-  } catch (error) {}
+  } catch (error) {
+    console.log("edit image error", error);
+    res.status(500).send("Internal Server Error");
+  }
 };
-
 
 const editImagePost = async (req, res) => {
     try {
@@ -200,6 +224,7 @@ module.exports = {
   addProduct,
   addProductPost,
   blockProduct,
+  blockProductAjax, 
   editProduct,
   editProductPost,
   editImage,

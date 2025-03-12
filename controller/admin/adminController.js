@@ -1,10 +1,5 @@
-
 const adminModel = require("../../models/userSchema");
 const bcrypt = require('bcrypt');
-
-
-
-
 
 const loadDashboard = async (req,res) =>{
     try {
@@ -57,9 +52,6 @@ const adminLogout = async (req,res) => {
     }
 }
 
-
-
-
 const usersPage = async (req, res) => {
     try {
         const { query } = req.query;
@@ -100,10 +92,7 @@ const usersPage = async (req, res) => {
     }
 };
 
-
-
-
-
+// Original block user function (non-AJAX)
 const blockUser = async (req,res) => {
     try {
         const id = req.params.userId;
@@ -122,12 +111,31 @@ const blockUser = async (req,res) => {
     }
 }
 
-
-
-
-
-
-
+// New AJAX block user endpoint
+const blockUserAjax = async (req, res) => {
+    try {
+        const id = req.params.userId;
+        
+        const user = await adminModel.findById(id);
+        if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+        
+        const newStatus = !user.status;
+        
+        await adminModel.updateOne({ _id: id }, { $set: { status: newStatus } });
+        
+        // Return the updated status
+        return res.status(200).json({ 
+            success: true, 
+            status: newStatus, 
+            message: `User ${newStatus ? 'unblocked' : 'blocked'} successfully` 
+        });
+    } catch (error) {
+        console.log("AJAX user blocking error", error);
+        return res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+};
 
 module.exports = {
     adminLogin,
@@ -136,4 +144,5 @@ module.exports = {
     adminLogout,
     usersPage,
     blockUser,
+    blockUserAjax 
 }

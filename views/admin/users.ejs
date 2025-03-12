@@ -101,6 +101,20 @@
             font-size: 18px;
             color: #555;
         }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 
     <% if (users.length>0) { %>
@@ -117,14 +131,16 @@
             </thead>
             <tbody>
                 <% users.forEach((user, index) => { %>
-                <tr>
+                <tr id="user-row-<%= user.id %>">
                     <td><%= index + 1 %></td>
                     <td><%= user.userName %></td>
                     <td><%= user.email %></td>
                     <td><%= user.phone %></td>
-                    <td><%= user.status ? "Active" : "Inactive" %></td>
+                    <td id="status-<%= user.id %>"><%= user.status ? "Active" : "Inactive" %></td>
                     <td>
-                        <button onclick="confirmBlock('<%= user.id %>')" class="action-btn delete-btn">
+                        <button id="block-btn-<%= user.id %>" 
+                                onclick="toggleUserStatus('<%= user.id %>', '<%= user.status %>')" 
+                                class="action-btn delete-btn">
                             <%= user.status ? "Block" : "UnBlock" %>
                         </button>
                     </td>
@@ -155,11 +171,12 @@
 <%- include('../partials/admin/footer') %>
 
 <script>
-    function confirmBlock(userId) {
+    function toggleUserStatus(userId, currentStatus) {
+        // Show confirmation dialog
         Swal.fire({
-            title: `Are you sure?`,
-            text: `Do you want to continue?`,
-            icon: 'warning',
+            title: "Are you sure?",
+            text: `Do you want to ${currentStatus ? "block" : "unblock"} this user?`,
+            icon: "warning",
             showCancelButton: true,
             confirmButtonColor: '#000000',
             cancelButtonColor: '#d33',
@@ -167,7 +184,55 @@
             cancelButtonText: 'No'
         }).then((result) => {
             if (result.isConfirmed) {
-                window.location.href = `/admin/block/${userId}`;
+                // Get the button element
+                const button = document.getElementById(`block-btn-${userId}`);
+                const statusCell = document.getElementById(`status-${userId}`);
+                
+                // Add spinner to button
+                const originalText = button.innerHTML;
+                button.innerHTML = '<div class="spinner"></div>';
+                button.disabled = true;
+                
+                // Send AJAX request
+                fetch(`/admin/api/block/${userId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Update button text and status cell
+                    button.innerHTML = data.status ? "Block" : "UnBlock";
+                    button.disabled = false;
+                    statusCell.textContent = data.status ? "Active" : "Inactive";
+                    
+                    // Show success message
+                    Swal.fire({
+                        title: "Success!",
+                        text: `User ${data.status ? "unblocked" : "blocked"} successfully`,
+                        icon: "success",
+                        confirmButtonColor: "#000000"
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    
+                    // Show error message
+                    Swal.fire({
+                        title: "Error!",
+                        text: "Something went wrong. Please try again.",
+                        icon: "error",
+                        confirmButtonColor: "#000000"
+                    });
+                });
             }
         });
     }
