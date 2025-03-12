@@ -48,6 +48,7 @@ router.get("/reset-password", userController.loadResetPassword);
 router.post("/reset-password", userController.resetPassword);
 
 router.get("/shop", userController.loadShop);
+router.get("/search",userController.loadShop)
 router.get("/shopbyfilter/:categoryId", userController.shopByFilter)
 router.get("/singleproduct/:id",checkProductStatus, productController.loadSingleproduct);
 
@@ -85,6 +86,6 @@ router.get("/orderdetails/:orderId", ifLogged, orderController.orderDetails);
 router.get("/confirmorder", ifLogged, orderController.placeOrder)
 router.post('/orders/:orderId/cancel', ifLogged, orderController.cancelOrder);
 router.get('/orders/:orderId/invoice', ifLogged, orderController.generateInvoice);
-router.get("/search",userController.loadShop)
+
 
 module.exports = router;

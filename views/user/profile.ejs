@@ -32,6 +32,9 @@
                             <a class="nav-link" id="account-address-tab" href="/address" aria-controls="account-address" aria-selected="false">Addresses</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" id="account-address-tab" href="/wallet/history" aria-controls="account-address" aria-selected="false">Wallet</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" id="account-details-tab" href="/changepassword" aria-controls="account-details" aria-selected="false">Change Password</a>
                         </li>
                         <li class="nav-item">
@@ -41,13 +44,13 @@
                 </div>
                 <div class="col-lg-9">
                     <div class="tab-content myaccount-tab-content" id="account-page-tab-content">
-                        <div class="welcome-section">
+                        <!-- <div class="welcome-section">
                             <div class="wallet-section">
                                 <h3>Wallet Balance</h3>
                                 <p>Your current wallet balance: ₹<%= user.wallet %></p>
                                 <a href="/wallet/history" class="btn-view-history">View Wallet History</a>
                             </div>
-                        </div>
+                        </div> -->
                         <!-- Personal Information Section -->
                         <div class="personal-info">
                             <div class="info-header">
@@ -138,7 +141,7 @@
                         }
                     
                         .edit-btn:hover {
-                            background-color: #cda557;
+                            background-color: #1d2951;
                         }
                     
                         .info-row {
@@ -185,7 +188,7 @@
                         }
                     
                         .form-group input:focus {
-                            border-color: #cda557;
+                            border-color: #1d2951;
                             outline: none;
                         }
                     
@@ -210,11 +213,11 @@
                         }
                     
                         .button-group button[type="submit"]:hover {
-                            background-color: #cda557;
+                            background-color: #1d2951;
                         }
                     
                         .button-group button[type="button"] {
-                            background-color: #cda557;
+                            background-color: #1d2951;
                             color: white;
                         }
                     
@@ -248,7 +251,7 @@
                         }
                     
                         .welcome-section a:hover {
-                            color: #cda557;
+                            color: #1d2951;
                         }
                     </style>
     </div>

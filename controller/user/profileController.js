@@ -441,8 +441,9 @@ const walletHistory = async (req, res) => {
     }
 
     const sortedWalletHistory = user.walletHistory.sort((a, b) => b.date - a.date);
+    const walletBalance = user.wallet
 
-    res.render("user/walletHistory", { walletHistory: sortedWalletHistory });
+    res.render("user/walletHistory", { walletHistory: sortedWalletHistory, user , walletBalance });
   } catch (error) {
     console.error("Error fetching wallet history:", error);
     res

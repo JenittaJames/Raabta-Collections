@@ -4,7 +4,6 @@ const productModel = require("../models/productSchema");
 const ifLogged = async (req, res, next) => {
   try {
     const user = await userModel.findOne({ _id: req.session.userId });
-    console.log("user:", user);
     if (req.session.isAuth && user && user.status === true) {
       next();
     } else {
@@ -49,5 +48,5 @@ const checkProductStatus = async (req, res, next) => {
 module.exports = {
   ifLogged,
   checkProductStatus,
-  logged
+  logged,
 };

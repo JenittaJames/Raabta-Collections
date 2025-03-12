@@ -35,7 +35,7 @@
   }
 
   .qty-cart_btn:hover {
-    background: #cda557;
+    background: #1d2951;
     color: #ffffff;
   }
 
@@ -55,7 +55,7 @@
   }
 
   .qty-wishlist_btn:hover {
-    border-color: #cda557;
+    border-color: #1d2951;
     border-width: 2px;
     color: #ffffff;
   }
@@ -190,11 +190,12 @@
 
                                 <a href="#">
                                   <% if (product.totalStock == 0) { %>
-                                    Out Of Stock
+                                    <span style="color: red;">Out Of Stock</span>
                                   <% } else { %>
-                                   Availability : <%= product.totalStock %> Item Available
+                                    <span style="color: green;"><%= product.totalStock %> Item Available</span>
                                   <% } %>
-                                </a>
+                                </a>
+                                
 
             <div class="quantity">
               <label>Quantity</label>
