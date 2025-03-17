@@ -3,6 +3,7 @@ const catModel = require("../../models/categorySchema");
 const userModel = require("../../models/userSchema")
 const ordersModel = require("../../models/orderSchema")
 const addressModel = require("../../models/addressSchema")
+const walletModel = require("../../models/walletSchema")
 
 const orders = async (req, res) => {
     try {
@@ -110,52 +111,64 @@ const orderDetails = async (req, res) => {
 const verifyReturnRequest = async (req, res) => {
     try {
         const { orderId, productId, status } = req.body;
-        
+
+        // Find the order
         const order = await ordersModel.findById(orderId);
         if (!order) {
             return res.status(404).json({ success: false, message: 'Order not found' });
         }
-        
+
+        // Find the specific product in the order
         const orderItem = order.orderedItem.find(item => item._id.toString() === productId);
         if (!orderItem) {
             return res.status(404).json({ success: false, message: 'Product not found in this order' });
         }
-        
+
+        // Update the product status
         orderItem.productStatus = status;
-        
+
+        // If the return is approved, process the refund
         if (status === 'Return Approved') {
             if (orderItem.refunded) {
                 return res.status(400).json({ success: false, message: 'This item has already been refunded' });
             }
-            
-            const user = await userModel.findById(order.userId);
-            if (!user) {
-                return res.status(404).json({ success: false, message: 'User not found' });
+
+            // Find the user's wallet
+            const wallet = await walletModel.findOne({ userId: order.userId });
+            if (!wallet) {
+                return res.status(404).json({ success: false, message: 'Wallet not found for the user' });
             }
-            
+
+            // Calculate the refund amount
             const refundAmount = orderItem.totalProductPrice;
-            user.wallet += refundAmount;
-            user.walletHistory.push({
+
+            // Update the wallet balance and add a transaction record
+            wallet.balance += refundAmount;
+            wallet.transaction.push({
                 amount: refundAmount,
-                type: 'credit',
-                description: `Refund for return of order ${order.orderNumber}`,
-                date: new Date()
+                transactionsMethod: 'Refund',
+                date: new Date(),
+                orderId: order._id
             });
-            
+
+            // Mark the item as refunded
             orderItem.refunded = true;
-            
-            await user.save();
-            
-            const allItemsReturned = order.orderedItem.every(item => 
+
+            // Save the updated wallet
+            await wallet.save();
+
+            // Check if all items in the order are returned or cancelled
+            const allItemsReturned = order.orderedItem.every(item =>
                 item.productStatus === 'Return Approved' || item.productStatus === 'Cancelled'
             );
-            
+
+            // Update the payment status of the order
             if (allItemsReturned) {
                 order.paymentStatus = 'Refunded';
             } else {
                 order.paymentStatus = 'partially-refunded';
             }
-            
+
             // Update inventory - add returned items back to stock
             try {
                 for (const item of order.orderedItem) {
@@ -172,12 +185,13 @@ const verifyReturnRequest = async (req, res) => {
                 // Continue processing even if stock update fails
             }
         }
-        
+
         // Record the return handling timestamp
         orderItem.updatedAt = new Date();
-        
+
+        // Save the updated order
         await order.save();
-        
+
         return res.json({
             success: true,
             message: `Return request ${status === 'Return Approved' ? 'approved and refund processed' : 'rejected'}`

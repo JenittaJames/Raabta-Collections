@@ -1,88 +1,99 @@
 const mongoose = require('mongoose');
-const {Schema} = mongoose;
+const { Schema } = mongoose;
 
 const orderSchema = new Schema({
-    userId : {
-        type :  mongoose.Schema.ObjectId,
-        ref : "User",
+    userId: {
+        type: mongoose.Schema.ObjectId,
+        ref: "User",
     },
     cartId: {
-        type :  mongoose.Schema.ObjectId,
-        ref : "Cart"
+        type: mongoose.Schema.ObjectId,
+        ref: "Cart"
     },
-    deliveryAddress: { 
+    deliveryAddress: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Address",
         required: true
     },
-    orderNumber : {
-        type : String,
-        required : true,
+    orderNumber: {
+        type: String,
+        required: true,
         unique: true
     },
-    orderedItem : [{
-        productId : {
-            type :  mongoose.Schema.ObjectId,
-            ref : "Product",
+    orderedItem: [{
+        productId: {
+            type: mongoose.Schema.ObjectId,
+            ref: "Product",
         },
-        quantity : {
-            type : Number,
-            required : true,
+        quantity: {
+            type: Number,
+            required: true,
         },
-        productPrice : {
-            type : Number,
-            required : true,
+        productPrice: {
+            type: Number,
+            required: true,
         },
-        productStatus : {
-            type : String,
-            enum: ["Pending", "Shipped", "Delivered", "Cancelled", "Returned","Return Requested", "Return Approved", "Return Rejected"],
-            default : "Pending",
-            required : true
+        productStatus: {
+            type: String,
+            enum: ["Pending", "Shipped", "Delivered", "Cancelled", "Returned", "Return Requested", "Return Approved", "Return Rejected"],
+            default: "Pending",
+            required: true
         },
-        totalProductPrice : {
-            type : Number,
-            required : true
+        totalProductPrice: {
+            type: Number,
+            required: true
         },
         refunded: {
             type: Boolean,
             default: false
         },
         returnReason: {
-            type : String,
-        } ,
-      returnRequestDate: Date,
-      returnApproved: {
-        type: Boolean,
-        default: false
-      },
-      returnApprovedDate: Date,
-      returnNotes: String
+            type: String,
+        },
+        returnRequestDate: Date,
+        returnApproved: {
+            type: Boolean,
+            default: false
+        },
+        returnApprovedDate: Date,
+        returnNotes: String
     }],
-    orderAmount : {
-        type : Number,
-        required : true
+    orderAmount: {
+        type: Number,
+        required: true
     },
-    deliveryDate : {
-        type : Date
+    discountAmount: { // Added for coupon discount
+        type: Number,
+        default: 0
     },
-    shippingDate : {
-        type : Date
+    finalAmount: { // Added for final amount after discount
+        type: Number,
+        required: true
     },
-    paymentMethod : {
-        type : String,
-        required : true
+    couponApplied: { 
+        type : mongoose.Schema.Types.ObjectId,
+        ref : "Coupon",
     },
-    paymentStatus : {
-        type : String,
-        required : true
+    deliveryDate: {
+        type: Date
     },
-    orderStatus: { 
+    shippingDate: {
+        type: Date
+    },
+    paymentMethod: {
         type: String,
-        enum: ["Pending", "Shipped", "Delivered", "Cancelled", "Returned"], 
-        default: "Pending" 
+        required: true
     },
-    
-},{ timestamps : true });
+    paymentStatus: {
+        type: String,
+        required: true
+    },
+    orderStatus: {
+        type: String,
+        enum: ["Pending", "Shipped", "Delivered", "Cancelled", "Returned"],
+        default: "Pending"
+    },
+}, { timestamps: true });
 
 const Orders = mongoose.model("Orders", orderSchema);
 

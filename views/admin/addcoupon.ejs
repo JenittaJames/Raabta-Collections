@@ -1,0 +1,230 @@
+<%- include('../partials/admin/header') %>
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title">Add Coupon</h2>
+            <!-- <p>Add a new coupon to your store</p> -->
+        </div>
+        <div>
+            <button onclick="window.location.href='/admin/coupon'" class="back-btn">
+                Back to Coupons
+            </button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <form action="/admin/addcoupon" method="POST" id="couponForm">
+                        <div class="mb-4">
+                            <label for="couponCode" class="form-label">Coupon Code</label>
+                            <input 
+                                type="text" 
+                                name="couponCode" 
+                                id="couponCode" 
+                                class="form-control" 
+                                placeholder="Enter coupon code (e.g., SUMMER25)" 
+                                required
+                            />
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="type" class="form-label">Discount Type</label>
+                            <select name="type" id="type" class="form-control" required>
+                                <option value="">Select discount type</option>
+                                <option value="percentageDiscount">Percentage Discount</option>
+                                <option value="flatDiscount">Flat Discount</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="discount" class="form-label">Discount Value</label>
+                            <div class="input-group">
+                                <input 
+                                    type="number" 
+                                    name="discount" 
+                                    id="discount" 
+                                    class="form-control" 
+                                    placeholder="Enter discount value" 
+                                    min="1" 
+                                    required
+                                />
+                                <span class="input-group-text" id="discountSymbol">%</span>
+                            </div>
+                            <small id="discountHelp" class="form-text">For percentage discount, enter a value between 1-100</small>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="minimumPrice" class="form-label">Minimum Purchase Amount (₹)</label>
+                            <input 
+                                type="number" 
+                                name="minimumPrice" 
+                                id="minimumPrice" 
+                                class="form-control" 
+                                placeholder="Enter minimum purchase amount" 
+                                min="0" 
+                                required
+                            />
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="maxRedeem" class="form-label">Maximum Redemptions</label>
+                            <input 
+                                type="number" 
+                                name="maxRedeem" 
+                                id="maxRedeem" 
+                                class="form-control" 
+                                placeholder="Enter maximum number of redemptions" 
+                                min="1" 
+                                required
+                            />
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="expiry" class="form-label">Expiry Date</label>
+                            <input 
+                                type="date" 
+                                name="expiry" 
+                                id="expiry" 
+                                class="form-control" 
+                                required
+                            />
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="status" class="form-label">Status</label>
+                            <select name="status" id="status" class="form-control" required>
+                                <option value="true">Active</option>
+                                <option value="false">Inactive</option>
+                            </select>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Create Coupon</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .back-btn {
+        background-color: #000000;
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+    
+    .form-control {
+        border: 1px solid #ddd;
+        padding: 8px 15px;
+        border-radius: 5px;
+        width: 100%;
+    }
+    
+    .form-label {
+        margin-bottom: 8px;
+        font-weight: bold;
+    }
+    
+    .mb-4 {
+        margin-bottom: 20px;
+    }
+    
+    .d-grid button {
+        background-color: #000000;
+        color: white;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+    
+    .card {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .input-group {
+        display: flex;
+    }
+    
+    .input-group-text {
+        display: flex;
+        align-items: center;
+        padding: 0 15px;
+        background-color: #f8f8f8;
+        border: 1px solid #ddd;
+        border-left: none;
+        border-radius: 0 5px 5px 0;
+    }
+    
+    .form-text {
+        font-size: 12px;
+        color: #666;
+        margin-top: 5px;
+    }
+</style>
+
+<%- include('../partials/admin/footer') %>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set minimum date for expiry to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('expiry').setAttribute('min', today);
+        
+        // Update discount symbol based on discount type
+        const typeSelect = document.getElementById('type');
+        const discountSymbol = document.getElementById('discountSymbol');
+        const discountHelp = document.getElementById('discountHelp');
+        const discountInput = document.getElementById('discount');
+        
+        typeSelect.addEventListener('change', function() {
+            if (this.value === 'percentageDiscount') {
+                discountSymbol.textContent = '%';
+                discountHelp.textContent = 'For percentage discount, enter a value between 1-100';
+                discountInput.setAttribute('max', '100');
+            } else if (this.value === 'flatDiscount') {
+                discountSymbol.textContent = '₹';
+                discountHelp.textContent = 'For flat discount, enter the amount in rupees';
+                discountInput.removeAttribute('max');
+            }
+        });
+        
+        // Form validation
+        const couponForm = document.getElementById('couponForm');
+        couponForm.addEventListener('submit', function(event) {
+            const discountValue = parseInt(discountInput.value);
+            const discountType = typeSelect.value;
+            
+            if (discountType === 'percentageDiscount' && (discountValue <= 0 || discountValue > 100)) {
+                event.preventDefault();
+                Swal.fire({
+                    title: "Invalid Discount!",
+                    text: "Percentage discount must be between 1 and 100",
+                    icon: "error",
+                    confirmButtonColor: "#000000"
+                });
+            } else if (discountType === 'flatDiscount' && discountValue <= 0) {
+                event.preventDefault();
+                Swal.fire({
+                    title: "Invalid Discount!",
+                    text: "Flat discount must be greater than 0",
+                    icon: "error",
+                    confirmButtonColor: "#000000"
+                });
+            }
+        });
+    });
+</script>

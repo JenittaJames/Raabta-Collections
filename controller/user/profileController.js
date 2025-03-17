@@ -2,6 +2,7 @@ const userModel = require("../../models/userSchema");
 const addressModel = require("../../models/addressSchema");
 const ordersModel = require("../../models/orderSchema");
 const cartModel = require("../../models/cartSchema");
+const walletModel = require("../../models/walletSchema")
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer");
 
@@ -435,20 +436,22 @@ const changePasswordPost = async (req, res) => {
 
 const walletHistory = async (req, res) => {
   try {
-    const user = await userModel.findById(req.session.userId);
-    if (!user) {
-      return res.status(404).render("error", { message: "User not found" });
+    const userId = req.session.userId;
+
+    // Find the wallet for the user
+    const wallet = await walletModel.findOne({ userId: userId }).populate('userId');
+
+    if (!wallet) {
+      return res.status(404).render("error", { message: "Wallet not found" });
     }
 
-    const sortedWalletHistory = user.walletHistory.sort((a, b) => b.date - a.date);
-    const walletBalance = user.wallet
-
-    res.render("user/walletHistory", { walletHistory: sortedWalletHistory, user , walletBalance });
+    res.render("user/walletHistory", { 
+      user: wallet.userId, 
+      wallet: wallet 
+    });
   } catch (error) {
     console.error("Error fetching wallet history:", error);
-    res
-      .status(500)
-      .render("error", { message: "Failed to load wallet history" });
+    res.status(500).render("error", { message: "Failed to load wallet history" });
   }
 };
 

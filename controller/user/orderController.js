@@ -3,18 +3,18 @@ const addressModel = require("../../models/addressSchema");
 const ordersModel = require("../../models/orderSchema");
 const cartModel = require("../../models/cartSchema");
 const productModel = require("../../models/productSchema");
+const couponModel = require("../../models/couponSchema")
 const PDFDocument = require('pdfkit');
 const path = require('path');
 
 const orders = async (req, res) => {
   try {
-
     const page = parseInt(req.query.page) || 1;
     const limit = 3;
     const skip = (page - 1) * limit;
 
-      const totalOrders = await ordersModel.countDocuments({userId : req.session.userId});
-        const totalPages = Math.ceil(totalOrders / limit);
+    const totalOrders = await ordersModel.countDocuments({ userId: req.session.userId });
+    const totalPages = Math.ceil(totalOrders / limit);
 
     const orders = await ordersModel
       .find({ userId: req.session.userId })
@@ -25,20 +25,20 @@ const orders = async (req, res) => {
       .populate("userId")
       .sort("-createdAt")
       .skip(skip)
-      .limit(limit)
+      .limit(limit);
 
-      res.render('user/orders', { 
-        orders,
-        pagination: {
-            page,
-            limit,
-            totalOrders,
-            totalPages,
-            hasNextPage: page < totalPages,
-            hasPrevPage: page > 1,
-            nextPage: page + 1,
-            prevPage: page - 1
-        }
+    res.render('user/orders', {
+      orders,
+      pagination: {
+        page,
+        limit,
+        totalOrders,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+        nextPage: page + 1,
+        prevPage: page - 1,
+      },
     });
   } catch (error) {
     console.error("Error in loadOrders:", error);
@@ -46,80 +46,134 @@ const orders = async (req, res) => {
   }
 };
 
+
+
 const placeOrder = async (req, res) => {
   try {
-    const userId = req.session.userId;
-    const user = await userModel.findById(userId);
+      const userId = req.session.userId;
+      const user = await userModel.findById(userId);
 
-    const cart = await cartModel
-      .findOne({ user: userId })
-      .populate("cartItem.productId");
+      const cart = await cartModel
+          .findOne({ user: userId })
+          .populate("cartItem.productId");
 
-    if (!cart || cart.cartItem.length === 0) {
-      return res.status(400).send("No items in cart");
-    }
+      if (!cart || cart.cartItem.length === 0) {
+          return res.status(400).send("No items in cart");
+      }
 
-    const address = await addressModel.findOne({ userId });
+      const address = await addressModel.findOne({ userId });
 
-    if (!address) {
-      return res.status(400).send("No delivery address found");
-    }
+      if (!address) {
+          return res.status(400).send("No delivery address found");
+      }
 
-    // Calculate total amount
-    let totalAmount = 0;
-    const orderedItems = cart.cartItem.map((item) => {
-      const itemTotal = item.quantity * item.productId.price;
-      totalAmount += itemTotal;
+      // Calculate total amount
+      let totalAmount = 0;
+      const orderedItems = cart.cartItem.map((item) => {
+          const itemTotal = item.quantity * item.productId.price;
+          totalAmount += itemTotal;
 
-      return {
-        productId: item.productId._id,
-        quantity: item.quantity,
-        productPrice: item.productId.price,
-        productStatus: "Pending",
-        totalProductPrice: itemTotal,
-      };
-    });
+          return {
+              productId: item.productId._id,
+              quantity: item.quantity,
+              productPrice: item.productId.price,
+              productStatus: "Pending",
+              totalProductPrice: itemTotal,
+          };
+      });
 
-    const orderNumber = "ORD" + Math.floor(Math.random() * 1000000);
+      // Check if a coupon is applied
+      let discountAmount = 0;
+      let finalAmount = totalAmount;
+      let couponApplied = null;
 
-    // Create a new order
-    const newOrder = new ordersModel({
-      userId: userId,
-      cartId: cart._id,
-      orderNumber: orderNumber,
-      orderedItem: orderedItems,
-      deliveryAddress: address,
-      orderAmount: totalAmount,
-      paymentMethod: "Cash on Delivery",
-      paymentStatus: "pending",
-      orderStatus: "Pending",
-    });
+      if (req.session.appliedCoupon) {
+          const { discountType, discountValue } = req.session.appliedCoupon;
 
-    await newOrder.save();
+          // Calculate discount based on coupon type
+          if (discountType === "percentage") {
+              discountAmount = (totalAmount * discountValue) / 100;
+          } else if (discountType === "flat") {
+              discountAmount = discountValue;
+          }
 
-    await cartModel.deleteOne({ user: userId });
+          // Ensure discount does not exceed total amount
+          discountAmount = Math.min(discountAmount, totalAmount);
+          finalAmount = totalAmount - discountAmount;
 
-    for (let i = 0; i < orderedItems.length; i++) {
-      const item = orderedItems[i];
-      await productModel.updateOne(
-        { _id: item.productId },
-        { $inc: { totalStock: -item.quantity } }
+          // Save coupon details
+          couponApplied = {
+              couponCode: req.session.appliedCoupon.code,
+              discountType: discountType,
+              discountValue: discountValue,
+          };
+
+      }
+
+      const orderNumber = "ORD" + Math.floor(Math.random() * 1000000);
+
+      // Create a new order
+      const newOrder = new ordersModel({
+          userId: userId,
+          cartId: cart._id,
+          deliveryAddress: address._id,
+          orderNumber: orderNumber,
+          orderedItem: orderedItems,
+          orderAmount: totalAmount,
+          discountAmount: discountAmount, // Add discount amount
+          finalAmount: finalAmount, // Add final amount after discount
+          couponApplied: req.session.appliedCoupon ? req.session.appliedCoupon.id : null,
+          paymentMethod: "Cash on Delivery",
+          paymentStatus: "pending",
+          orderStatus: "Pending",
+      });
+
+      await newOrder.save();
+
+        // Mark the coupon as used in the couponModel
+    if (req.session.appliedCoupon) {
+      await couponModel.updateOne(
+        { _id: req.session.appliedCoupon.id },
+        { $push: { usedBy: { userId, orderId: newOrder._id } } }
       );
     }
 
-    res.render("user/confirmorder", {
-      order: {
-        customerName: user.username || user.name || "Customer",
-        orderNumber: orderNumber,
-        _id: newOrder._id,
-        orderAmount: totalAmount,
-        items: orderedItems,
-        orderStatus: newOrder.orderStatus,
-      },
-    });
+
+      // Clear the cart after placing the order
+      await cartModel.deleteOne({ user: userId });
+
+      // Update product stock
+      for (let i = 0; i < orderedItems.length; i++) {
+          const item = orderedItems[i];
+          await productModel.updateOne(
+              { _id: item.productId },
+              { $inc: { totalStock: -item.quantity } }
+          );
+      }
+
+
+      // Clear the coupon from the session after applying
+      delete req.session.appliedCoupon;
+      delete req.session.discountAmount;
+      delete req.session.finalPrice;
+
+      // Render the confirmation page
+      res.render("user/confirmorder", {
+          order: {
+              customerName: user.username || user.name || "Customer",
+              orderNumber: orderNumber,
+              _id: newOrder._id,
+              orderAmount: totalAmount,
+              discountAmount: discountAmount,
+              finalAmount: finalAmount,
+              items: orderedItems,
+              orderStatus: newOrder.orderStatus,
+              couponApplied: couponApplied, // Pass coupon details to the view
+          },
+      });
   } catch (error) {
-    console.log("Error occurred while placing the order", error);
-    res.status(500).send("An error occurred while placing your order");
+      console.log("Error occurred while placing the order", error);
+      res.status(500).send("An error occurred while placing your order");
   }
 };
 
@@ -134,7 +188,8 @@ const orderDetails = async (req, res) => {
         path: "orderedItem.productId",
         model: "Product",
       })
-      .populate("userId");
+      .populate("userId")
+      .populate("couponApplied"); 
 
     if (!order) {
       return res.status(404).render("error", { message: "Order not found" });
@@ -142,14 +197,24 @@ const orderDetails = async (req, res) => {
 
     const address = await addressModel.findOne({ userId: userId });
 
-    res.render("user/orderdetails", { order, address });
+    const appliedCoupon = order.couponApplied || null;
+
+    res.render("user/orderdetails", {
+      order,
+      address,
+      appliedCoupon,
+      discountAmount: order.discountAmount, 
+      finalPrice: order.finalAmount,
+    });
   } catch (error) {
     console.error("Error in getOrderDetails:", error);
-    res
-      .status(500)
-      .render("error", { message: "Failed to load order details" });
+    res.status(500).render("error", { message: "Failed to load order details" });
   }
 };
+
+
+
+
 
 const cancelOrder = async (req, res) => {
   try {

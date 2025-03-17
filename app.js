@@ -1,4 +1,4 @@
-5
+
 const express = require("express");
 const path = require("path");
 const dotenv = require("dotenv");
@@ -13,6 +13,8 @@ const passport = require("passport");
 require("./config/passport");
 const flash = require("connect-flash");
 const nocache = require("nocache");
+const cors = require("cors");
+const bodyParser = require("body-parser");
 
 const app = express();
 
@@ -20,6 +22,11 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+
+app.use(cors());
+app.use(bodyParser.json());
+
 
 app.use(
   session({

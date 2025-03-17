@@ -56,8 +56,15 @@
             </li>
 
             <li class="nav-item">
-              <a class="nav-link" id="account-address-tab" href="/wallet/history" aria-controls="account-address" aria-selected="false">Wallet</a>
-          </li>
+              <a
+                class="nav-link"
+                id="account-address-tab"
+                href="/wallet/history"
+                aria-controls="account-address"
+                aria-selected="false"
+                >Wallet</a
+              >
+            </li>
 
             <li class="nav-item">
               <a
@@ -99,7 +106,9 @@
                 <div class="order-card">
                   <div class="order-header">
                     <div class="order-header-left">
-                      <div class="order-id">Order ID: <%= order.orderNumber %></div>
+                      <div class="order-id">
+                        Order ID: <%= order.orderNumber %>
+                      </div>
                       <div class="order-date">
                         Ordered on: <%= new
                         Date(order.createdAt).toLocaleDateString() %>
@@ -107,7 +116,7 @@
                     </div>
                     <div class="order-header-right">
                       <div class="order-amount">
-                        Total: ₹<%= order.orderAmount %>
+                        Total: ₹<%= order.finalAmount %>
                       </div>
                       <div
                         class="payment-status <%= order.paymentStatus.toLowerCase() %>"
@@ -133,31 +142,36 @@
                   </div>
                 </div>
                 <% }); %>
-                
+
                 <!-- Pagination Section -->
                 <% if (pagination && pagination.totalPages > 1) { %>
                 <div class="pagination-wrapper">
                   <div class="pagination">
                     <% if (pagination.hasPrevPage) { %>
-                    <a href="/orders?page=<%= pagination.prevPage %>" class="pagination-btn prev">&laquo;</a>
-                    <% } %>
-                    
-                    <% for(let i = 1; i <= pagination.totalPages; i++) { %>
-                      <% if (i === pagination.page) { %>
-                        <a href="javascript:void(0)" class="pagination-btn active"><%= i %></a>
-                      <% } else { %>
-                        <a href="/orders?page=<%= i %>" class="pagination-btn"><%= i %></a>
-                      <% } %>
-                    <% } %>
-                    
-                    <% if (pagination.hasNextPage) { %>
-                    <a href="/orders?page=<%= pagination.nextPage %>" class="pagination-btn next">&raquo;</a>
+                    <a
+                      href="/orders?page=<%= pagination.prevPage %>"
+                      class="pagination-btn prev"
+                      >&laquo;</a
+                    >
+                    <% } %> <% for(let i = 1; i <= pagination.totalPages; i++) {
+                    %> <% if (i === pagination.page) { %>
+                    <a href="javascript:void(0)" class="pagination-btn active"
+                      ><%= i %></a
+                    >
+                    <% } else { %>
+                    <a href="/orders?page=<%= i %>" class="pagination-btn"
+                      ><%= i %></a
+                    >
+                    <% } %> <% } %> <% if (pagination.hasNextPage) { %>
+                    <a
+                      href="/orders?page=<%= pagination.nextPage %>"
+                      class="pagination-btn next"
+                      >&raquo;</a
+                    >
                     <% } %>
                   </div>
                 </div>
-                <% } %>
-                
-                <% } else { %>
+                <% } %> <% } else { %>
                 <div class="no-orders">
                   <p>No orders found</p>
                   <a href="/shop" class="btn-shop">Start Shopping</a>
@@ -299,7 +313,7 @@
     background-color: #e8f5e9;
     color: #2e7d32;
   }
-  
+
   .order-status.shipped {
     background-color: #e0f7fa;
     color: #00838f;
@@ -366,11 +380,11 @@
       flex-direction: column;
       gap: 10px;
     }
-    
+
     .pagination {
       gap: 3px;
     }
-    
+
     .pagination-btn {
       padding: 6px 12px;
       min-width: 35px;

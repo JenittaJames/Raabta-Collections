@@ -68,9 +68,20 @@
                                                     </div>
                                                     <div class="additional-add_action">
                                                         <ul>
-                                                            <li><a class="hiraola-add_compare" href="#" data-bs-toggle="tooltip" data-placement="top" title="Add To Wishlist"><i class="ion-android-favorite-outline"></i></a></li>
+                                                          <li>
+                                                            <a
+                                                              class="hiraola-add_compare"
+                                                              href="#"
+                                                              data-bs-toggle="tooltip"
+                                                              data-placement="top"
+                                                              title="Add To Wishlist"
+                                                              data-product-id="<%= product._id %>"
+                                                            >
+                                                              <i class="ion-android-favorite-outline"></i>
+                                                            </a>
+                                                          </li>
                                                         </ul>
-                                                    </div>
+                                                      </div>
                                                     <div class="rating-box">
                                                         <ul>
                                                             <li><i class="fa fa-star-of-david"></i></li>
@@ -130,3 +141,64 @@
         <!-- Hiraola's Content Wrapper Area End Here -->
 
         <%- include('../partials/user/footer') %>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+              const wishlistButtons = document.querySelectorAll('.hiraola-add_compare');
+              
+          
+              wishlistButtons.forEach((button) => {
+                button.addEventListener('click', function (event) {
+                  event.preventDefault(); // Prevent the default link behavior
+          
+                  const productId = button.getAttribute('data-product-id'); // Get the product ID
+          
+                  // Send an AJAX request to the server
+                  fetch('/wishlist/add', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    credentials: 'include', // Include cookies (for session)
+                    body: JSON.stringify({ productId: productId }), // Send the product ID
+                  })
+                    .then((response) => response.json())
+                    .then((data) => {
+                      if (data.success) {
+                        // Show a success message
+                        Swal.fire({
+                          icon: 'success',
+                          title: 'Success!',
+                          text: 'Product added to wishlist successfully!',
+                          toast: true,
+                          position: 'top-end',
+                          showConfirmButton: false,
+                          timer: 3000,
+                        });
+          
+                        // Optionally, update the button UI
+                        const icon = button.querySelector('i');
+                        icon.classList.remove('ion-android-favorite-outline');
+                        icon.classList.add('ion-android-favorite');
+                        button.setAttribute('title', 'Added to Wishlist');
+                      } else {
+                        // Show an error message
+                        Swal.fire({
+                          icon: 'error',
+                          title: 'Oops...',
+                          text: data.message || 'Failed to add product to wishlist',
+                        });
+                      }
+                    })
+                    .catch((error) => {
+                      console.error('Error:', error);
+                      Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while adding the product to the wishlist',
+                      });
+                    });
+                });
+              });
+            });
+          </script>

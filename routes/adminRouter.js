@@ -4,6 +4,7 @@ const adminController = require("../controller/admin/adminController");
 const categoryController = require("../controller/admin/categoryController")
 const productController = require("../controller/admin/productController")
 const orderController = require("../controller/admin/orderController")
+const couponController = require("../controller/admin/couponController")
 const {adminAuth} = require("../middleware/adminMiddleware")
 const multer = require("multer");
 
@@ -48,6 +49,13 @@ router.post('/orders/update-status',adminAuth, orderController.updateOrderStatus
 router.post('/orders/update-product-status', orderController.updateProductStatus);
 router.post('/submit-return', adminAuth, orderController.submitReturnRequest);
 
+
+router.get("/coupon",adminAuth, couponController.loadCoupon);
+router.get("/addcoupon",adminAuth, couponController.addCoupon);
+router.post("/addcoupon",adminAuth, couponController.addCouponPost)
+router.get("/editcoupon/:id", adminAuth, couponController.editCoupon)
+router.post("/editcoupon/:id", adminAuth, couponController.editCouponPost)
+router.put('/api/blockcoupon/:id',adminAuth, couponController.toggleCouponStatus);
 
 
 module.exports = router;

@@ -1,5 +1,8 @@
 <%- include('../partials/user/header') %>
 
+<!-- Include SweetAlert CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
 <style>
     .checkout-container {
       background-color: #f5f5f5;
@@ -41,7 +44,6 @@
       background: #f8f8f8;
       padding: 1rem;
       border-radius: 4px;
-      cursor: pointer;
       transition: background-color 0.3s ease;
     }
   
@@ -89,7 +91,180 @@
     .savings {
       color: #22C55E;
     }
-  </style>
+
+    .coupon-form {
+      display: flex;
+      margin-top: 1rem;
+    }
+
+    .coupon-input {
+      flex-grow: 1;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px 0 0 4px;
+      outline: none;
+    }
+
+    .coupon-btn {
+      background: #1d2951;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 0 4px 4px 0;
+      cursor: pointer;
+    }
+
+    .coupon-btn:hover {
+      background-color: #141e3c;
+    }
+
+    .coupon-message {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .coupon-success {
+      color: #22C55E;
+    }
+
+    .coupon-error {
+      color: #EF4444;
+    }
+
+    .applied-coupon {
+      background: #e8f5e9;
+      padding: 0.5rem;
+      border-radius: 4px;
+      margin-top: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .remove-coupon {
+      color: #EF4444;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-size: 0.9rem;
+    }
+
+    .discount-details {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #777;
+    }
+
+    .discount-label {
+      font-weight: 500;
+    }
+
+    .discount-value {
+      font-weight: 600;
+      color: #1d2951;
+    }
+
+    /* Available Coupons Section Styles */
+    .coupons-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .coupon-card {
+      background: #f8f8f8;
+      border-radius: 8px;
+      padding: 1rem;
+      border: 1px solid #e0e0e0;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .coupon-card:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .coupon-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .coupon-header h4 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1d2951;
+    }
+
+    .coupon-discount {
+      background: #1d2951;
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .coupon-description {
+      margin-bottom: 0.5rem;
+      color: #555;
+    }
+
+    .coupon-terms {
+      font-size: 0.9rem;
+      color: #777;
+    }
+
+    .coupon-terms p {
+      margin: 0.25rem 0;
+    }
+
+    /* Apply Button Styles */
+    .apply-coupon-btn {
+      background: #1d2951;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      width: 100%;
+      transition: background-color 0.3s ease;
+    }
+
+    .apply-coupon-btn:hover {
+      background-color: #141e3c;
+    }
+
+    .toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 15px 20px;
+  border-radius: 5px;
+  color: white;
+  z-index: 1000;
+}
+
+.toast-success {
+  background-color: #28a745; /* Green for success */
+}
+
+.toast-error {
+  background-color: #dc3545; /* Red for error */
+}
+
+
+</style>
+
+<% if (couponMessage) { %>
+  <div class="toast <%= couponSuccess ? 'toast-success' : 'toast-error' %>">
+    <%= couponMessage %>
+  </div>
+<% } %>
 
 <div class="checkout-container">
     <div class="container">
@@ -114,6 +289,8 @@
                 <p class="text-muted">No saved address</p>
               <% } %>
           </div>
+          <!-- Add a hidden div to store the addressRequired value -->
+<div id="addressRequired" data-address-required="<%= addressRequired %>"></div>
   
           <!-- Gift Cards Section -->
           <div class="checkout-card">
@@ -123,6 +300,61 @@
             </p>
             <div class="voucher-section mt-3">
               <span>Coupons and Vouchers</span>
+              
+              <% if (locals.appliedCoupon) { %>
+                <div class="applied-coupon">
+                  <div>
+                    <strong><%= appliedCoupon.code %></strong>
+                    <span class="coupon-success"> - <%= appliedCoupon.discountType === 'percentage' ? appliedCoupon.discountValue + '%' : '₹' + appliedCoupon.discountValue %> off</span>
+                  </div>
+                  <form action="/remove-coupon" method="POST">
+                    <button type="submit" class="remove-coupon">Remove</button>
+                  </form>
+                </div>
+              <% } else { %>
+                <form action="/apply-coupon" method="POST" class="coupon-form">
+                  <input type="text" name="couponCode" class="coupon-input" placeholder="Enter coupon code" required>
+                  <button type="submit" class="coupon-btn">Apply</button>
+                </form>
+                <% if (locals.couponMessage) { %>
+                  <div class="coupon-message <%= locals.couponSuccess ? 'coupon-success' : 'coupon-error' %>">
+                    <%= couponMessage %>
+                  </div>
+                <% } %>
+              <% } %>
+            </div>
+
+            <!-- Available Coupons Section -->
+            <div class="checkout-card">
+              <h2 class="section-title">AVAILABLE COUPONS</h2>
+              <% if (availableCoupons && availableCoupons.length > 0) { %>
+                <div class="coupons-list">
+                  <% availableCoupons.forEach(coupon => { %>
+                    <div class="coupon-card">
+                      <div class="coupon-header">
+                        <h4><%= coupon.couponCode %></h4>
+                        <span class="coupon-discount">
+                          <% if (coupon.type === "percentageDiscount") { %>
+                            <%= coupon.discount %>% off
+                          <% } else { %>
+                            ₹<%= coupon.discount %> off
+                          <% } %>
+                        </span>
+                      </div>
+                      <div class="coupon-description">
+                        <p><%= coupon.description || "No description available." %></p>
+                      </div>
+                      <div class="coupon-terms">
+                        <p><strong>Minimum Purchase:</strong> ₹<%= coupon.minimumPrice %></p>
+                        <p><strong>Expiry:</strong> <%= coupon.expiry.toLocaleDateString() %></p>
+                      </div>
+                      <button class="apply-coupon-btn" data-coupon-code="<%= coupon.couponCode %>">Apply</button>
+                    </div>
+                  <% }) %>
+                </div>
+              <% } else { %>
+                <p class="text-muted">No coupons available at the moment.</p>
+              <% } %>
             </div>
           </div>
         </div>
@@ -141,8 +373,20 @@
               
               <div class="price-row">
                 <span>Discount</span>
-                <span class="savings"></span>
+                <% if (locals.discountAmount && discountAmount > 0) { %>
+                  <span class="savings">-₹<%= discountAmount.toFixed(2) %></span>
+                <% } else { %>
+                  <span class="savings">₹0.00</span>
+                <% } %>
               </div>
+              <% if (appliedCoupon) { %>
+                <div class="discount-details">
+                    <div class="discount-label">Coupon Applied:</div>
+                    <div class="discount-value">
+                        <%= appliedCoupon.code %> (<%= appliedCoupon.discountType === 'percentage' ? appliedCoupon.discountValue + '%' : '₹' + appliedCoupon.discountValue %>)
+                    </div>
+                </div>
+              <% } %>
               
               <div class="price-row">
                 <span>Delivery Charge</span>
@@ -151,7 +395,11 @@
               
               <div class="price-row total-row">
                 <span>TOTAL</span>
-                <span>₹<%= totalPrice.toFixed(2) %></span>
+                <% if (locals.finalPrice) { %>
+                  <span>₹<%= finalPrice.toFixed(2) %></span>
+                <% } else { %>
+                  <span>₹<%= totalPrice.toFixed(2) %></span>
+                <% } %>
               </div>
             </div>
   
@@ -172,8 +420,7 @@
                 <% } %>
               </div>
   
-            <a href="/placingorder"><button class="proceed-btn">Proceed To Buy</button>
-          </a>
+            <a href="/placingorder"><button class="proceed-btn">Proceed To Buy</button></a>
           </div>
         </div>
       </div>
@@ -181,3 +428,90 @@
   </div>
 
 <%- include('../partials/user/footer') %>
+
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Get the addressRequired value from the data attribute
+    const addressRequiredElement = document.getElementById("addressRequired");
+    const addressRequired = addressRequiredElement.dataset.addressRequired === "true";
+
+    // Check if address is required
+    if (addressRequired) {
+      Swal.fire({
+        icon: "warning",
+        title: "Address Required",
+        text: "Please add a delivery address before proceeding to checkout.",
+        confirmButtonText: "Add Address",
+        confirmButtonColor: "#1d2951",
+        showCancelButton: true,
+        cancelButtonText: "Cancel",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Redirect to the address creation page
+          window.location.href = "/createaddress";
+        }
+      });
+    }
+
+    // Handle Apply Coupon Button Clicks
+    const applyButtons = document.querySelectorAll(".apply-coupon-btn");
+
+    applyButtons.forEach((button) => {
+      button.addEventListener("click", function () {
+        const couponCode = this.getAttribute("data-coupon-code");
+
+        // Send a POST request to apply the coupon
+        fetch("/apply-coupon", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ couponCode }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              // Show success message with SweetAlert
+              Swal.fire({
+                icon: "success",
+                title: "Coupon Applied",
+                text: "Your coupon has been applied successfully!",
+                confirmButtonColor: "#1d2951",
+              }).then(() => {
+                // Reload the page to reflect the applied coupon
+                window.location.reload();
+              });
+            } else {
+              // Show error message with SweetAlert
+              Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: data.message || "Failed to apply coupon",
+                confirmButtonColor: "#1d2951",
+              });
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            // Show error message with SweetAlert
+            Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: "Something went wrong. Please try again.",
+              confirmButtonColor: "#1d2951",
+            });
+          });
+      });
+    });
+
+    // Automatically hide the toast after 5 seconds
+    setTimeout(() => {
+      const toast = document.querySelector('.toast');
+      if (toast) {
+        toast.remove();
+      }
+    }, 5000);
+  });
+</script>

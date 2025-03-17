@@ -156,38 +156,41 @@
           </div>
         </div>
 
-        <!-- Order Price Summary Section -->
-        <div class="price-summary-section">
-          <h3>Price Summary</h3>
-          <div class="price-summary-content">
-            <div class="price-row">
-              <span class="price-label">Items Total:</span>
-              <span class="price-value"
-                >₹<%= order.totalProductAmount || order.orderAmount %></span
-              >
-            </div>
-            <% if (order.shippingCharge) { %>
-            <div class="price-row">
-              <span class="price-label">Shipping Charge:</span>
-              <span class="price-value">₹<%= order.shippingCharge %></span>
-            </div>
-            <% } %> <% if (order.discount) { %>
-            <div class="price-row discount">
-              <span class="price-label">Discount:</span>
-              <span class="price-value">-₹<%= order.discount %></span>
-            </div>
-            <% } %> <% if (order.couponDiscount) { %>
-            <div class="price-row discount">
-              <span class="price-label">Coupon Discount:</span>
-              <span class="price-value">-₹<%= order.couponDiscount %></span>
-            </div>
-            <% } %>
-            <div class="price-row total">
-              <span class="price-label">Total Amount:</span>
-              <span class="price-value">₹<%= order.orderAmount %></span>
-            </div>
-          </div>
-        </div>
+<div class="price-summary-section">
+  <h3>Price Summary</h3>
+  <div class="price-summary-content">
+   <div class="price-row">
+      <span class="price-label">Items Total:</span>
+      <span class="price-value">₹<%= order.orderAmount %></span>
+    </div>
+
+
+    <% if (order.shippingCharge) { %>
+    <div class="price-row">
+      <span class="price-label">Shipping Charge:</span>
+      <span class="price-value">₹<%= order.shippingCharge %></span>
+    </div>
+    <% } %>
+
+
+    <% if (appliedCoupon) { %>
+  <div class="price-row coupon">
+    <span class="price-label">Coupon Applied:</span>
+    <span class="price-value">
+      <%= appliedCoupon.couponCode %> : 
+      <% if (appliedCoupon.type === "percentage") { %>
+        <%= appliedCoupon.discount %>% off
+      <% } else { %>
+        ₹<%= appliedCoupon.discount %> off
+      <% } %>
+    </span>
+  </div>
+<% } %>
+
+<div class="price-row">
+  <span class="price-label">Final Amount:</span>
+  <span class="price-value">₹<%= finalPrice %></span>
+</div>
 
         <div class="order-actions-section">
           <a href="/orders" class="btn-back">Back to Orders</a>
@@ -214,6 +217,24 @@
 </main>
 
 <style>
+
+  .discount-details {
+    display: flex;
+    justify-content: space-between; /* Aligns key to the left and value to the right */
+    align-items: center; /* Vertically centers the content */
+    margin: 10px 0;
+    font-size: 16px;
+    color: #333;
+  }
+
+  .discount-label {
+    font-weight: bold;
+  }
+
+  .discount-value {
+    color: #28a745; /* Green color for discount */
+  }
+
   /* Order Details Page Styles */
   .order-details-container {
     max-width: 1000px;
@@ -581,6 +602,71 @@
   .btn-return:hover {
     background-color: #ffcdd2;
   }
+
+
+  /* Price Summary Section Styles */
+.price-summary-section {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.price-summary-section h3 {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.price-summary-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px dashed #eee;
+}
+
+.price-row:last-child {
+  border-bottom: none;
+}
+
+.price-label {
+  font-weight: 500;
+  color: #666;
+}
+
+.price-value {
+  font-weight: 500;
+  color: #333;
+}
+
+.price-row.discount .price-value {
+  color: #e53935; /* Red color for discount */
+}
+
+.price-row.coupon .price-value {
+  color: #28a745; /* Green color for coupon */
+}
+
+.price-row.total {
+  font-weight: 600;
+  font-size: 18px;
+  border-top: 2px solid #eee;
+  margin-top: 10px;
+  padding-top: 15px;
+}
+
+.price-row.total .price-value {
+  color: #2e7d32; /* Green color for total amount */
+}
 </style>
 
 <%- include('../partials/user/footer') %>

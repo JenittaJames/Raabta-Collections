@@ -229,7 +229,7 @@
         <div class="order-title">Order Amount</div>
         <div class="amount-display">
             <div class="amount-label">Amount</div>
-            <div class="amount-value"><%= totalPrice %></div>
+            <div class="amount-value"><%= finalPrice %></div>
         </div>
     </div>
     
@@ -244,36 +244,27 @@
                 </div>
                 <div class="payment-name">Cash on Delivery</div>
             </div>
+
+            <div class="payment-option">
+                <div class="payment-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 4H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm-1 8h-4v4h-2v-4H6"></path>
+                    </svg>
+                </div>
+                <div class="payment-name">Online Payment</div>
+            </div>
             
-            <!-- <div class="payment-option">
+            <div class="payment-option">
                 <div class="payment-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
                         <line x1="1" y1="10" x2="23" y2="10"></line>
                     </svg>
                 </div>
-                <div class="payment-name">Debit / Credit Card</div>
-            </div> -->
+                <div class="payment-name">Wallet</div>
+            </div>
             
-            <!-- <div class="payment-option">
-                <div class="payment-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
-                    </svg>
-                </div>
-                <div class="payment-name">UPI</div>
-            </div> -->
-            
-            <!-- <div class="payment-option">
-                <div class="payment-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="3" y1="9" x2="21" y2="9"></line>
-                        <line x1="9" y1="21" x2="9" y2="9"></line>
-                    </svg>
-                </div>
-                <div class="payment-name">Netbanking</div>
-            </div> -->
+           
         </div>
         
         <div class="payment-details">
@@ -294,17 +285,8 @@
     
 </div>
 
-<!-- <div class="help-chat">
-    <div class="help-text">How can I help you?</div>
-    <div class="close-btn">×</div>
-</div>
 
-<div class="chat-avatar">
-    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
-        <path d="M12 6v6l4 2"></path>
-    </svg>
-</div> -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <script>
     // JavaScript for interactive elements
@@ -331,20 +313,7 @@
             });
         });
         
-        // // Help chat close button
-        // const closeBtn = document.querySelector('.close-btn');
-        // const helpChat = document.querySelector('.help-chat');
-        // const chatAvatar = document.querySelector('.chat-avatar');
-        
-        // closeBtn.addEventListener('click', function() {
-        //     helpChat.style.display = 'none';
-        //     chatAvatar.style.display = 'flex';
-        // });
-        
-        // chatAvatar.addEventListener('click', function() {
-        //     helpChat.style.display = 'flex';
-        //     chatAvatar.style.display = 'none';
-        // });
+       
     });
 </script>
 

@@ -6,12 +6,13 @@ const cartController = require("../controller/user/cartController");
 const profileController = require("../controller/user/profileController");
 const checkoutController = require("../controller/user/checkoutController");
 const orderController = require("../controller/user/orderController");
-const { checkProductStatus, ifLogged, logged } = require("../middleware/userMiddleware");
+const wishlistController = require("../controller/user/wishlistController")
+const { checkProductStatus, ifLogged, logged, wishlistMiddleware} = require("../middleware/userMiddleware");
 const passport = require("passport");
 
 router.get("/pageNotFound", userController.pageNotFound);
-router.get("/", userController.loadHomepage);
-router.get("/home", userController.loadHomepage);
+router.get("/",wishlistMiddleware, userController.loadHomepage);
+router.get("/home",wishlistMiddleware, userController.loadHomepage);
 router.get("/register", userController.loadRegister);
 router.get(
   "/auth/google",
@@ -47,10 +48,10 @@ router.post("/verify-otp", userController.verifyOtp);
 router.get("/reset-password", userController.loadResetPassword);
 router.post("/reset-password", userController.resetPassword);
 
-router.get("/shop", userController.loadShop);
-router.get("/search",userController.loadShop)
+router.get("/shop",wishlistMiddleware, userController.loadShop);
+router.get("/search",wishlistMiddleware,userController.loadShop)
 router.get("/shopbyfilter/:categoryId", userController.shopByFilter)
-router.get("/singleproduct/:id",checkProductStatus, productController.loadSingleproduct);
+router.get("/singleproduct/:id",wishlistMiddleware,checkProductStatus, productController.loadSingleproduct);
 
 router.get("/cart", ifLogged, cartController.loadCart);
 router.post("/addtocart/:productId", ifLogged, cartController.addCart);
@@ -61,6 +62,8 @@ router.get('/get-cart-item',ifLogged, cartController.getCartItem);
 
 router.get("/checkout", ifLogged, checkoutController.checkout);
 router.get("/placingorder", ifLogged, checkoutController.placingOrder)
+router.post('/apply-coupon', ifLogged, checkoutController.applyCoupon);
+router.post('/remove-coupon', ifLogged, checkoutController.removeCoupon);
 
 router.get("/profile", ifLogged, profileController.profile);
 router.post("/updateprofile", ifLogged, profileController.updateProfile);
@@ -81,11 +84,18 @@ router.get('/verify-email-update', ifLogged, profileController.verifyEmailUpdate
 router.post('/verify-email-otp', ifLogged, profileController.verifyEmailOtp);
 router.post('/resend-email-otp', ifLogged, profileController.resendEmailOtp);
 
+
 router.get("/orders", ifLogged, orderController.orders);
 router.get("/orderdetails/:orderId", ifLogged, orderController.orderDetails);
 router.get("/confirmorder", ifLogged, orderController.placeOrder)
 router.post('/orders/:orderId/cancel', ifLogged, orderController.cancelOrder);
 router.get('/orders/:orderId/invoice', ifLogged, orderController.generateInvoice);
+
+
+router.get('/wishlist',ifLogged, wishlistController.loadWishlist);
+router.post('/wishlist/add',ifLogged, wishlistController.addToWishlist);
+router.post('/wishlist/remove',ifLogged, wishlistController.removeFromWishlist);
+router.post('/wishlist/add-to-cart',ifLogged, wishlistController.addToCartFromWishlist);
 
 
 module.exports = router;

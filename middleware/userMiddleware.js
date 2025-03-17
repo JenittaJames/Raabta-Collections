@@ -45,8 +45,34 @@ const checkProductStatus = async (req, res, next) => {
   }
 };
 
+
+
+const wishlistMiddleware = async (req, res, next) => {
+  try {
+    if (req.session.userId) {
+      const user = await userModel.findById(req.session.userId).select('wishlist');
+      
+      const wishlistProductIds = user 
+        ? user.wishlist.map(productId => productId.toString()) 
+        : [];
+      
+      res.locals.wishlistProducts = wishlistProductIds;
+    } else {
+      res.locals.wishlistProducts = [];
+    }
+    
+    next();
+  } catch (error) {
+    console.error('Error in wishlist middleware:', error);
+    res.locals.wishlistProducts = []; 
+    next();
+  }
+};
+
+
 module.exports = {
   ifLogged,
   checkProductStatus,
   logged,
+  wishlistMiddleware
 };

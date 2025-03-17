@@ -28,29 +28,18 @@ const userSchema = new Schema({
         type: Boolean,
         default: false
     },
-    wallet: {
-        type: Number,
-        default: 0
-    },
-    walletHistory: [{
-        amount: {
-            type: Number,
-            required: true
-        },
-        type: {
-            type: String,
-            enum: ['credit', 'debit'],
-            required: true
-        },
-        description: {
-            type: String,
-            required: true
-        },
-        date: {
-            type: Date,
-            default: Date.now
-        }
-    }]
+    wishlist: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product'
+      }],
+      referralCode: {
+        type: String,
+        required: false
+      },
+      referredBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
 },{timestamps:true});
 
 
