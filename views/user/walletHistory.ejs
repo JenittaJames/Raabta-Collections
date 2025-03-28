@@ -234,7 +234,7 @@
                             <a class="nav-link" id="account-address-tab" href="/address" aria-controls="account-address" aria-selected="false">Addresses</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link active" id="account-address-tab" href="/wallet/history" aria-controls="account-address" aria-selected="false">Wallet</a>
+                            <a class="nav-link active" id="account-address-tab" href="/walletHistory" aria-controls="account-address" aria-selected="false">Wallet</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" id="account-details-tab" href="/changepassword" aria-controls="account-details" aria-selected="false">Change Password</a>
@@ -274,7 +274,7 @@
                                                 <div class="card-number">•••• •••• •••• <%= user.walletCardNumber || '1234' %></div>
                                             </div>
                                             <div class="card-back">
-                                                <div class="balance-amount">Rs.<%= wallet.balance || '0.00' %></div>
+                                                <div class="balance-amount">Rs.<%= wallet.balance.toFixed(2) || '0.00' %></div>
                                                 <div class="balance-label">Available Balance</div>
                                             </div>
                                         </div>
@@ -282,25 +282,25 @@
                                     
                                     <!-- Transaction History -->
                                     <div class="transaction-history">
-                                        <h3>Recent Transactions</h3>
-                                        
-                                        <% if (wallet.transaction && wallet.transaction.length > 0) { %>
-                                            <% wallet.transaction.forEach(transaction => { %>
-                                                <div class="transaction-item">
-                                                    <div class="transaction-details">
-                                                        <div class="transaction-title"><%= transaction.transactionsMethod %></div>
-                                                        <div class="transaction-date"><%= new Date(transaction.date).toLocaleDateString() %></div>
-                                                    </div>
-                                                    <div class="transaction-amount <%= transaction.amount > 0 ? 'credit' : 'debit' %>">
-                                                        <%= transaction.amount > 0 ? '+' : '-' %> <%= Math.abs(transaction.amount).toFixed(2) %>
-                                                    </div>
-                                                </div>
-                                            <% }); %>
-                                        <% } else { %>
-                                            <p>No transactions yet</p>
-                                        <% } %>
+                                      <h3>Recent Transactions</h3>
+                                      <% if (wallet?.transaction?.length > 0) { %>
+                                        <% wallet.transaction.forEach(transaction => { %>
+                                          <div class="transaction-item">
+                                            <div class="transaction-details">
+                                              <div class="transaction-title"><%= transaction.transactionsMethod %></div>
+                                              <div class="transaction-date"><%= new Date(transaction.date).toLocaleDateString() %></div>
+                                              <div class="transaction-description"><%= transaction.description || 'No description provided' %></div>
+                                            </div>
+                                            <div class="transaction-amount <%= transaction.amount > 0 ? 'credit' : 'debit' %>">
+                                              <%= transaction.amount > 0 ? '+' : '-' %> <%= Math.abs(transaction.amount).toFixed(2) %>
+                                            </div>
+                                          </div>
+                                        <% }); %>
+                                      <% } else { %>
+                                        <p>No transactions yet</p>
+                                      <% } %>
                                     </div>
-                                </div>
+                                    
                         </div>
                 </div>
             </div>

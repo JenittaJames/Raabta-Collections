@@ -33,14 +33,22 @@ const orderSchema = new Schema({
             type: Number,
             required: true,
         },
+        finalProductPrice: { // Price per unit after discount
+            type: Number,
+            required: true
+        },
+        totalProductPrice: { // Original total (productPrice * quantity)
+            type: Number,
+            required: true
+        },
+        finalTotalProductPrice: { // Final total after discount (finalProductPrice * quantity)
+            type: Number,
+            required: true
+        },
         productStatus: {
             type: String,
             enum: ["Pending", "Shipped", "Delivered", "Cancelled", "Returned", "Return Requested", "Return Approved", "Return Rejected"],
             default: "Pending",
-            required: true
-        },
-        totalProductPrice: {
-            type: Number,
             required: true
         },
         refunded: {
@@ -58,21 +66,25 @@ const orderSchema = new Schema({
         returnApprovedDate: Date,
         returnNotes: String
     }],
-    orderAmount: {
+    orderAmount: { // Total before discount
         type: Number,
         required: true
     },
-    discountAmount: { // Added for coupon discount
+    discountAmount: { // Coupon or offer discount
         type: Number,
         default: 0
     },
-    finalAmount: { // Added for final amount after discount
+    finalAmount: { // Total after discount
         type: Number,
         required: true
     },
     couponApplied: { 
-        type : mongoose.Schema.Types.ObjectId,
-        ref : "Coupon",
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Coupon",
+    },
+    appliedOffer: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: "Offer",
     },
     deliveryDate: {
         type: Date

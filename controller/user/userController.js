@@ -2,12 +2,20 @@ const User = require("../../models/userSchema");
 const walletModel = require("../../models/walletSchema");
 const productModel = require("../../models/productSchema");
 const catModel = require("../../models/categorySchema");
+const offerModel = require("../../models/offerSchema")
+const { handleReferralReward } = require('../../controller/admin/offerController')
 const dotenv = require("dotenv");
 const bcrypt = require("bcrypt");
 const crypto = require('crypto');
 const nodemailer = require("nodemailer");
 
 dotenv.config();
+
+
+const generateReferralCode = (userId) => {
+  const randomBytes = crypto.randomBytes(3).toString("hex");
+  return `REF${userId.substring(0, 5)}${randomBytes}`.toUpperCase();
+};
 
 // Helper Functions
 function generateOtp() {
@@ -45,9 +53,35 @@ async function sendVerificationEmail(email, otp) {
 // Home Page
 const loadHomepage = async (req, res) => {
   try {
+    // Fetch categories
     const categories = await catModel.find({});
-    const products = await productModel.find({status: true}); 
-    res.render("user/home", { categories, products });
+
+    // Fetch active products
+    const products = await productModel.find({ status: true });
+
+    // Fetch active offers (status: true, within date range)
+    const activeOffers = await offerModel.find({
+      status: true,
+      startDate: { $lte: new Date() }, // Offers that have started
+      endDate: { $gte: new Date() }    // Offers that haven't ended
+    })
+    .populate('productId', 'productName') // Populate product details if offer type is 'product'
+    .populate('categoryId', 'name');      
+
+    let userWishlist = [];
+    if (req.session.userId) {
+      const user = await User.findById(req.session.userId);
+      userWishlist = user ? user.wishlist.map(id => id.toString()) : [];
+    }
+
+    // Render the home page with categories, products, and offers
+    res.render("user/home", { 
+      categories, 
+      products, 
+      offers: activeOffers,
+      userWishlist
+
+    });
   } catch (error) {
     console.error("Error while loading homepage:", error);
     res.status(500).send("Internal Server Error");
@@ -57,12 +91,11 @@ const loadHomepage = async (req, res) => {
 // Shop Pages
 const loadShop = async (req, res) => {
   try {
-    const {query} = req.query;
+    const { query } = req.query;
     const searchQuery = query || "";
-    
 
-    // First, get all active categories
-    const activeCategories = await catModel.find({status: true}).select('_id');
+    // Fetch all active categories
+    const activeCategories = await catModel.find({ status: true }).select('_id');
     const activeCategoriesId = activeCategories.map(cat => cat._id);
 
     // Create search filter with both product status and category check
@@ -81,30 +114,49 @@ const loadShop = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = 9;
     const skip = (page - 1) * limit;
-    
+
     const totalProducts = await productModel.countDocuments(searchFilter);
     const totalPages = Math.ceil(totalProducts / limit);
-    
+
     const products = await productModel.find(searchFilter)
       .skip(skip)
       .limit(limit);
-    
-    const categories = await catModel.find({status: true});
-    
-    res.render("user/shop", { 
+
+    const categories = await catModel.find({ status: true });
+
+    // Fetch active offers (similar to loadHomepage)
+    const activeOffers = await offerModel.find({
+      status: true,
+      startDate: { $lte: new Date() }, // Offers that have started
+      endDate: { $gte: new Date() }    // Offers that haven't ended
+    })
+      .populate('productId', 'productName') // Populate product details if offer type is 'product'
+      .populate('categoryId', 'name');     
+
+      let userWishlist = [];
+    if (req.session.userId) {
+      const user = await User.findById(req.session.userId);
+      userWishlist = user ? user.wishlist.map(id => id.toString()) : [];
+    }
+
+    res.render("user/shop", {
       products,
-      searchQuery: searchQuery, 
+      searchQuery: searchQuery,
       categories,
       currentPage: page,
       totalPages,
       totalProducts,
-      limit
+      limit,
+      offers: activeOffers ,
+      userWishlist
     });
   } catch (error) {
     console.error("Error loading shop page:", error);
     res.status(500).send("Internal Server Error");
   }
 };
+
+
 
 const shopByFilter = async (req, res) => {
   try {
@@ -153,30 +205,29 @@ const loadRegister = async (req, res) => {
 
 const register = async (req, res) => {
   try {
-    const { userName, email, phone, password, confirmPassword } = req.body;
-    
+    const { userName, email, phone, password, confirmPassword, referralCode } = req.body;
+
     if (password !== confirmPassword) {
       return res.render("user/register", { message: "Passwords do not match" });
     }
-    
+
     const findUser = await User.findOne({ email });
     if (findUser) {
       return res.render("user/register", {
         message: "User with this email already exists",
       });
     }
-    
+
     const otp = generateOtp();
     const emailSent = await sendVerificationEmail(email, otp);
-    
+
     if (!emailSent) {
       return res.status(500).json({ error: "Failed to send verification email" });
     }
-    
-    // Store user data in session for later use after OTP verification
-    req.session.userData = { userName, email, phone, password };
+
+    req.session.userData = { userName, email, phone, password, referralCode };
     req.session.userOtp = otp;
-    
+
     console.log("OTP Sent", otp);
     return res.redirect("/otp");
   } catch (error) {
@@ -184,6 +235,7 @@ const register = async (req, res) => {
     return res.redirect("/pageNotFound");
   }
 };
+
 
 const loadOtpPage = async (req, res) => {
   try {
@@ -197,10 +249,7 @@ const loadOtpPage = async (req, res) => {
 const resendOtp = async (req, res) => {
   try {
     if (!req.session.userData || !req.session.userData.email) {
-      return res.status(400).json({
-        status: "error",
-        message: "Session expired. Please try again.",
-      });
+      req.flash('error_msg', "Session expired. Please try again");
     }
 
     const email = req.session.userData.email;
@@ -211,70 +260,68 @@ const resendOtp = async (req, res) => {
     if (emailSent) {
       req.session.userOtp = newOtp;
       console.log(`OTP resent successfully: ${newOtp}`);
-      return res.json({
-        status: "success",
-        message: "OTP resent successfully",
-      });
+      req.flash('success_msg', "OTP resent successfully");
     } else {
-      return res.status(500).json({
-        status: "error",
-        message: "Failed to send verification email",
-      });
+      req.flash('error_msg', "Failed to send verification mail");
     }
   } catch (error) {
     console.error("Resend OTP error:", error);
-    return res.status(500).json({
-      status: "error",
-      message: "Failed to resend OTP",
-    });
+    req.flash('error_msg', "Failed to resent OTP");
   }
 };
 
 const verifyOtp = async (req, res) => {
   try {
     const { otp } = req.body;
-    
+
     if (!req.session.userOtp || !req.session.userData) {
-      return res.status(400).json({
-        status: "error",
-        message: "Session expired. Please request a new OTP.",
-      });
+      req.flash('error_msg', "Session expired. Please request a new OTP");
     }
-    
+
     if (otp === req.session.userOtp) {
-      const { userName, email, phone, password } = req.session.userData;
-      
-      // Hash password
+      const { userName, email, phone, password, referralCode } = req.session.userData;
+
       const hashedPassword = await bcrypt.hash(password, 10);
-      
-      // Create and save new user
+
       const newUser = new User({
         userName,
         email,
         phone,
         password: hashedPassword,
         isVerified: true,
-        referralCode: referralCode || 'NONE',
+        referralCode: generateReferralCode(new Date().getTime().toString()),
       });
       await newUser.save();
-      
-      // Create wallet for the new user
+
+      newUser.referralCode = generateReferralCode(newUser._id.toString());
+      await newUser.save();
+
       const newWallet = new walletModel({
         userId: newUser._id,
         balance: 0,
         transaction: [],
       });
       await newWallet.save();
-      
-      // Clear session data
+
+      if (referralCode && referralCode !== "NONE") {
+        const referrer = await User.findOne({ referralCode });
+        if (referrer) {
+          newUser.referredBy = referrer._id;
+          referrer.successfulReferrals.push({ user: newUser._id });
+          await newUser.save();
+          await referrer.save();
+          await handleReferralReward(referrer._id);
+        }
+      }
+
       req.session.userOtp = null;
       req.session.userData = null;
-      
-      req.flash('success_msg', 'Registration successful');
+
+      req.flash("success_msg", "Registration successful");
       return res.redirect("/login");
     } else {
-      req.flash('error_msg', 'Invalid OTP. Please try again');
-      return res.redirect('/otp');
+      req.flash("error_msg", "Invalid OTP. Please try again");
+      return res.redirect("/otp");
     }
   } catch (error) {
     console.error("OTP verification error:", error);
@@ -285,7 +332,10 @@ const verifyOtp = async (req, res) => {
   }
 };
 
-// Login Flow
+
+
+
+
 const loadLogin = async (req, res) => {
   try {
     return res.render("user/login");

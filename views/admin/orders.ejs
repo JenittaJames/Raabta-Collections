@@ -54,24 +54,16 @@
                                     <td><%= order.orderNumber %></td>
                                     <td><%= order.userName %></td>
                                     <td><%= new Date(order.orderDate).toLocaleDateString() %></td>
-                                    <td>₹<%= order.totalAmount ? order.totalAmount.toFixed(2) : '0.00' %></td>
+                                    <td>₹<%= order.finalAmount ? order.finalAmount.toFixed(2) : '0.00' %></td>
                                     <td>
-                                        <select class="form-select form-select-sm order-status-select" <%= (order.status === 'Cancelled' || order.status === 'Returned') ? 'disabled' : '' %>>
-                                            <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %> <%= order.status === 'Delivered' ? 'disabled' : '' %>>Pending</option>
-                                            <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %> <%= order.status === 'Delivered' ? 'disabled' : '' %>>Shipped</option>
-                                            <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %> <%= order.status === 'Delivered' ? 'disabled' : '' %>>Delivered</option>
-                                            <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %> <%= order.status === 'Delivered' ? 'disabled' : '' %>>Cancelled</option>
-                                            <option value="Returned" <%= order.status === 'Returned' ? 'selected' : '' %>>Returned</option>
-                                        </select>
+                                        <span class="badge bg-<%= order.status === 'Delivered' ? 'success' : order.status === 'Cancelled' ? 'danger' : order.status === 'Returned' ? 'info' : 'warning' %>">
+                                            <%= order.status %>
+                                        </span>
                                     </td>
                                     <td>
-                                        <select class="form-select form-select-sm payment-status-select" <%= order.paymentStatus === 'failed' ? 'disabled' : '' %>>
-                                            <option value="pending" <%= order.paymentStatus === 'pending' ? 'selected' : '' %> <%= (order.paymentStatus === 'paid' || order.paymentStatus === 'refunded' || order.paymentStatus === 'partially-refunded') ? 'disabled' : '' %>>Pending</option>
-                                            <option value="paid" <%= order.paymentStatus === 'paid' ? 'selected' : '' %> <%= (order.paymentStatus === 'refunded' || order.paymentStatus === 'partially-refunded') ? 'disabled' : '' %>>Paid</option>
-                                            <option value="failed" <%= order.paymentStatus === 'failed' ? 'selected' : '' %> <%= (order.paymentStatus === 'paid' || order.paymentStatus === 'refunded' || order.paymentStatus === 'partially-refunded') ? 'disabled' : '' %>>Failed</option>
-                                            <option value="refunded" <%= order.paymentStatus === 'refunded' ? 'selected' : '' %> <%= (order.paymentStatus !== 'paid' && order.paymentStatus !== 'refunded' && order.paymentStatus !== 'partially-refunded') ? 'disabled' : '' %>>Refunded</option>
-                                            <option value="partially-refunded" <%= order.paymentStatus === 'partially-refunded' ? 'selected' : '' %> <%= (order.paymentStatus !== 'paid' && order.paymentStatus !== 'refunded' && order.paymentStatus !== 'partially-refunded') ? 'disabled' : '' %>>Partially Refunded</option>
-                                        </select>
+                                        <span class="badge bg-<%= order.paymentStatus === 'Paid' ? 'success' : order.paymentStatus === 'failed' ? 'danger' : order.paymentStatus === 'refunded' || order.paymentStatus === 'partially-refunded' ? 'info' : 'warning' %>">
+                                            <%= order.paymentStatus %>
+                                        </span>
                                     </td>
                                     <td>
                                         <% if (order.hasReturnRequest) { %>
@@ -111,7 +103,7 @@
                     <% if (currentPage > 1) { %>
                         <li class="page-item">
                             <a class="page-link" href="?page=<%= currentPage - 1 %><%= locals.searchQuery ? '&query=' + searchQuery : '' %>" aria-label="Previous">
-                                <span aria-hidden="true">&larr;</span>
+                                <span aria-hidden="true">←</span>
                             </a>
                         </li>
                     <% } %>
@@ -125,7 +117,7 @@
                     <% if (currentPage < totalPages) { %>
                         <li class="page-item">
                             <a class="page-link" href="?page=<%= currentPage + 1 %><%= locals.searchQuery ? '&query=' + searchQuery : '' %>" aria-label="Next">
-                                <span aria-hidden="true">&rarr;</span>
+                                <span aria-hidden="true">→</span>
                             </a>
                         </li>
                     <% } %>
@@ -135,72 +127,4 @@
     </div>
 </div>
 
-<!-- Add JavaScript for AJAX status updates -->
-<script>
-   document.addEventListener('DOMContentLoaded', function() {
-    function updateOrderStatus(orderId, statusType, statusValue) {
-        const updateData = {
-            orderId: orderId
-        };
-        
-        if (statusType === 'order') {
-            updateData.orderStatus = statusValue;
-        } else if (statusType === 'payment') {
-            updateData.paymentStatus = statusValue;
-        }
-
-        // Updated endpoint to match the controller route
-        fetch('/admin/orders/update-status', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(updateData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: 'Status updated successfully',
-                    confirmButtonText: 'OK'
-                }).then(() => {
-                    window.location.reload();
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Failed!',
-                    text: 'Failed to update status: ' + data.message,
-                    confirmButtonText: 'OK'
-                });
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            Swal.fire({
-                icon: 'error',
-                title: 'Error!',
-                text: 'An error occurred while updating status',
-                confirmButtonText: 'OK'
-            });
-        });
-    }
-    
-    document.querySelectorAll('.order-status-select').forEach(select => {
-        select.addEventListener('change', function() {
-            const orderId = this.closest('tr').dataset.orderId;
-            updateOrderStatus(orderId, 'order', this.value);
-        });
-    });
-    
-    document.querySelectorAll('.payment-status-select').forEach(select => {
-        select.addEventListener('change', function() {
-            const orderId = this.closest('tr').dataset.orderId;
-            updateOrderStatus(orderId, 'payment', this.value);
-        });
-    });
-});
-    </script>
 <%- include('../partials/admin/footer') %>

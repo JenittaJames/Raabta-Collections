@@ -59,7 +59,7 @@
               <a
                 class="nav-link"
                 id="account-address-tab"
-                href="/wallet/history"
+                href="/walletHistory"
                 aria-controls="account-address"
                 aria-selected="false"
                 >Wallet</a
@@ -77,15 +77,8 @@
               >
             </li>
             <li class="nav-item">
-              <a
-                class="nav-link"
-                id="account-logout-tab"
-                href="/logout"
-                role="tab"
-                aria-selected="false"
-                >Logout</a
-              >
-            </li>
+              <a class="nav-link" id="account-logout-tab" href="#" onclick="logout()" role="tab" aria-selected="false">Logout</a>
+          </li>
           </ul>
         </div>
         <div class="col-lg-9">
@@ -236,7 +229,7 @@
     color: #e65100;
   }
 
-  .payment-status.completed {
+  .payment-status.paid {
     background-color: #e8f5e9;
     color: #2e7d32;
   }
@@ -393,3 +386,22 @@
 </style>
 
 <%- include('../partials/user/footer') %>
+
+<script>
+  function logout() {
+        Swal.fire({
+            title: `Are you sure?`,
+            text: `Do you want to continue to logout?`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#000000",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Logout",
+            cancelButtonText: "Cancel",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "/logout";
+            }
+        });
+    }
+</script>

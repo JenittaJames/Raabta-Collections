@@ -14,11 +14,11 @@ const walletSchema = new mongoose.Schema({
     transaction: [{
         amount: {
             type: Number,
-            required: true
+            required: false
         },
         transactionsMethod: {
             type: String,
-            required: true,
+            required: false,
             enum: ["Credit", "Razorpay", "referral", "Refund", "Payment"]
         },
         date: {
@@ -29,6 +29,10 @@ const walletSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Orders',
             required: false
+        },
+        description: { 
+            type: String, 
+            required: false 
         }
     }]
 }, { timestamps: true });

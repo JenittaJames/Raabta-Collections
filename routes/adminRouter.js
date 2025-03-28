@@ -5,6 +5,8 @@ const categoryController = require("../controller/admin/categoryController")
 const productController = require("../controller/admin/productController")
 const orderController = require("../controller/admin/orderController")
 const couponController = require("../controller/admin/couponController")
+const offerController = require("../controller/admin/offerController")
+const salesReportController=require("../controller/admin/salesreportController")
 const {adminAuth} = require("../middleware/adminMiddleware")
 const multer = require("multer");
 
@@ -56,6 +58,22 @@ router.post("/addcoupon",adminAuth, couponController.addCouponPost)
 router.get("/editcoupon/:id", adminAuth, couponController.editCoupon)
 router.post("/editcoupon/:id", adminAuth, couponController.editCouponPost)
 router.put('/api/blockcoupon/:id',adminAuth, couponController.toggleCouponStatus);
+
+
+router.get("/offer", adminAuth, offerController.getOffers);
+router.get("/addoffer", adminAuth, offerController.getAddOfferPage);
+router.post("/addoffer", adminAuth, offerController.createOffer);
+router.get("/editoffer/:id", adminAuth, offerController.getEditOfferPage);
+router.post("/editoffer/:id", adminAuth, offerController.updateOffer);
+router.put("/api/blockoffer/:id", adminAuth, offerController.toggleOfferStatus);
+
+
+router.get('/sales/daily',adminAuth,salesReportController.dailySalesReport);
+router.get('/sales/weekly',adminAuth,salesReportController.weeklySalesReport);
+router.get('/sales/monthly',adminAuth,salesReportController.monthlySalesReport);
+router.get('/sales/yearly',adminAuth,salesReportController.yearlySalesReport);
+router.post('/customdate',adminAuth, salesReportController.customDateSalesReport);
+router.get("/checkDataExist",adminAuth, salesReportController. checkDataExist);
 
 
 module.exports = router;

@@ -15,6 +15,8 @@ const flash = require("connect-flash");
 const nocache = require("nocache");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const Razorpay=require('razorpay')
+const razorpay=require('./config/razorpay')
 
 const app = express();
 

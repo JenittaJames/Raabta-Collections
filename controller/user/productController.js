@@ -1,13 +1,13 @@
 const productModel = require("../../models/productSchema");
 const catModel = require("../../models/categorySchema");
+const offerModel = require("../../models/offerSchema");
 
 const loadSingleproduct = async (req, res) => {
   try {
-    const id = req.params.id;
-    const product = await productModel.findOne({ _id: id, status: true });
+    const productId = req.params.id;
+    const product = await productModel.findById(productId).populate('category');
 
     if (!product) {
-      // Return a JSON response with an error status
       return res.status(404).json({ 
         error: true, 
         message: "Product not available or has been blocked",
@@ -15,11 +15,49 @@ const loadSingleproduct = async (req, res) => {
       });
     }
 
+    // Find applicable product offers (without maxUses)
+    const productOffers = await offerModel.find({
+      status: true,
+      offerType: 'product',
+      productId: { $in: [productId] }, // Using $in for array
+      startDate: { $lte: new Date() },
+      endDate: { $gte: new Date() }
+    }).sort({ discount: -1 });
+
+    // Find applicable category offers (without maxUses)
+    const categoryOffers = await offerModel.find({
+      status: true,
+      offerType: 'category',
+      categoryId: { $in: [product.category._id] }, // Using $in for array
+      startDate: { $lte: new Date() },
+      endDate: { $gte: new Date() }
+    }).sort({ discount: -1 });
+
+    // Get the best offer (highest discount)
+    const allOffers = [...productOffers, ...categoryOffers];
+    const bestOffer = allOffers.length > 0 ? 
+      allOffers.reduce((max, offer) => offer.discount > max.discount ? offer : max) 
+      : null;
+
+    // Calculate discounted price if offers exist
+    const discountedPrice = bestOffer ? 
+      product.price - (product.price * bestOffer.discount / 100) 
+      : product.price;
+
+    // Fetch related products
     const relatedProduct = await productModel.find({
       category: product.category,
-      _id: { $ne: id },
+      _id: { $ne: productId },
     });
-    res.render("user/singleproduct", { product, relatedProduct });
+
+    res.render("user/singleproduct", { 
+      product, 
+      relatedProduct,
+      productOffers,
+      categoryOffers,
+      bestOffer,
+      discountedPrice
+    });
   } catch (error) {
     console.error("Error fetching product:", error);
     res.status(500).json({ 
@@ -29,7 +67,6 @@ const loadSingleproduct = async (req, res) => {
     });
   }
 };
-
 
 module.exports = {
   loadSingleproduct,

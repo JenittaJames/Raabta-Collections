@@ -74,7 +74,7 @@
             <% } %>
             <div class="detail-row">
               <span class="detail-label">Total Amount:</span>
-              <span class="detail-value price">₹<%= order.orderAmount %></span>
+              <span class="detail-value price">₹<%= order.orderAmount.toFixed(2) %></span>
             </div>
           </div>
         </div>
@@ -125,14 +125,14 @@
                 <% } %>
                 <div class="item-meta">
                   <span class="item-price"
-                    >Price: ₹<%= item.productPrice %></span
+                    >Price: ₹<%= item.productPrice.toFixed(2) %></span
                   >
                   <span class="item-quantity">Qty: <%= item.quantity %></span>
                 </div>
               </div>
               <div class="item-totals">
                 <div class="item-total-price">
-                  ₹<%= item.totalProductPrice %>
+                  ₹<%= item.totalProductPrice.toFixed(2) %>
                 </div>
                 <div
                   class="item-status status-badge <%= item.productStatus.toLowerCase() %>"
@@ -156,40 +156,47 @@
           </div>
         </div>
 
-<div class="price-summary-section">
+        <div class="price-summary-section">
   <h3>Price Summary</h3>
   <div class="price-summary-content">
-   <div class="price-row">
+    <div class="price-row">
       <span class="price-label">Items Total:</span>
-      <span class="price-value">₹<%= order.orderAmount %></span>
+      <span class="price-value">₹<%= order.orderAmount.toFixed(2) %></span>
     </div>
-
 
     <% if (order.shippingCharge) { %>
     <div class="price-row">
       <span class="price-label">Shipping Charge:</span>
-      <span class="price-value">₹<%= order.shippingCharge %></span>
+      <span class="price-value">₹<%= order.shippingCharge.toFixed(2) %></span>
     </div>
     <% } %>
 
-
     <% if (appliedCoupon) { %>
-  <div class="price-row coupon">
-    <span class="price-label">Coupon Applied:</span>
-    <span class="price-value">
-      <%= appliedCoupon.couponCode %> : 
-      <% if (appliedCoupon.type === "percentage") { %>
-        <%= appliedCoupon.discount %>% off
-      <% } else { %>
-        ₹<%= appliedCoupon.discount %> off
-      <% } %>
-    </span>
-  </div>
-<% } %>
+    <div class="price-row coupon">
+      <span class="price-label">Coupon Applied:</span>
+      <span class="price-value">
+        <%= appliedCoupon.couponCode %> : 
+        <% if (appliedCoupon.type === "percentage") { %>
+          <%= appliedCoupon.discount %>% off
+        <% } else { %>
+          ₹<%= appliedCoupon.discount %> off
+        <% } %>
+      </span>
+    </div>
+    <% } %>
 
-<div class="price-row">
-  <span class="price-label">Final Amount:</span>
-  <span class="price-value">₹<%= finalPrice %></span>
+    <% if (discountAmount && discountAmount > 0) { %>
+    <div class="price-row discount">
+      <span class="price-label">Total Discount:</span>
+      <span class="price-value">₹<%= discountAmount.toFixed(2) %></span>
+    </div>
+    <% } %>
+
+    <div class="price-row total">
+      <span class="price-label">Final Amount:</span>
+      <span class="price-value">₹<%= finalPrice.toFixed(2) %></span>
+    </div>
+  </div>
 </div>
 
         <div class="order-actions-section">
@@ -752,7 +759,6 @@
                 <option value="Wrong item received">Wrong item received</option>
                 <option value="Product not as described">Product not as described</option>
                 <option value="Quality issues">Quality issues</option>
-                <option value="Size/fit issues">Size/fit issues</option>
                 <option value="Other">Other</option>
               </select>
               <div id="other-reason-container" style="display: none; margin-top: 10px;">

@@ -1,16 +1,126 @@
 const productModel = require("../../models/productSchema");
 const cartModel = require("../../models/cartSchema");
-const catModel = require("../../models/categorySchema")
+const catModel = require("../../models/categorySchema");
+const offerModel = require("../../models/offerSchema");
 
 const loadCart = async (req, res) => {
   try {
     const userId = req.session.userId;
     const cartDetails = await cartModel
       .find({ user: userId })
-      .populate("cartItem.productId", "productName price productImage totalStock");
-    res.render("user/cart", { cartDetails });
+      .populate({
+        path: "cartItem.productId",
+        select: "productName price productImage totalStock category",
+        populate: { path: "category" }
+      });
+
+    // Initialize offers data
+    const appliedOffers = {};
+    let originalSubtotal = 0;
+    let discountedSubtotal = 0;
+    let totalDiscount = 0;
+
+    // Process cart data only if cart exists and has items
+    if (cartDetails.length > 0 && cartDetails[0].cartItem && cartDetails[0].cartItem.length > 0) {
+      // Get active offers
+      const activeOffers = await offerModel.find({
+        status: true,
+        startDate: { $lte: new Date() },
+        endDate: { $gte: new Date() }
+      });
+      
+      // Calculate values for each cart item
+      for (const item of cartDetails[0].cartItem) {
+        if (!item.productId) continue; // Skip if productId is null
+        
+        const productIdString = item.productId._id.toString();
+        const originalItemPrice = item.productId.price;
+        const originalItemTotal = originalItemPrice * item.quantity;
+        originalSubtotal += originalItemTotal;
+        
+        // Find applicable offers for this item
+        const productOffers = activeOffers.filter(offer => 
+          offer.offerType === "product" && 
+          offer.productId && 
+          offer.productId.some(p => p && p.toString() === productIdString)
+        );
+        
+        const categoryOffers = [];
+        if (item.productId.category) {
+          const categoryIdString = item.productId.category._id.toString();
+          categoryOffers.push(...activeOffers.filter(offer => 
+            offer.offerType === "category" && 
+            offer.categoryId && 
+            offer.categoryId.some(c => c && c.toString() === categoryIdString)
+          ));
+        }
+        
+        const allOffers = [...productOffers, ...categoryOffers];
+        
+        if (allOffers.length > 0) {
+          // Find best offer (highest discount)
+          const bestOffer = allOffers.reduce((max, offer) =>
+            offer.discount > max.discount ? offer : max, allOffers[0]
+          );
+          
+          // Calculate discounted price
+          const discountAmount = (originalItemPrice * bestOffer.discount) / 100;
+          const discountedPrice = originalItemPrice - discountAmount;
+          const discountedItemTotal = discountedPrice * item.quantity;
+          
+          // Update item price in cart
+          item.price = discountedPrice;
+          item.total = discountedItemTotal;
+          
+          // Store offer details for this product
+          appliedOffers[productIdString] = {
+            name: bestOffer.offerName,
+            discount: bestOffer.discount,
+            discountedPrice: discountedPrice,
+            originalPrice: originalItemPrice,
+            discountAmount: discountAmount,
+            itemDiscountTotal: discountAmount * item.quantity
+          };
+          
+          discountedSubtotal += discountedItemTotal;
+        } else {
+          // No discount applies
+          item.price = originalItemPrice;
+          item.total = originalItemTotal;
+          discountedSubtotal += originalItemTotal;
+        }
+      }
+      
+      // Calculate total discount amount
+      totalDiscount = originalSubtotal - discountedSubtotal;
+      
+      // Update cart total
+      cartDetails[0].cartTotal = discountedSubtotal;
+    }
+
+    // Prepare summary data for the view
+    const cartSummary = {
+      originalSubtotal,
+      discountedSubtotal,
+      totalDiscount,
+      itemCount: cartDetails.length > 0 && cartDetails[0].cartItem ? cartDetails[0].cartItem.length : 0
+    };
+
+
+    req.session.originalSubtotal = originalSubtotal;
+req.session.discountedSubtotal = discountedSubtotal;
+req.session.cartTotalDiscount = totalDiscount;
+
+
+    res.render("user/cart", { 
+      cartDetails, 
+      appliedOffers, 
+      cartSummary 
+    });
+    
   } catch (error) {
-    console.log("error in rendering cart page", error);
+    console.error("Error in rendering cart page:", error);
+    res.status(500).send("Server Error");
   }
 };
 
@@ -25,13 +135,11 @@ const addCart = async (req, res) => {
       return res.status(400).json({ message: "Invalid product or quantity" });
     }
 
-    const product = await productModel.findOne({_id: productId, status: true});
-
+    const product = await productModel.findOne({ _id: productId, status: true });
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
-    
-    // Check if the product's category is still active
+
     const category = await catModel.findById(product.category);
     if (!category || category.status === false) {
       return res.status(400).json({ message: "This product's category is no longer available" });
@@ -54,11 +162,38 @@ const addCart = async (req, res) => {
       (item) => item.productId.toString() === productId.toString()
     );
 
-    if (existingItemIndex > -1) {
-      const newQuantity =
-        cart.cartItem[existingItemIndex].quantity + parseInt(quantity);
+    const productOffers = await offerModel.find({
+      status: true,
+      offerType: "product",
+      productId: productId,
+      startDate: { $lte: new Date() },
+      endDate: { $gte: new Date() },
+      $or: [{ maxUses: null }, { maxUses: { $gt: 0 } }],
+    }).sort({ discount: -1 });
 
-      if(newQuantity > MAX_QUANTITY) {
+    const categoryOffers = await offerModel.find({
+      status: true,
+      offerType: "category",
+      categoryId: product.category,
+      startDate: { $lte: new Date() },
+      endDate: { $gte: new Date() },
+      $or: [{ maxUses: null }, { maxUses: { $gt: 0 } }],
+    }).sort({ discount: -1 });
+
+    const allOffers = [...productOffers, ...categoryOffers];
+    const bestOffer =
+      allOffers.length > 0
+        ? allOffers.reduce((max, offer) => (offer.discount > max.discount ? offer : max), allOffers[0])
+        : null;
+
+    const unitPrice = bestOffer
+      ? product.price - (product.price * bestOffer.discount) / 100
+      : product.price;
+
+    if (existingItemIndex > -1) {
+      const newQuantity = cart.cartItem[existingItemIndex].quantity + parseInt(quantity);
+
+      if (newQuantity > MAX_QUANTITY) {
         return res.status(400).json({
           message: `Maximum quantity per product is ${MAX_QUANTITY}`,
         });
@@ -71,9 +206,9 @@ const addCart = async (req, res) => {
       }
 
       cart.cartItem[existingItemIndex].quantity = newQuantity;
-      cart.cartItem[existingItemIndex].price = product.price;
+      cart.cartItem[existingItemIndex].price = unitPrice;
       cart.cartItem[existingItemIndex].stock = product.totalStock;
-      cart.cartItem[existingItemIndex].total = newQuantity * product.price;
+      cart.cartItem[existingItemIndex].total = newQuantity * unitPrice;
     } else {
       if (quantity > MAX_QUANTITY) {
         return res.status(400).json({
@@ -90,9 +225,9 @@ const addCart = async (req, res) => {
       const newItem = {
         productId: productId,
         quantity: parseInt(quantity),
-        price: product.price,
+        price: unitPrice,
         stock: product.totalStock,
-        total: parseInt(quantity) * product.price,
+        total: parseInt(quantity) * unitPrice,
       };
 
       cart.cartItem.push(newItem);
@@ -102,7 +237,15 @@ const addCart = async (req, res) => {
 
     await cart.save();
 
-    // Fetch updated cart with populated product details
+    if (bestOffer) {
+      req.session.appliedOffer = {
+        id: bestOffer._id,
+        name: bestOffer.offerName,
+        discount: bestOffer.discount,
+        discountAmount: (product.price * bestOffer.discount) / 100 * quantity,
+      };
+    }
+
     const updatedCart = await cartModel
       .findOne({ _id: cart._id })
       .populate("cartItem.productId", "productName price productImage");
@@ -116,7 +259,6 @@ const addCart = async (req, res) => {
   }
 };
 
-
 const removeCart = async (req, res) => {
   try {
     const userId = req.session.userId;
@@ -128,14 +270,13 @@ const removeCart = async (req, res) => {
 
     const updatedCart = await cartModel.findOne({ user: userId });
 
-    let updatedCartTotal = updatedCart.cartItem.reduce(
-      (acc, curr) => curr.total + acc,
-      0
-    );
-
-    updatedCart.cartTotal = updatedCartTotal;
-
-    await updatedCart.save();
+    if (updatedCart) {
+      updatedCart.cartTotal = updatedCart.cartItem.reduce(
+        (acc, curr) => curr.total + acc,
+        0
+      );
+      await updatedCart.save();
+    }
 
     res.redirect("/cart");
   } catch (error) {
@@ -145,11 +286,11 @@ const removeCart = async (req, res) => {
 };
 
 const updateCartQuantity = async (req, res) => {
-  const { productId, quantity } = req.body;
-  const userId = req.session.userId;
-  const MAX_QUANTITY = 7;
-
   try {
+    const { productId, quantity } = req.body;
+    const userId = req.session.userId;
+    const MAX_QUANTITY = 7;
+
     if (!productId || !quantity || quantity < 1) {
       return res.status(400).json({ message: "Invalid product or quantity" });
     }
@@ -171,48 +312,169 @@ const updateCartQuantity = async (req, res) => {
       });
     }
 
-    const cart = await cartModel.findOne({ user: userId });
+    const cart = await cartModel.findOne({ user: userId }).populate(
+      "cartItem.productId",
+      "price totalStock category"
+    );
     if (!cart) {
       return res.status(404).json({ message: "Cart not found" });
     }
 
-    const cartItem = cart.cartItem.find(
-      (item) => item.productId.toString() === productId
+    const itemIndex = cart.cartItem.findIndex(
+      (item) => item.productId._id.toString() === productId
     );
-
-    if (!cartItem) {
+    if (itemIndex === -1) {
       return res.status(404).json({ message: "Product not found in cart" });
     }
 
-    cartItem.quantity = parseInt(quantity);
-    cartItem.total = cartItem.price * quantity;
-    cartItem.stock = product.totalStock;
-    
+    // Fetch active offers
+    const activeOffers = await offerModel.find({
+      status: true,
+      startDate: { $lte: new Date() },
+      endDate: { $gte: new Date() },
+      $or: [{ maxUses: null }, { maxUses: { $gt: 0 } }],
+    }).populate("productId categoryId");
+
+    const filterOffersByUsedCount = (offers) => {
+      return offers.filter((offer) => {
+        if (offer.maxUses === null) return true;
+        return offer.usedCount < offer.maxUses;
+      });
+    };
+
+    const filteredOffers = filterOffersByUsedCount(activeOffers);
+
+    // Calculate discounted price
+    const productOffers = filteredOffers.filter(
+      (offer) =>
+        offer.offerType === "product" &&
+        offer.productId.some((p) => p._id.equals(productId))
+    );
+    const categoryOffers = filteredOffers.filter(
+      (offer) =>
+        offer.offerType === "category" &&
+        offer.categoryId.some((c) => c._id.equals(product.category))
+    );
+    const allOffers = [...productOffers, ...categoryOffers];
+    const bestOffer =
+      allOffers.length > 0
+        ? allOffers.reduce((max, offer) =>
+            offer.discount > max.discount ? offer : max
+          )
+        : null;
+
+    const unitPrice = bestOffer
+      ? product.price - (product.price * bestOffer.discount) / 100
+      : product.price;
+
+    // Update item
+    cart.cartItem[itemIndex].quantity = parseInt(quantity);
+    cart.cartItem[itemIndex].price = unitPrice;
+    cart.cartItem[itemIndex].stock = product.totalStock;
+    cart.cartItem[itemIndex].total = quantity * unitPrice;
+
+    // Recalculate cart total
     cart.cartTotal = cart.cartItem.reduce((acc, item) => acc + item.total, 0);
 
     await cart.save();
 
-    res.status(200).json({ message: "Cart updated successfully" });
+    // Calculate total offer discount
+    const offerDiscount = cart.cartItem.reduce((acc, item) => {
+      const itemProduct = item.productId;
+      const itemOffers = filteredOffers.filter(
+        (offer) =>
+          (offer.offerType === "product" &&
+            offer.productId.some((p) => p._id.equals(item.productId._id))) ||
+          (offer.offerType === "category" &&
+            offer.categoryId.some((c) => c._id.equals(itemProduct.category)))
+      );
+      const itemBestOffer =
+        itemOffers.length > 0
+          ? itemOffers.reduce((max, offer) =>
+              offer.discount > max.discount ? offer : max
+            )
+          : null;
+      if (itemBestOffer) {
+        const originalPrice = itemProduct.price;
+        const discountedPrice =
+          originalPrice - (originalPrice * itemBestOffer.discount) / 100;
+        return acc + (originalPrice - discountedPrice) * item.quantity;
+      }
+      return acc;
+    }, 0);
+
+    res.status(200).json({
+      message: "Cart updated successfully",
+      cartTotal: cart.cartTotal,
+      offerDiscount: offerDiscount,
+    });
   } catch (error) {
     console.error("Error updating cart:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
-// NEW FUNCTION: Get cart totals
 const getCartTotals = async (req, res) => {
   try {
     const userId = req.session.userId;
-    
-    const cart = await cartModel.findOne({ user: userId });
-    
-    if (!cart) {
-      return res.json({ cartTotal: 0, itemCount: 0 });
+
+    const cart = await cartModel.findOne({ user: userId }).populate(
+      "cartItem.productId",
+      "price category"
+    );
+
+    if (!cart || !cart.cartItem.length) {
+      return res.json({
+        cartTotal: 0,
+        offerDiscount: 0,
+        itemCount: 0,
+      });
     }
-    
-    return res.json({ 
-      cartTotal: cart.cartTotal, 
-      itemCount: cart.cartItem.length 
+
+    const activeOffers = await offerModel.find({
+      status: true,
+      startDate: { $lte: new Date() },
+      endDate: { $gte: new Date() },
+      $or: [{ maxUses: null }, { maxUses: { $gt: 0 } }],
+    }).populate("productId categoryId");
+
+    const filterOffersByUsedCount = (offers) => {
+      return offers.filter((offer) => {
+        if (offer.maxUses === null) return true;
+        return offer.usedCount < offer.maxUses;
+      });
+    };
+
+    const filteredOffers = filterOffersByUsedCount(activeOffers);
+
+    const offerDiscount = cart.cartItem.reduce((acc, item) => {
+      const itemProduct = item.productId;
+      const itemOffers = filteredOffers.filter(
+        (offer) =>
+          (offer.offerType === "product" &&
+            offer.productId.some((p) => p._id.equals(item.productId._id))) ||
+          (offer.offerType === "category" &&
+            offer.categoryId.some((c) => c._id.equals(itemProduct.category)))
+      );
+      const itemBestOffer =
+        itemOffers.length > 0
+          ? itemOffers.reduce((max, offer) =>
+              offer.discount > max.discount ? offer : max
+            )
+          : null;
+      if (itemBestOffer) {
+        const originalPrice = itemProduct.price;
+        const discountedPrice =
+          originalPrice - (originalPrice * itemBestOffer.discount) / 100;
+        return acc + (originalPrice - discountedPrice) * item.quantity;
+      }
+      return acc;
+    }, 0);
+
+    return res.json({
+      cartTotal: cart.cartTotal,
+      offerDiscount: offerDiscount,
+      itemCount: cart.cartItem.length,
     });
   } catch (error) {
     console.error("Error fetching cart totals:", error);
@@ -220,26 +482,25 @@ const getCartTotals = async (req, res) => {
   }
 };
 
-// NEW FUNCTION: Get specific cart item
 const getCartItem = async (req, res) => {
   try {
     const userId = req.session.userId;
     const { productId } = req.query;
-    
+
     const cart = await cartModel.findOne({ user: userId });
-    
+
     if (!cart) {
       return res.status(404).json({ message: "Cart not found" });
     }
-    
+
     const item = cart.cartItem.find(
-      item => item.productId.toString() === productId
+      (item) => item.productId.toString() === productId
     );
-    
+
     if (!item) {
       return res.status(404).json({ message: "Item not found in cart" });
     }
-    
+
     return res.json(item);
   } catch (error) {
     console.error("Error fetching cart item:", error);
@@ -252,6 +513,6 @@ module.exports = {
   addCart,
   removeCart,
   updateCartQuantity,
-  getCartTotals,  // Export the new function
-  getCartItem     // Export the new function
+  getCartTotals,
+  getCartItem,
 };

@@ -7,8 +7,11 @@ const profileController = require("../controller/user/profileController");
 const checkoutController = require("../controller/user/checkoutController");
 const orderController = require("../controller/user/orderController");
 const wishlistController = require("../controller/user/wishlistController")
+const offerController = require("../controller/user/offerController")
 const { checkProductStatus, ifLogged, logged, wishlistMiddleware} = require("../middleware/userMiddleware");
 const passport = require("passport");
+
+
 
 router.get("/pageNotFound", userController.pageNotFound);
 router.get("/",wishlistMiddleware, userController.loadHomepage);
@@ -31,8 +34,8 @@ router.get(
   }
 );
 
-router.get("/logout", userController.logout);
 
+router.get("/logout", userController.logout);
 router.post("/register",logged, userController.register);
 router.get("/login",logged, userController.loadLogin);
 router.post("/login", userController.login);
@@ -48,10 +51,12 @@ router.post("/verify-otp", userController.verifyOtp);
 router.get("/reset-password", userController.loadResetPassword);
 router.post("/reset-password", userController.resetPassword);
 
+
 router.get("/shop",wishlistMiddleware, userController.loadShop);
 router.get("/search",wishlistMiddleware,userController.loadShop)
 router.get("/shopbyfilter/:categoryId", userController.shopByFilter)
 router.get("/singleproduct/:id",wishlistMiddleware,checkProductStatus, productController.loadSingleproduct);
+
 
 router.get("/cart", ifLogged, cartController.loadCart);
 router.post("/addtocart/:productId", ifLogged, cartController.addCart);
@@ -60,10 +65,17 @@ router.post("/update-cart", ifLogged, cartController.updateCartQuantity);
 router.get('/get-cart-totals',ifLogged, cartController.getCartTotals);
 router.get('/get-cart-item',ifLogged, cartController.getCartItem);
 
+
 router.get("/checkout", ifLogged, checkoutController.checkout);
 router.get("/placingorder", ifLogged, checkoutController.placingOrder)
 router.post('/apply-coupon', ifLogged, checkoutController.applyCoupon);
 router.post('/remove-coupon', ifLogged, checkoutController.removeCoupon);
+router.post("/apply-offer", ifLogged, checkoutController.applyOffer);
+router.post("/remove-offer", ifLogged, checkoutController.removeOffer);
+router.post("/create-order",ifLogged,checkoutController.createOrder)
+router.post('/verify-payment', ifLogged, checkoutController.verifyPayment);
+router.post('/select-address', ifLogged, checkoutController.selectAddress);
+
 
 router.get("/profile", ifLogged, profileController.profile);
 router.post("/updateprofile", ifLogged, profileController.updateProfile);
@@ -73,7 +85,7 @@ router.post("/address/default/:id", ifLogged, profileController.setDefaultAddres
 router.get("/address", ifLogged, profileController.addressDetails);
 router.get("/changepassword", ifLogged, profileController.changePassword);
 router.post("/changepassword", ifLogged, profileController.changePasswordPost);
-router.get('/wallet/history',ifLogged, profileController. walletHistory);
+router.get('/walletHistory',ifLogged, profileController. walletHistory);
 router.post('/orders/:orderId/return', ifLogged, profileController.requestReturn);
 router.get('/address/edit/:id', ifLogged, profileController.editAddress);
 router.post('/address/update/:id', ifLogged, profileController.updateAddress);
@@ -90,12 +102,21 @@ router.get("/orderdetails/:orderId", ifLogged, orderController.orderDetails);
 router.get("/confirmorder", ifLogged, orderController.placeOrder)
 router.post('/orders/:orderId/cancel', ifLogged, orderController.cancelOrder);
 router.get('/orders/:orderId/invoice', ifLogged, orderController.generateInvoice);
+router.get("/orderconfirmation/:orderId", ifLogged, orderController.orderConfirmation);
+router.get('/get-wallet-balance', ifLogged, orderController.getWalletBalance);
+router.post('/place-order-wallet', ifLogged, orderController.placeOrderWallet);
+
 
 
 router.get('/wishlist',ifLogged, wishlistController.loadWishlist);
 router.post('/wishlist/add',ifLogged, wishlistController.addToWishlist);
 router.post('/wishlist/remove',ifLogged, wishlistController.removeFromWishlist);
 router.post('/wishlist/add-to-cart',ifLogged, wishlistController.addToCartFromWishlist);
+
+
+router.get('/offers/product/:productId',ifLogged, offerController.getProductOffers);
+router.get('/offers/category/:categoryId',ifLogged, offerController.getCategoryOffers);
+router.get('/offers/referral',ifLogged, offerController.getReferralOffers);
 
 
 module.exports = router;

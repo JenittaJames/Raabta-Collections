@@ -32,13 +32,13 @@
                             <a class="nav-link" id="account-address-tab" href="/address" aria-controls="account-address" aria-selected="false">Addresses</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" id="account-address-tab" href="/wallet/history" aria-controls="account-address" aria-selected="false">Wallet</a>
+                            <a class="nav-link" id="account-address-tab" href="/walletHistory" aria-controls="account-address" aria-selected="false">Wallet</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" id="account-details-tab" href="/changepassword" aria-controls="account-details" aria-selected="false">Change Password</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" id="account-logout-tab" href="/logout" role="tab" aria-selected="false">Logout</a>
+                            <a class="nav-link" id="account-logout-tab" href="#" onclick="logout()" role="tab" aria-selected="false">Logout</a>
                         </li>
                     </ul>
                 </div>
@@ -95,6 +95,43 @@
                                 </div>
                             </form>
                         </div>
+
+                        <br><br>
+
+
+                        <div class="welcome-section">
+                            <!-- Referral Section -->
+                            <div class="referral-section">
+                                <h3 class="section-title">Referral Program</h3>
+                                <p><strong>Your Referral Code:</strong> <%= user.referralCode %> (Share this with friends!)</p>
+                                <p>Invite friends and earn rewards when they sign up using your referral code.</p>
+                                <h4>Your Referral Rewards</h4>
+                                <% if (user.referralRewards && user.referralRewards.length > 0) { %>
+                                  <ul class="rewards-list">
+                                    <% user.referralRewards.forEach(reward => { %>
+                                      <li>
+                                        <% if (reward.offerId && reward.offerId.offerName) { %>
+                                          <%= reward.offerId.offerName %> - <%= reward.offerId.discount %>% off
+                                          <% if (reward.used && reward.dateIssued) { %>
+                                            (Used on <%= reward.dateIssued.toLocaleDateString() %>)
+                                          <% } else if (reward.offerId.endDate) { %>
+                                            (Valid until <%= reward.offerId.endDate.toLocaleDateString() %>)
+                                          <% } else { %>
+                                            (Reward details unavailable)
+                                          <% } %>
+                                        <% } else { %>
+                                          Incomplete reward information
+                                        <% } %>
+                                      </li>
+                                    <% }) %>
+                                  </ul>
+                                <% } else { %>
+                                  <p>No referral rewards yet. Start inviting friends!</p>
+                                <% } %>
+                            </div>
+                        </div>
+
+                        <br><br>
                     
                         <!-- Welcome Section -->
                         <div class="welcome-section">
@@ -332,4 +369,25 @@ async function updateProfile(event) {
             editBtn.style.display = 'block';
         }
     }
+
+
+    // Logout confirmation
+    function logout() {
+        Swal.fire({
+            title: `Are you sure?`,
+            text: `Do you want to continue to logout?`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#000000",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Logout",
+            cancelButtonText: "Cancel",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "/logout";
+            }
+        });
+    }
+
+
 </script>

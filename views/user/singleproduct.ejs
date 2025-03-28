@@ -1,111 +1,363 @@
 <%- include('../partials/user/header') %>
 
 <style>
-  .qty-btn_area {
-    margin-top: 15px;
-  }
+/* Product Button Area Styles */
+.qty-btn_area {
+  margin-top: 20px;
+}
 
-  .qty-btn_area ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    gap: 10px;
-  }
+.qty-btn_area ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
 
-  .qty-btn_area ul li {
-    display: inline-block;
-  }
+.qty-btn_area ul li {
+  display: inline-block;
+}
 
+/* Add to Cart Button */
+.qty-cart_btn {
+  background: #333333;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 500;
+  height: 45px;
+  line-height: 45px;
+  padding: 0 28px;
+  text-align: center;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.qty-cart_btn:hover {
+  background: #1d2951;
+  color: #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.qty-cart_btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Wishlist Button */
+.qty-wishlist_btn {
+  background: #ffffff;
+  border: 1px solid #ddd;
+  color: #333333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  height: 45px;
+  width: 45px;
+  border-radius: 4px;
+  transition: all 0.3s ease-in-out;
+  text-decoration: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.qty-wishlist_btn:hover {
+  border-color: #1d2951;
+  color: #1d2951;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.qty-wishlist_btn:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+.qty-wishlist_btn i {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Quantity Control */
+.quantity {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.quantity label {
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+.cart-plus-minus {
+  display: flex;
+  align-items: center;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  max-width: 130px;
+  height: 42px;
+  overflow: hidden;
+}
+
+.cart-plus-minus-box {
+  border: none;
+  text-align: center;
+  width: 60px;
+  height: 40px;
+  font-size: 15px;
+  margin: 0;
+}
+
+.qtybutton {
+  background: #f7f7f7;
+  cursor: pointer;
+  width: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  transition: all 0.2s ease;
+}
+
+.qtybutton:hover {
+  background: #e0e0e0;
+}
+
+/* Product Info Styles */
+.product-info {
+  margin-bottom: 25px;
+}
+
+.product-info h3 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.product-price {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.original-price {
+  font-size: 16px;
+  color: #999;
+  text-decoration: line-through;
+  margin-right: 10px;
+}
+
+.discount-price {
+  font-size: 22px;
+  font-weight: 600;
+  color: #333;
+  margin-right: 10px;
+}
+
+.discount-badge {
+  background-color: #e53935;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Available Offers Section */
+.available-offers {
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-left: 3px solid #1d2951;
+}
+
+.available-offers h5 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.available-offers ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.available-offers ul li {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.offer-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-right: 10px;
+  color: white;
+  min-width: 80px;
+  text-align: center;
+}
+
+.product-offer {
+  background-color: #1565c0;
+}
+
+.category-offer {
+  background-color: #6a1b9a;
+}
+
+/* Rating Box */
+.rating-box {
+  margin-bottom: 15px;
+}
+
+.rating-box ul {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.rating-box ul li {
+  margin-right: 2px;
+  color: #ffc107;
+}
+
+.rating-box ul li.silver-color {
+  color: #d5d5d5;
+}
+
+/* Stock Status */
+[style*="color: red"] {
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+}
+
+[style*="color: red"]:before {
+  content: "•";
+  display: inline-block;
+  margin-right: 5px;
+  font-size: 20px;
+}
+
+[style*="color: green"] {
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+}
+
+[style*="color: green"]:before {
+  content: "•";
+  display: inline-block;
+  margin-right: 5px;
+  font-size: 20px;
+}
+
+/* Product Description Styles */
+.product-description h4,
+.product-description h5 {
+  margin-bottom: 15px;
+  color: #333;
+  font-weight: 600;
+}
+
+.product-description p {
+  line-height: 1.6;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.product-features ul {
+  padding-left: 20px;
+  margin-bottom: 20px;
+}
+
+.product-features li {
+  margin-bottom: 8px;
+  position: relative;
+  padding-left: 5px;
+  line-height: 1.5;
+}
+
+/* Product Specs Table */
+.product-specs table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.product-specs td {
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  line-height: 1.5;
+}
+
+.product-specs tr td:first-child {
+  width: 30%;
+  background-color: #f9f9f9;
+  font-weight: 500;
+}
+
+/* Utilities */
+.mt-4 {
+  margin-top: 1.5rem;
+}
+
+/* Fix for input number arrows */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
   .qty-cart_btn {
-    background: rgb(51, 51, 51);
-    color: #ffffff;
+    padding: 0 20px;
     font-size: 14px;
-    font-weight: 500;
-    height: 45px;
-    line-height: 45px;
-    padding: 0 25px;
-    text-align: center;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
-    transition: all 0.3s ease-in-out;
-  }
-
-  .qty-cart_btn:hover {
-    background: #1d2951;
-    color: #ffffff;
-  }
-
-  .qty-wishlist_btn {
-    background: #ffffff;
-    border: 1px solid #ddd;
-    color: #333333;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    height: 45px;
-    width: 45px;
-    border-radius: 3px;
-    transition: all 0.3s ease-in-out;
-    text-decoration: none;
-  }
-
-  .qty-wishlist_btn:hover {
-    border-color: #1d2951;
-    border-width: 2px;
-    color: #ffffff;
-  }
-
-  .qty-wishlist_btn i {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-
-  .product-description h4, .product-description h5 {
-    margin-bottom: 15px;
-    color: #333;
-  }
-  
-  .product-description p {
-    line-height: 1.6;
-    color: #666;
-    margin-bottom: 20px;
-  }
-  
-  .product-features ul {
-    padding-left: 20px;
-  }
-  
-  .product-features li {
-    margin-bottom: 8px;
-    position: relative;
-    padding-left: 5px;
-  }
-  
-  .product-specs table {
-    border-collapse: collapse;
-    width: 100%;
-  }
-  
-  .product-specs td {
-    padding: 10px;
-    border: 1px solid #ddd;
   }
   
   .product-specs tr td:first-child {
-    width: 30%;
-    background-color: #f9f9f9;
+    width: 40%;
+  }
+}
+
+@media (max-width: 576px) {
+  .product-price {
+    flex-direction: column;
+    align-items: flex-start;
   }
   
-  .mt-4 {
-    margin-top: 1.5rem;
+  .discount-badge {
+    margin-top: 5px;
   }
+  
+  .offer-badge {
+    min-width: 70px;
+  }
+}
 </style>
 
 <!-- Begin Hiraola's Breadcrumb Area -->
@@ -120,7 +372,6 @@
     </div>
   </div>
 </div>
-<!-- Hiraola's Breadcrumb Area End Here -->
 
 <!-- Begin Hiraola's Single Product Area -->
 <div class="sp-area">
@@ -154,10 +405,49 @@
           </div>
         </div>
         <div class="col-lg-7 col-md-7">
-          <div class="sp-content">
-            <div class="sp-heading">
-              <h5><a href="#"><%= product.productName %></a></h5>
+          <div class="product-info">
+            <h3><%= product.productName %></h3>
+            <div class="product-price">
+              <% if (bestOffer) { %>
+                <span class="original-price">₹<%= product.price.toFixed(2) %></span>
+                <span class="discount-price">₹<%= discountedPrice.toFixed(2) %></span>
+                <span class="discount-badge"><%= bestOffer.discount %>% OFF</span>
+              <% } else { %>
+                <span>₹<%= product.price.toFixed(2) %></span>
+              <% } %>
             </div>
+
+            <!-- Available Offers Section -->
+            <div class="available-offers">
+              <h5>Available Offers</h5>
+              <% if ((productOffers && productOffers.length > 0) || (categoryOffers && categoryOffers.length > 0)) { %>
+                <ul>
+                  <% if (productOffers && productOffers.length > 0) { %>
+                    <% productOffers.forEach(offer => { %>
+                      <li>
+                        <span class="offer-badge product-offer">Product Offer</span>
+                        <%= offer.offerName %> - <%= offer.discount %>% off
+                        <small>(Valid till <%= offer.endDate.toLocaleDateString() %>)</small>
+                      </li>
+                    <% }); %>
+                  <% } %>
+                  <% if (categoryOffers && categoryOffers.length > 0) { %>
+                    <% categoryOffers.forEach(offer => { %>
+                      <li>
+                        <span class="offer-badge category-offer">Category Offer</span>
+                        <%= offer.offerName %> - <%= offer.discount %>% off
+                        <small>(Valid till <%= offer.endDate.toLocaleDateString() %>)</small>
+                      </li>
+                    <% }); %>
+                  <% } %>
+                </ul>
+              <% } else { %>
+                <p>No offers available for this product at the moment.</p>
+              <% } %>
+            </div>
+          </div>
+
+          <div class="sp-content">
             <div class="rating-box">
               <ul>
                 <li><i class="fa fa-star-of-david"></i></li>
@@ -169,38 +459,17 @@
                 </li>
               </ul>
             </div>
-            <!-- <div class="sp-essential_stuff">
-                                    <ul>
-                                        <li>EX Tax: <a href="javascript:void(0)"><span>£453.35</span></a></li>
-                                        <li>Brands <a href="javascript:void(0)">Buxton</a></li>
-                                        <li>Product Code: <a href="javascript:void(0)">Product 16</a></li>
-                                        <li>Reward Points: <a href="javascript:void(0)">600</a></li>
-                                        <li>Availability: <a href="javascript:void(0)">In Stock</a></li>
-                                    </ul>
-                                </div> -->
-            <!-- <div class="product-size_box">
-                                    <span>Size</span>
-                                    <select class="myniceselect nice-select">
-                                        <option value="1">S</option>
-                                        <option value="2">M</option>
-                                        <option value="3">L</option>
-                                        <option value="4">XL</option>
-                                    </select>
-                                </div> -->
 
-                                <a href="#">
-                                  <% if (product.totalStock == 0) { %>
-                                    <span style="color: red;">Out Of Stock</span>
-                                  <% } else { %>
-                                    <span style="color: green;"><%= product.totalStock %> Item Available</span>
-                                  <% } %>
-                                </a>
-                                
+            <a href="#">
+              <% if (product.totalStock == 0) { %>
+                <span style="color: red;">Out Of Stock</span>
+              <% } else { %>
+                <span style="color: green;"><%= product.totalStock %> Item Available</span>
+              <% } %>
+            </a>
 
             <div class="quantity">
               <label>Quantity</label>
-
-              
               <div class="cart-plus-minus">
                 <input class="cart-plus-minus-box" value="1" type="text" />
                 <div class="dec qtybutton">
@@ -210,8 +479,6 @@
               </div>
             </div>
 
-
-            
             <div class="qty-btn_area">
               <ul>
                 <li>
@@ -237,56 +504,18 @@
               </ul>
             </div>
 
-            <br>
-            <br>
-            <br>
-            
+            <br><br><br>
+
             <div class="product-description-container">
               <h4>About This <%= product.productName %></h4>
               <p><%= product.description %></p>
-              
-            <!-- <div class="hiraola-tag-line">
-                                    <h6>Tags:</h6>
-                                    <a href="javascript:void(0)">Ring</a>,
-                                    <a href="javascript:void(0)">Necklaces</a>,
-                                    <a href="javascript:void(0)">Braid</a>
-                                </div> -->
-            <!-- <div class="hiraola-social_link">
-                                    <ul>
-                                        <li class="facebook">
-                                            <a href="https://www.facebook.com/" data-bs-toggle="tooltip" target="_blank" title="Facebook">
-                                                <i class="fab fa-facebook"></i>
-                                            </a>
-                                        </li>
-                                        <li class="twitter">
-                                            <a href="https://twitter.com/" data-bs-toggle="tooltip" target="_blank" title="Twitter">
-                                                <i class="fab fa-twitter-square"></i>
-                                            </a>
-                                        </li>
-                                        <li class="youtube">
-                                            <a href="https://www.youtube.com/" data-bs-toggle="tooltip" target="_blank" title="Youtube">
-                                                <i class="fab fa-youtube"></i>
-                                            </a>
-                                        </li>
-                                        <li class="google-plus">
-                                            <a href="https://www.plus.google.com/discover" data-bs-toggle="tooltip" target="_blank" title="Google Plus">
-                                                <i class="fab fa-google-plus"></i>
-                                            </a>
-                                        </li>
-                                        <li class="instagram">
-                                            <a href="https://rss.com/" data-bs-toggle="tooltip" target="_blank" title="Instagram">
-                                                <i class="fab fa-instagram"></i>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div> -->
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </div>
-<!-- Hiraola's Single Product Area End Here -->
 
 <!-- Begin Hiraola's Single Product Tab Area -->
 <div class="hiraola-product-tab_area-2 sp-product-tab_area">
@@ -297,14 +526,10 @@
           <div class="product-tab">
             <ul class="nav product-menu">
               <li>
-                <a class="active" data-bs-toggle="tab" href="#description"
-                  ><span>Description</span></a
-                >
+                <a class="active" data-bs-toggle="tab" href="#description"><span>Description</span></a>
               </li>
               <li>
-                <a data-bs-toggle="tab" href="#reviews"
-                  ><span>Reviews (1)</span></a
-                >
+                <a data-bs-toggle="tab" href="#reviews"><span>Reviews (1)</span></a>
               </li>
             </ul>
           </div>
@@ -413,8 +638,7 @@
                         id="con_message"
                       ></textarea>
                       <div class="help-block">
-                        <span class="text-danger">Note:</span> HTML is not
-                        translated!
+                        <span class="text-danger">Note:</span> HTML is not translated!
                       </div>
                     </div>
                   </div>
@@ -434,11 +658,7 @@
                       </div>
                     </div>
                     <div class="hiraola-btn-ps_right">
-                      <a
-                        href="javascript:void(0)"
-                        class="hiraola-btn hiraola-btn_dark"
-                        >Continue</a
-                      >
+                      <a href="javascript:void(0)" class="hiraola-btn hiraola-btn_dark">Continue</a>
                     </div>
                   </div>
                 </form>
@@ -487,10 +707,8 @@
                         data-bs-toggle="tooltip"
                         data-placement="top"
                         title="Add To Cart"
-                        ><i class="ion-bag"></i
-                      ></a>
+                        ><i class="ion-bag"></i></a>
                     </li>
-
                     <li
                       class="quick-view-btn"
                       data-bs-toggle="modal"
@@ -501,8 +719,7 @@
                         data-bs-toggle="tooltip"
                         data-placement="top"
                         title="Quick View"
-                        ><i class="ion-eye"></i
-                      ></a>
+                        ><i class="ion-eye"></i></a>
                     </li>
                   </ul>
                 </div>
@@ -510,9 +727,7 @@
               <div class="hiraola-product_content">
                 <div class="product-desc_info">
                   <h6>
-                    <a class="product-name" href="/product/<%= related._id %>"
-                      ><%= related.productName %></a
-                    >
+                    <a class="product-name" href="/product/<%= related._id %>"><%= related.productName %></a>
                   </h6>
                   <div class="price-box">
                     <span class="new-price">₹<%= related.price %></span>
@@ -526,8 +741,7 @@
                           data-bs-toggle="tooltip"
                           data-placement="top"
                           title="Add To Wishlist"
-                          ><i class="ion-android-favorite-outline"></i
-                        ></a>
+                          ><i class="ion-android-favorite-outline"></i></a>
                       </li>
                     </ul>
                   </div>
@@ -537,23 +751,19 @@
                       <li><i class="fa fa-star-of-david"></i></li>
                       <li><i class="fa fa-star-of-david"></i></li>
                       <li><i class="fa fa-star-of-david"></i></li>
-                      <li class="silver-color">
-                        <i class="fa fa-star-of-david"></i>
-                      </li>
+                      <li class="silver-color"><i class="fa fa-star-of-david"></i></li>
                     </ul>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <!-- Hiraola's Slide Item Area End Here -->
           <% }); %>
         </div>
       </div>
     </div>
   </div>
 </div>
-<!-- Hiraola's Product Area Two End Here -->
 
 <%- include('../partials/user/footer') %>
 
@@ -579,14 +789,11 @@
     $("#gallery a").on("click", function (e) {
       e.preventDefault();
 
-      // Get image URLs
       var newImage = $(this).data("image");
       var newZoomImage = $(this).data("zoom-image");
 
-      // Update the main image and reinitialize zoom
       $(".zoompro").attr("src", newImage).attr("data-zoom-image", newZoomImage);
 
-      // Destroy previous zoom and reinitialize
       $(".zoompro").elevateZoom({
         gallery: "gallery",
         galleryActiveClass: "active",
@@ -601,96 +808,102 @@
     });
   });
 
-  // Global constant for maximum quantity
   const MAX_QUANTITY = 7;
   
   async function addToCart(productId) {
-  console.log("entering to the addtocart method");
-  const quantity = document.querySelector(".cart-plus-minus-box").value;
-  console.log("quantity:", quantity);
+    console.log("entering to the addtocart method");
+    const quantity = document.querySelector(".cart-plus-minus-box").value;
+    console.log("quantity:", quantity);
 
-  try {
-    const response = await fetch("/addtocart/" + productId, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        productId: productId,
-        quantity: quantity,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      // Success message
-      Swal.fire({
-        icon: "success",
-        title: "Success!",
-        text: "Product added to cart successfully!",
-        showConfirmButton: false,
-        timer: 1500,
+    try {
+      const response = await fetch("/addtocart/" + productId, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId: productId,
+          quantity: quantity,
+        }),
       });
 
-      if (data.cartCount) {
-        const cartCountElement = document.querySelector(".cart-count");
-        if (cartCountElement) {
-          cartCountElement.textContent = data.cartCount;
+      const data = await response.json();
+
+      if (response.ok) {
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: "Product added to cart successfully!",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+
+        if (data.cartCount) {
+          const cartCountElement = document.querySelector(".cart-count");
+          if (cartCountElement) {
+            cartCountElement.textContent = data.cartCount;
+          }
+        }
+      } else {
+        let errorMessage = data.message || "Failed to add product to cart";
+        let isProductBlocked = errorMessage.includes("blocked") || 
+                              errorMessage.includes("disabled") || 
+                              errorMessage.includes("not available");
+
+        if (errorMessage.includes("undefined")) {
+          errorMessage = "This item is out of stock.";
+        }
+
+        if (isProductBlocked) {
+          errorMessage = "This product is no longer available.";
+          Swal.fire({
+            icon: "error",
+            title: "Product Unavailable",
+            text: errorMessage,
+            confirmButtonText: "OK",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.href = "/shop";
+            }
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Failed to Add to Cart",
+            text: errorMessage,
+          });
         }
       }
-    } else {
-      // Error message with specific server details
-      let errorMessage = data.message || "Failed to add product to cart";
-      
-      // Replace "undefined items available in stock" with "out of stock"
-      if (errorMessage.includes("undefined")) {
-        errorMessage = "This item is out of stock.";
-      }
-      
-      // Handle blocked category case
-      if (errorMessage.includes("blocked") || errorMessage.includes("disabled")) {
-        errorMessage = "This product category is no longer available.";
-      }
-      
+    } catch (error) {
+      console.error("Error:", error);
       Swal.fire({
-        icon: "error",
-        title: "Failed to Add to Cart",
-        text: errorMessage,
+        icon: "warning",
+        title: "Please Login",
+        text: "Please login to continue",
+        showCancelButton: true,
+        confirmButtonText: "Login",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = "/login"; 
+        }
       });
     }
-  } catch (error) {
-    console.error("Error:", error);
-    Swal.fire({
-      icon: "warning",
-      title: "Please Login",
-      text: "Please login to continue",
-      showCancelButton: true,
-      confirmButtonText: "Login",
-      cancelButtonText: "Cancel",
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        window.location.href = "/login"; 
-      }
-    });
   }
-}
 
   document.addEventListener("DOMContentLoaded", function () {
     const quantityInput = document.querySelector(".cart-plus-minus-box");
-    const productStock = "<%= product.totalStock %>"; // Get stock from server
+    const productStock = "<%= product.totalStock %>";
     
     document.querySelector(".inc.qtybutton").addEventListener("click", function () {
       const currentVal = parseInt(quantityInput.value);
-      // Check both max quantity and available stock
       const maxAllowed = Math.min(MAX_QUANTITY, productStock);
       
       if (currentVal < maxAllowed) {
         quantityInput.value = currentVal + 1;
       } else {
-        // Show appropriate error message
         if (currentVal >= MAX_QUANTITY) {
           Swal.fire({
             icon: "error",
@@ -714,134 +927,28 @@
     });
   });
 
-
   document.addEventListener("DOMContentLoaded", function() {
-  // Check if we received a JSON response with error status
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.has('error')) {
-    Swal.fire({
-      icon: "error",
-      title: "Product Unavailable",
-      text: "This product is not available or has been blocked.",
-      confirmButtonText: "OK",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        window.location.href = "/shop";
-      }
-    });
-  }
-  
-  // Also check for productNotFound variable if you're passing it from server
-  if (typeof productNotFound !== 'undefined' && productNotFound) {
-    Swal.fire({
-      icon: "error",
-      title: "Product Unavailable",
-      text: "This product is not available or has been blocked.",
-      confirmButtonText: "OK",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        window.location.href = "/shop";
-      }
-    });
-  }
-});
-
-// Modify your fetch request handling for blocked products
-async function addToCart(productId) {
-  console.log("entering to the addtocart method");
-  const quantity = document.querySelector(".cart-plus-minus-box").value;
-  console.log("quantity:", quantity);
-
-  try {
-    const response = await fetch("/addtocart/" + productId, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        productId: productId,
-        quantity: quantity,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      // Success message
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('error')) {
       Swal.fire({
-        icon: "success",
-        title: "Success!",
-        text: "Product added to cart successfully!",
-        showConfirmButton: false,
-        timer: 1500,
-      });
-
-      if (data.cartCount) {
-        const cartCountElement = document.querySelector(".cart-count");
-        if (cartCountElement) {
-          cartCountElement.textContent = data.cartCount;
+        icon: "error",
+        title: "Product Unavailable",
+        text: "This product is not available or has been blocked.",
+        confirmButtonText: "OK",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = "/shop";
         }
-      }
-    } else {
-      // Error message with specific server details
-      let errorMessage = data.message || "Failed to add product to cart";
-      let isProductBlocked = errorMessage.includes("blocked") || 
-                            errorMessage.includes("disabled") || 
-                            errorMessage.includes("not available");
-      
-      // Replace "undefined items available in stock" with "out of stock"
-      if (errorMessage.includes("undefined")) {
-        errorMessage = "This item is out of stock.";
-      }
-      
-      // Handle blocked category case
-      if (isProductBlocked) {
-        errorMessage = "This product is no longer available.";
-        
-        Swal.fire({
-          icon: "error",
-          title: "Product Unavailable",
-          text: errorMessage,
-          confirmButtonText: "OK",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            window.location.href = "/shop";
-          }
-        });
-      } else {
-        // Regular error message
-        Swal.fire({
-          icon: "error",
-          title: "Failed to Add to Cart",
-          text: errorMessage,
-        });
-      }
+      });
     }
-  } catch (error) {
-    console.error("Error:", error);
-    Swal.fire({
-      icon: "warning",
-      title: "Please Login",
-      text: "Please login to continue",
-      showCancelButton: true,
-      confirmButtonText: "Login",
-      cancelButtonText: "Cancel",
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        window.location.href = "/login"; 
-      }
-    });
-  }
-}
+  });
 
-document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function() {
     const wishlistButtons = document.querySelectorAll('.qty-wishlist_btn');
 
     wishlistButtons.forEach(button => {
       button.addEventListener('click', function(event) {
-        event.preventDefault(); // Prevent the default link behavior
+        event.preventDefault();
 
         const productId = button.getAttribute('data-product-id');
 
@@ -855,24 +962,21 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            // Update the UI dynamically
             const icon = button.querySelector('i');
-            icon.classList.remove('ion-android-favorite-outline'); // Remove the outline icon
-            icon.classList.add('ion-android-favorite'); // Add the filled icon
-            button.setAttribute('title', 'Added to Wishlist'); // Update the tooltip text
+            icon.classList.remove('ion-android-favorite-outline');
+            icon.classList.add('ion-android-favorite');
+            button.setAttribute('title', 'Added to Wishlist');
 
-            // Show a success toast notification
             Swal.fire({
               icon: 'success',
               title: 'Success!',
               text: 'Product added to wishlist successfully!',
-              toast: true, // Enable toast mode
-              position: 'top-end', // Position at the top-right corner
-              showConfirmButton: false, // Hide the "OK" button
-              timer: 3000, // Auto-close after 3 seconds
+              toast: true,
+              position: 'top-end',
+              showConfirmButton: false,
+              timer: 3000,
             });
           } else {
-            // Show an error toast notification
             Swal.fire({
               icon: 'error',
               title: 'Oops...',
@@ -886,7 +990,6 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
           console.error('Error:', error);
-          // Show an error toast notification for unexpected errors
           Swal.fire({
             icon: 'error',
             title: 'Error',
@@ -901,5 +1004,3 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 </script>
-
-

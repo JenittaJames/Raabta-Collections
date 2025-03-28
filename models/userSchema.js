@@ -14,7 +14,7 @@ const userSchema = new Schema({
     },
     phone: {
         type: String,
-        required : false,
+        required: false,
     },
     password: {
         type: String,
@@ -31,15 +31,43 @@ const userSchema = new Schema({
     wishlist: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product'
-      }],
-      referralCode: {
+    }],
+    referralCode: {
         type: String,
         required: false
-      },
-      referredBy: {
+    },
+    referredBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-      },
+    },
+    successfulReferrals: [{
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        date: {
+            type: Date,
+            default: Date.now
+        },
+        rewardApplied: {
+            type: Boolean,
+            default: false
+        }
+    }],
+    referralRewards: [{
+        offerId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Offer'
+        },
+        dateIssued: {
+            type: Date,
+            default: Date.now
+        },
+        used: {
+            type: Boolean,
+            default: false
+        }
+    }]
 },{timestamps:true});
 
 

@@ -1,14 +1,166 @@
 const adminModel = require("../../models/userSchema");
+const mongoose = require('mongoose');
+const Orders = require('../../models/orderSchema');
+const Product = require('../../models/productSchema')
+const Category = require('../../models/categorySchema');
+const User = require('../../models/userSchema');
 const bcrypt = require('bcrypt');
 
-const loadDashboard = async (req,res) =>{
+const loadDashboard = async (req, res) => {
     try {
-        res.render("admin/index")
+        const currentDate = new Date();
+        const filter = req.query.filter || 'monthly'; // Default to monthly
+
+        // Calculate date range based on filter
+        let startDate;
+        switch (filter) {
+            case 'daily':
+                startDate = new Date(currentDate.setHours(0, 0, 0, 0));
+                break;
+            case 'weekly':
+                startDate = new Date(currentDate.setDate(currentDate.getDate() - 7));
+                break;
+            case 'monthly':
+                startDate = new Date(currentDate.setMonth(currentDate.getMonth() - 1));
+                break;
+            case 'yearly':
+                startDate = new Date(currentDate.setFullYear(currentDate.getFullYear() - 1));
+                break;
+        }
+
+        // Basic Stats
+        const totalRevenue = await Orders.aggregate([
+            { $match: { createdAt: { $gte: startDate }, orderStatus: 'Delivered' } },
+            { $group: { _id: null, total: { $sum: '$finalAmount' } } }
+        ]);
+
+        const totalOrders = await Orders.countDocuments({ 
+            createdAt: { $gte: startDate }, 
+            orderStatus: 'Delivered' 
+        });
+
+        const totalProducts = await Product.countDocuments({ status: true });
+        
+        const monthlyEarning = await Orders.aggregate([
+            { 
+                $match: { 
+                    createdAt: { 
+                        $gte: new Date(currentDate.getFullYear(), currentDate.getMonth(), 1) 
+                    },
+                    orderStatus: 'Delivered'
+                } 
+            },
+            { $group: { _id: null, total: { $sum: '$finalAmount' } } }
+        ]);
+
+        // Sales Chart Data
+        const salesData = await Orders.aggregate([
+            { $match: { createdAt: { $gte: startDate }, orderStatus: 'Delivered' } },
+            {
+                $group: {
+                    _id: {
+                        $dateToString: {
+                            format: filter === 'daily' ? '%Y-%m-%d' : 
+                                  filter === 'weekly' ? '%Y-%U' : 
+                                  filter === 'monthly' ? '%Y-%m' : '%Y',
+                            date: '$createdAt'
+                        }
+                    },
+                    total: { $sum: '$finalAmount' }
+                }
+            },
+            { $sort: { '_id': 1 } }
+        ]);
+
+        // Top 10 Best Selling Products
+        const bestSellingProducts = await Orders.aggregate([
+            { $match: { createdAt: { $gte: startDate }, orderStatus: 'Delivered' } },
+            { $unwind: '$orderedItem' },
+            {
+                $group: {
+                    _id: '$orderedItem.productId',
+                    totalSold: { $sum: '$orderedItem.quantity' },
+                    totalRevenue: { $sum: '$orderedItem.finalTotalProductPrice' }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'product'
+                }
+            },
+            { $unwind: '$product' },
+            { $sort: { totalSold: -1 } },
+            { $limit: 10 }
+        ]);
+
+        // Top 10 Best Selling Categories
+        const bestSellingCategories = await Orders.aggregate([
+            { $match: { createdAt: { $gte: startDate }, orderStatus: 'Delivered' } },
+            { $unwind: '$orderedItem' },
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: 'orderedItem.productId',
+                    foreignField: '_id',
+                    as: 'product'
+                }
+            },
+            { $unwind: '$product' },
+            {
+                $group: {
+                    _id: '$product.category',
+                    totalSold: { $sum: '$orderedItem.quantity' },
+                    totalRevenue: { $sum: '$orderedItem.finalTotalProductPrice' }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'categories',
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'category'
+                }
+            },
+            { $unwind: '$category' },
+            { $sort: { totalSold: -1 } },
+            { $limit: 10 }
+        ]);
+
+        // Latest Orders
+        const latestOrders = await Orders.find({ 
+            orderStatus: { $ne: 'Cancelled' }
+        })
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .populate('userId', 'userName')
+        .populate('deliveryAddress');
+
+        // Sales report URL for redirection
+        const salesReportUrl = '/admin/salesreport';
+
+        res.render('admin/index', {
+            revenue: totalRevenue[0]?.total || 0,
+            orders: totalOrders,
+            products: totalProducts,
+            monthlyEarning: monthlyEarning[0]?.total || 0,
+            salesData,
+            bestSellingProducts,
+            bestSellingCategories,
+            latestOrders,
+            filter,
+            currentDate: new Date(),
+            salesReportUrl
+        });
     } catch (error) {
-        console.log("Admin Dashboard not found")
-        res.status(500).send("Server error")
+        console.error('Admin Dashboard Error:', error);
+        res.status(500).send('Server error');
     }
-}
+};
+
+
 
 const adminLogin = async (req,res) => {
     try {

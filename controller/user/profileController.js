@@ -438,12 +438,25 @@ const walletHistory = async (req, res) => {
   try {
     const userId = req.session.userId;
 
-    // Find the wallet for the user
+    if (!userId) {
+      return res.status(401).redirect("/login");
+    }
+
     const wallet = await walletModel.findOne({ userId: userId }).populate('userId');
 
     if (!wallet) {
-      return res.status(404).render("error", { message: "Wallet not found" });
+      
+      const newWallet = new walletModel({
+        userId,
+        balance : 0,
+        transaction : []
+      })
+
+      await newWallet.save()
+
     }
+
+    wallet.transaction.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     res.render("user/walletHistory", { 
       user: wallet.userId, 

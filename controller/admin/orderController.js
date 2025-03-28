@@ -1,9 +1,9 @@
 const productModel = require("../../models/productSchema");
 const catModel = require("../../models/categorySchema");
-const userModel = require("../../models/userSchema")
-const ordersModel = require("../../models/orderSchema")
-const addressModel = require("../../models/addressSchema")
-const walletModel = require("../../models/walletSchema")
+const userModel = require("../../models/userSchema");
+const ordersModel = require("../../models/orderSchema");
+const addressModel = require("../../models/addressSchema");
+const walletModel = require("../../models/walletSchema");
 
 const orders = async (req, res) => {
     try {
@@ -11,13 +11,13 @@ const orders = async (req, res) => {
         const searchQuery = query || "";
         
         const page = parseInt(req.query.page) || 1;
-        const limit = 10;
+        const limit = 100;
         const skip = (page - 1) * limit;
         
         let filter = {};
         
         if (searchQuery) {
-            const matchingUsers = await require('mongoose').model('User').find({
+            const matchingUsers = await userModel.find({
                 userName: { $regex: searchQuery, $options: 'i' }
             }).select('_id');
             
@@ -61,6 +61,7 @@ const orders = async (req, res) => {
                 userName: order.userId ? order.userId.userName : 'Unknown',
                 orderDate: order.createdAt,
                 totalAmount: order.orderAmount,
+                finalAmount: order.finalAmount,
                 status: order.orderStatus,
                 paymentStatus: order.paymentStatus,
                 hasReturnRequest,
@@ -89,36 +90,130 @@ const orderDetails = async (req, res) => {
         const order = await ordersModel.findById(orderId)
             .populate({
                 path: 'orderedItem.productId',
-                model: 'Product'
+                model: 'Product',
+                select: 'price productName productImage productDescription'
             })
-            .populate('userId');
-        
+            .populate('userId')
+            .populate('couponApplied');
+
         if (!order) {
             return res.status(404).render('error', { message: 'Order not found' });
         }
-        
-        const address = order.deliveryAddress && order.deliveryAddress.length > 0 
-            ? order.deliveryAddress[0] 
-            : await addressModel.findOne({ userId: order.userId });
-        
-        res.render('admin/orderdetails', { order, address });
+
+        // Convert order to plain object to avoid Mongoose document issues
+        const orderData = order.toObject();
+
+        const address = orderData.deliveryAddress?.length > 0 
+            ? orderData.deliveryAddress[0] 
+            : await addressModel.findOne({ userId: orderData.userId });
+
+        let originalSubtotal = 0;
+        let discountedSubtotal = 0;
+        let totalDiscount = 0;
+        const shippingCharge = orderData.shippingCharge || 0;
+
+        // Use the order-level discountAmount instead of calculating from item-level fields
+        const orderLevelDiscount = Number(orderData.discountAmount) || 0;
+        const totalOriginalPrice = orderData.orderedItem.reduce((sum, item) => sum + (Number(item.totalProductPrice) || 0), 0);
+
+        const enhancedOrderItems = orderData.orderedItem.map(item => {
+            const quantity = Number(item.quantity) || 1;
+            
+            // Use schema fields directly for pricing
+            let originalUnitPrice = Number(item.productPrice) || 0; // Original price per unit
+            let originalTotal = Number(item.totalProductPrice) || (originalUnitPrice * quantity); // Original total (price * quantity)
+
+            // If the item prices are 0 or incorrect, calculate them based on order totals
+            if (originalUnitPrice === 0 || originalTotal === 0) {
+                // Pro-rate the orderAmount across items based on quantity
+                const totalQuantity = orderData.orderedItem.reduce((sum, item) => sum + (Number(item.quantity) || 1), 0);
+                originalTotal = (orderData.orderAmount || 0) * (quantity / totalQuantity);
+                originalUnitPrice = originalTotal / quantity;
+                item.productPrice = originalUnitPrice; // Update the item for display
+                item.totalProductPrice = originalTotal;
+            }
+
+            // Pro-rate the order-level discount across items based on their original totals
+            let itemDiscount = 0;
+            let finalTotal = originalTotal;
+
+            if (totalOriginalPrice > 0 && orderLevelDiscount > 0) {
+                itemDiscount = (orderLevelDiscount * originalTotal) / totalOriginalPrice;
+                finalTotal = originalTotal - itemDiscount;
+            }
+
+            // Update the item with the corrected final price
+            const discountedUnitPrice = finalTotal / quantity;
+            item.finalProductPrice = discountedUnitPrice;
+            item.finalTotalProductPrice = finalTotal;
+
+            // Update subtotals and total discount
+            originalSubtotal += originalTotal;
+            discountedSubtotal += finalTotal;
+            totalDiscount += itemDiscount;
+
+            const enhancedItem = {
+                ...item,
+                originalUnitPrice,
+                originalTotal,
+                finalTotal,
+                itemDiscount: itemDiscount || 0,
+                quantity
+            };
+            return enhancedItem;
+        });
+
+        // Update the plain object
+        orderData.orderedItem = enhancedOrderItems;
+
+        const appliedCoupon = orderData.couponApplied 
+            ? {
+                couponCode: orderData.couponApplied.couponCode,
+                type: orderData.couponApplied.type,
+                discount: orderData.couponApplied.discount
+            } 
+            : null;
+
+        const finalPrice = discountedSubtotal + shippingCharge;
+
+        // Update the order totals to reflect the discount
+        orderData.orderAmount = originalSubtotal;
+        orderData.finalAmount = finalPrice;
+
+
+        res.render('admin/orderdetails', { 
+            order: orderData, 
+            address, 
+            originalSubtotal,
+            discountedSubtotal,
+            totalDiscount,
+            shippingCharge,
+            appliedCoupon,
+            finalPrice
+        });
+
     } catch (error) {
         console.error('Error in admin orderDetails:', error);
         res.status(500).render('error', { message: 'Failed to load order details' });
     }
 };
 
+
 const verifyReturnRequest = async (req, res) => {
     try {
         const { orderId, productId, status } = req.body;
 
-        // Find the order
-        const order = await ordersModel.findById(orderId);
+        const order = await ordersModel.findById(orderId)
+            .populate({
+                path: 'orderedItem.productId',
+                model: 'Product',
+                select: 'price productName productImage productDescription'
+            });
+
         if (!order) {
             return res.status(404).json({ success: false, message: 'Order not found' });
         }
 
-        // Find the specific product in the order
         const orderItem = order.orderedItem.find(item => item._id.toString() === productId);
         if (!orderItem) {
             return res.status(404).json({ success: false, message: 'Product not found in this order' });
@@ -126,75 +221,87 @@ const verifyReturnRequest = async (req, res) => {
 
         // Update the product status
         orderItem.productStatus = status;
+        orderItem.updatedAt = new Date();
 
-        // If the return is approved, process the refund
         if (status === 'Return Approved') {
             if (orderItem.refunded) {
                 return res.status(400).json({ success: false, message: 'This item has already been refunded' });
             }
 
-            // Find the user's wallet
             const wallet = await walletModel.findOne({ userId: order.userId });
             if (!wallet) {
                 return res.status(404).json({ success: false, message: 'Wallet not found for the user' });
             }
 
-            // Calculate the refund amount
-            const refundAmount = orderItem.totalProductPrice;
+            // Calculate finalTotal for refund (mirroring orderDetails logic)
+            const quantity = Number(orderItem.quantity) || 1;
+            let originalUnitPrice = Number(orderItem.productPrice) || 0;
+            let originalTotal = Number(orderItem.totalProductPrice) || (originalUnitPrice * quantity);
 
-            // Update the wallet balance and add a transaction record
+            // If original prices are missing or incorrect, pro-rate based on order totals
+            if (originalUnitPrice === 0 || originalTotal === 0) {
+                const totalQuantity = order.orderedItem.reduce((sum, item) => sum + (Number(item.quantity) || 1), 0);
+                originalTotal = (order.orderAmount || 0) * (quantity / totalQuantity);
+                originalUnitPrice = originalTotal / quantity;
+            }
+
+            // Calculate item-level discount based on order-level discount
+            const orderLevelDiscount = Number(order.discountAmount) || 0;
+            const totalOriginalPrice = order.orderedItem.reduce((sum, item) => sum + (Number(item.totalProductPrice) || 0), 0);
+            let itemDiscount = 0;
+            let finalTotal = originalTotal;
+
+            if (totalOriginalPrice > 0 && orderLevelDiscount > 0) {
+                itemDiscount = (orderLevelDiscount * originalTotal) / totalOriginalPrice;
+                finalTotal = originalTotal - itemDiscount;
+            }
+
+            // Use finalTotal as the refund amount
+            const refundAmount = finalTotal;
+
             wallet.balance += refundAmount;
             wallet.transaction.push({
                 amount: refundAmount,
                 transactionsMethod: 'Refund',
                 date: new Date(),
-                orderId: order._id
+                orderId: order._id,
+                description: `Amount refunded for returned product`
             });
 
-            // Mark the item as refunded
             orderItem.refunded = true;
-
-            // Save the updated wallet
+            orderItem.finalTotalProductPrice = refundAmount; // Optionally store this for reference
             await wallet.save();
 
-            // Check if all items in the order are returned or cancelled
+            // Determine refund status for online payments
+            const isOnlinePayment = ['Online', 'Wallet', 'Card', 'UPI'].includes(order.paymentMethod);
             const allItemsReturned = order.orderedItem.every(item =>
                 item.productStatus === 'Return Approved' || item.productStatus === 'Cancelled'
             );
 
-            // Update the payment status of the order
             if (allItemsReturned) {
-                order.paymentStatus = 'Refunded';
-            } else {
+                order.orderStatus = 'Returned';
+                if (isOnlinePayment) {
+                    order.paymentStatus = 'Refunded';
+                }
+            } else if (isOnlinePayment) {
                 order.paymentStatus = 'partially-refunded';
             }
 
-            // Update inventory - add returned items back to stock
-            try {
-                for (const item of order.orderedItem) {
-                    if (item.productStatus === 'Return Approved') {
-                        const product = await productModel.findById(item.productId);
-                        if (product) {
-                            product.totalStock += item.quantity;
-                            await product.save();
-                        }
-                    }
-                }
-            } catch (stockError) {
-                console.error('Error updating product stock:', stockError);
-                // Continue processing even if stock update fails
+            // Update inventory
+            const product = await productModel.findById(orderItem.productId);
+            if (product) {
+                product.totalStock += orderItem.quantity;
+                await product.save();
             }
         }
 
-        // Record the return handling timestamp
-        orderItem.updatedAt = new Date();
-
-        // Save the updated order
         await order.save();
 
         return res.json({
             success: true,
-            message: `Return request ${status === 'Return Approved' ? 'approved and refund processed' : 'rejected'}`
+            message: `Return request ${status === 'Return Approved' ? 'approved and refund processed' : 'rejected'}`,
+            productStatus: orderItem.productStatus,
+            returnReason: orderItem.returnReason,
         });
     } catch (error) {
         console.error('Error processing return verification:', error);
@@ -202,40 +309,38 @@ const verifyReturnRequest = async (req, res) => {
     }
 };
 
-
-
 const updateOrderStatus = async (req, res) => {
     try {
         const { orderId, orderStatus, paymentStatus } = req.body;
         
         if (!orderId) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Order ID is required' 
-            });
+            return res.status(400).json({ success: false, message: 'Order ID is required' });
         }
 
         const order = await ordersModel.findById(orderId);
-        
         if (!order) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Order not found' 
-            });
+            return res.status(404).json({ success: false, message: 'Order not found' });
         }
 
+        // For online payments, always ensure payment status is 'Paid'
+        const isOnlinePayment = ['Online', 'Wallet', 'Card', 'UPI'].includes(order.paymentMethod);
+        
         if (orderStatus) {
             order.orderStatus = orderStatus;
         }
 
-
-        if (paymentStatus) {
+        // If payment status is provided and this is NOT an online payment, update it
+        // For online payments, we ignore manual payment status changes
+        if (paymentStatus && !isOnlinePayment) {
             order.paymentStatus = paymentStatus;
+        } else if (isOnlinePayment) {
+            // For online payments, always ensure it's marked as paid
+            order.paymentStatus = 'Paid';
         }
 
-
+        // Automatically set payment status to 'paid' if order is delivered and payment method is COD
         if (orderStatus === 'Delivered' && order.paymentMethod === 'COD') {
-            order.paymentStatus = 'paid';
+            order.paymentStatus = 'Paid';
         }
 
         await order.save();
@@ -251,10 +356,7 @@ const updateOrderStatus = async (req, res) => {
         });
     } catch (error) {
         console.error('Error updating order status:', error);
-        return res.status(500).json({ 
-            success: false, 
-            message: 'Failed to update order status: ' + error.message 
-        });
+        return res.status(500).json({ success: false, message: 'Failed to update order status: ' + error.message });
     }
 };
 
@@ -265,59 +367,46 @@ const updateProductStatus = async (req, res) => {
         const { orderId, productId, productStatus } = req.body;
 
         if (!orderId || !productId || !productStatus) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Order ID, Product ID, and Product Status are required' 
-            });
+            return res.status(400).json({ success: false, message: 'Order ID, Product ID, and Product Status are required' });
         }
 
-        const validStatuses = ["Pending", "Shipped", "Delivered", "Cancelled", "Returned","Return Requested", "Return Approved", "Return Rejected"];
+        const validStatuses = ["Pending", "Shipped", "Delivered", "Cancelled", "Returned", "Return Requested", "Return Approved", "Return Rejected"];
         if (!validStatuses.includes(productStatus)) {
-            return res.status(400).json({ 
-                success: false, 
-                message: `Invalid product status. Valid values are: ${validStatuses.join(', ')}` 
-            });
+            return res.status(400).json({ success: false, message: `Invalid product status. Valid values are: ${validStatuses.join(', ')}` });
         }
 
         const order = await ordersModel.findById(orderId);
         if (!order) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Order not found' 
-            });
+            return res.status(404).json({ success: false, message: 'Order not found' });
         }
 
         const product = order.orderedItem.find(item => item._id.toString() === productId);
         if (!product) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Product not found in this order' 
-            });
+            return res.status(404).json({ success: false, message: 'Product not found in this order' });
         }
 
-       product.productStatus = productStatus;
+        product.productStatus = productStatus;
 
-       // Optional: Update overall order status based on product statuses
-const allProductStatuses = order.orderedItem.map(item => item.productStatus);
-
-// If all products are in the same status, update order status accordingly
-if (allProductStatuses.every(status => status === 'Delivered')) {
-    order.orderStatus = 'Delivered';
-} else if (allProductStatuses.every(status => status === 'Cancelled')) {
-    order.orderStatus = 'Cancelled';
-} else if (allProductStatuses.some(status => status === 'Returned')) {
-    // If any product is returned but not all
-    order.orderStatus = 'Returned';
-} else if (allProductStatuses.every(status => status === 'Shipped')) {
-    order.orderStatus = 'Shipped';
-} else if (allProductStatuses.some(status => status === 'Shipped') && 
-           allProductStatuses.every(status => status === 'Shipped' || status === 'Delivered')) {
-    // Some shipped, some delivered
-    order.orderStatus = 'Delivered';
-} else {
-    // Mixed statuses
-    order.orderStatus = 'Pending';
-}
+        const allProductStatuses = order.orderedItem.map(item => item.productStatus);
+        if (allProductStatuses.every(status => status === 'Delivered')) {
+            order.orderStatus = 'Delivered';
+            
+            // If payment method is COD and all items are delivered, mark payment as paid
+            if (order.paymentMethod === 'COD') {
+                order.paymentStatus = 'Paid';
+            }
+        } else if (allProductStatuses.every(status => status === 'Cancelled')) {
+            order.orderStatus = 'Cancelled';
+        } else if (allProductStatuses.some(status => status === 'Returned')) {
+            order.orderStatus = 'Returned';
+        } else if (allProductStatuses.every(status => status === 'Shipped')) {
+            order.orderStatus = 'Shipped';
+        } else if (allProductStatuses.some(status => status === 'Shipped') && 
+                  allProductStatuses.every(status => status === 'Shipped' || status === 'Delivered')) {
+            order.orderStatus = 'Delivered';
+        } else {
+            order.orderStatus = 'Pending';
+        }
 
         await order.save();
 
@@ -331,14 +420,9 @@ if (allProductStatuses.every(status => status === 'Delivered')) {
         });
     } catch (error) {
         console.error('Error updating product status:', error);
-        return res.status(500).json({ 
-            success: false, 
-            message: 'Failed to update product status: ' + error.message 
-        });
+        return res.status(500).json({ success: false, message: 'Failed to update product status: ' + error.message });
     }
 };
-
-
 
 const submitReturnRequest = async (req, res) => {
     try {
@@ -349,7 +433,6 @@ const submitReturnRequest = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Order not found' });
         }
         
-        // Check if user is authorized to request this return
         if (order.userId.toString() !== req.session.userId) {
             return res.status(403).json({ success: false, message: 'Unauthorized' });
         }
@@ -359,7 +442,6 @@ const submitReturnRequest = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Product not found in this order' });
         }
         
-        // Check if product is eligible for return
         if (orderItem.productStatus !== 'Delivered') {
             return res.status(400).json({ success: false, message: 'Only delivered items can be returned' });
         }
@@ -372,7 +454,6 @@ const submitReturnRequest = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Return window has expired (7 days)' });
         }
         
-        // Update item status and store return reason
         orderItem.productStatus = 'Return Requested';
         orderItem.returnReason = reason;
         orderItem.updatedAt = new Date();
@@ -388,7 +469,6 @@ const submitReturnRequest = async (req, res) => {
         return res.status(500).json({ success: false, message: 'Failed to submit return request' });
     }
 };
-
 
 module.exports = {
     orders,
