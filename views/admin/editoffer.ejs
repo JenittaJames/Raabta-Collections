@@ -12,7 +12,7 @@
     <style>
         .back-btn {
             background-color: #000000;
-            color: white; 
+            color: white;
             font-size: 14px;
             padding: 8px 15px;
             border: none;
@@ -46,6 +46,10 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 14px;
+        }
+        
+        .form-control.error {
+            border-color: #dc3545;
         }
         
         .form-section {
@@ -97,6 +101,12 @@
         .hidden {
             display: none;
         }
+        
+        .text-danger {
+            font-size: 0.875em;
+            margin-top: 5px;
+            color: #dc3545;
+        }
     </style>
 
     <div class="form-container">
@@ -104,21 +114,25 @@
             <div class="form-group">
                 <label for="offerName">Offer Name</label>
                 <input type="text" class="form-control" id="offerName" name="offerName" value="<%= offer.offerName %>" required>
+                <div id="offerNameError" class="text-danger"></div>
             </div>
             
             <div class="form-group">
                 <label for="discount">Discount Percentage (%)</label>
                 <input type="number" class="form-control" id="discount" name="discount" min="1" max="100" value="<%= offer.discount %>" required>
+                <div id="discountError" class="text-danger"></div>
             </div>
             
             <div class="form-group">
                 <label for="startDate">Start Date</label>
                 <input type="datetime-local" class="form-control" id="startDate" name="startDate" value="<%= new Date(offer.startDate).toISOString().slice(0, 16) %>" required>
+                <div id="startDateError" class="text-danger"></div>
             </div>
             
             <div class="form-group">
                 <label for="endDate">End Date</label>
                 <input type="datetime-local" class="form-control" id="endDate" name="endDate" value="<%= new Date(offer.endDate).toISOString().slice(0, 16) %>" required>
+                <div id="endDateError" class="text-danger"></div>
             </div>
             
             <div class="form-group">
@@ -131,6 +145,7 @@
                         <input type="radio" name="offerType" value="category" class="radio-input" <%= offer.offerType === 'category' ? 'checked' : '' %>> Category Offer
                     </label>
                 </div>
+                <div id="offerTypeError" class="text-danger"></div>
             </div>
             
             <div id="productSection" class="form-section <%= offer.offerType !== 'product' ? 'hidden' : '' %>">
@@ -146,6 +161,7 @@
                         <% }) %>
                     </select>
                     <small>Hold Ctrl (or Cmd on Mac) to select multiple products</small>
+                    <div id="productIdError" class="text-danger"></div>
                 </div>
             </div>
             
@@ -162,6 +178,7 @@
                         <% }) %>
                     </select>
                     <small>Hold Ctrl (or Cmd on Mac) to select multiple categories</small>
+                    <div id="categoryIdError" class="text-danger"></div>
                 </div>
             </div>
             
@@ -176,10 +193,20 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('offerForm');
+        const today = new Date();
+        const todayISO = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
         const offerTypeRadios = document.querySelectorAll('input[name="offerType"]');
         const productSection = document.getElementById('productSection');
         const categorySection = document.getElementById('categorySection');
-        
+
+        // Set minimum dates
+        startDateInput.min = todayISO;
+        endDateInput.min = todayISO;
+
+        // Toggle offer type sections
         offerTypeRadios.forEach(radio => {
             radio.addEventListener('change', function() {
                 if (this.value === 'product') {
@@ -191,50 +218,110 @@
                 }
             });
         });
-        
-        const offerForm = document.getElementById('offerForm');
-        offerForm.addEventListener('submit', function(event) {
-            const startDate = new Date(document.getElementById('startDate').value);
-            const endDate = new Date(document.getElementById('endDate').value);
-            
-            if (endDate <= startDate) {
-                event.preventDefault();
-                Swal.fire({
-                    title: "Invalid Dates",
-                    text: "End date must be after start date",
-                    icon: "error",
-                    confirmButtonColor: "#000000"
-                });
-                return false;
-            }
-            
-            const selectedOfferType = document.querySelector('input[name="offerType"]:checked').value;
-            
-            if (selectedOfferType === 'product') {
-                const selectedProducts = document.getElementById('productId').selectedOptions;
-                if (selectedProducts.length === 0) {
-                    event.preventDefault();
-                    Swal.fire({
-                        title: "No Products Selected",
-                        text: "Please select at least one product for the product offer",
-                        icon: "error",
-                        confirmButtonColor: "#000000"
-                    });
-                    return false;
-                }
-            } else if (selectedOfferType === 'category') {
-                const selectedCategories = document.getElementById('categoryId').selectedOptions;
-                if (selectedCategories.length === 0) {
-                    event.preventDefault();
-                    Swal.fire({
-                        title: "No Categories Selected",
-                        text: "Please select at least one category for the category offer",
-                        icon: "error",
-                        confirmButtonColor: "#000000"
-                    });
-                    return false;
-                }
+
+        // Form submission handler
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            if (validateForm()) {
+                this.submit();
             }
         });
+
+        // Real-time validation
+        const inputs = document.querySelectorAll('.form-control');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                validateField(this);
+            });
+        });
+
+        function validateField(field) {
+            const errorElement = document.getElementById(field.id + 'Error');
+            errorElement.innerHTML = '';
+            field.classList.remove('error');
+
+            switch(field.id) {
+                case 'offerName':
+                    const offerName = field.value.trim();
+                    if (!offerName) {
+                        showError(field, errorElement, 'Offer name is required');
+                    } else if (offerName.length < 3 || offerName.length > 50) {
+                        showError(field, errorElement, 'Name must be 3-50 characters long');
+                    }
+                    break;
+
+                case 'discount':
+                    const discount = parseFloat(field.value);
+                    if (!discount || isNaN(discount)) {
+                        showError(field, errorElement, 'Discount percentage is required');
+                    } else if (discount < 1 || discount > 100) {
+                        showError(field, errorElement, 'Discount must be between 1-100%');
+                    }
+                    break;
+
+                case 'startDate':
+                    const startDate = field.value;
+                    if (!startDate) {
+                        showError(field, errorElement, 'Start date is required');
+                    } else {
+                        const start = new Date(startDate);
+                        const todayDate = new Date(todayISO);
+                        if (start < todayDate) {
+                            showError(field, errorElement, 'Start date cannot be in the past');
+                        }
+                    }
+                    break;
+
+                case 'endDate':
+                    const endDate = field.value;
+                    if (!endDate) {
+                        showError(field, errorElement, 'End date is required');
+                    } else {
+                        const end = new Date(endDate);
+                        const start = new Date(document.getElementById('startDate').value);
+                        const todayDate = new Date(todayISO);
+                        if (end < todayDate) {
+                            showError(field, errorElement, 'End date cannot be in the past');
+                        } else if (start && end <= start) {
+                            showError(field, errorElement, 'End date must be after start date');
+                        }
+                    }
+                    break;
+
+                case 'productId':
+                    const productOfferType = document.querySelector('input[name="offerType"]:checked').value === 'product';
+                    if (productOfferType && field.selectedOptions.length === 0) {
+                        showError(field, errorElement, 'At least one product must be selected');
+                    }
+                    break;
+
+                case 'categoryId':
+                    const categoryOfferType = document.querySelector('input[name="offerType"]:checked').value === 'category';
+                    if (categoryOfferType && field.selectedOptions.length === 0) {
+                        showError(field, errorElement, 'At least one category must be selected');
+                    }
+                    break;
+            }
+        }
+
+        function validateForm() {
+            let isValid = true;
+            const fields = ['offerName', 'discount', 'startDate', 'endDate', 'productId', 'categoryId'];
+            
+            fields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                validateField(field);
+                if (field.classList.contains('error')) {
+                    isValid = false;
+                }
+            });
+
+            return isValid;
+        }
+
+        function showError(field, errorElement, message) {
+            errorElement.innerHTML = message;
+            field.classList.add('error');
+        }
     });
 </script>

@@ -88,11 +88,13 @@ const loadHomepage = async (req, res) => {
   }
 };
 
-// Shop Pages
+
+
 const loadShop = async (req, res) => {
   try {
-    const { query } = req.query;
+    const { query, sort } = req.query;
     const searchQuery = query || "";
+    const sortOption = sort || "";
 
     // Fetch all active categories
     const activeCategories = await catModel.find({ status: true }).select('_id');
@@ -115,25 +117,43 @@ const loadShop = async (req, res) => {
     const limit = 9;
     const skip = (page - 1) * limit;
 
+    // Sorting logic
+    let sortCriteria = { createdAt: -1 }; // Default sort by newest
+    switch(sortOption) {
+      case 'a-z':
+        sortCriteria = { productName: 1 }; // Ascending by name
+        break;
+      case 'z-a':
+        sortCriteria = { productName: -1 }; // Descending by name
+        break;
+      case 'l-h':
+        sortCriteria = { price: 1 }; // Ascending by price
+        break;
+      case 'h-l':
+        sortCriteria = { price: -1 }; // Descending by price
+        break;
+    }
+
     const totalProducts = await productModel.countDocuments(searchFilter);
     const totalPages = Math.ceil(totalProducts / limit);
 
     const products = await productModel.find(searchFilter)
+      .sort(sortCriteria)
       .skip(skip)
       .limit(limit);
 
     const categories = await catModel.find({ status: true });
 
-    // Fetch active offers (similar to loadHomepage)
+    // Fetch active offers
     const activeOffers = await offerModel.find({
       status: true,
       startDate: { $lte: new Date() }, // Offers that have started
       endDate: { $gte: new Date() }    // Offers that haven't ended
     })
-      .populate('productId', 'productName') // Populate product details if offer type is 'product'
+      .populate('productId', 'productName')
       .populate('categoryId', 'name');     
 
-      let userWishlist = [];
+    let userWishlist = [];
     if (req.session.userId) {
       const user = await User.findById(req.session.userId);
       userWishlist = user ? user.wishlist.map(id => id.toString()) : [];
@@ -147,15 +167,15 @@ const loadShop = async (req, res) => {
       totalPages,
       totalProducts,
       limit,
-      offers: activeOffers ,
-      userWishlist
+      offers: activeOffers,
+      userWishlist,
+      sort: sortOption // Pass the sort option to the view
     });
   } catch (error) {
     console.error("Error loading shop page:", error);
     res.status(500).send("Internal Server Error");
   }
 };
-
 
 
 const shopByFilter = async (req, res) => {

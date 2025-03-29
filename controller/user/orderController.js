@@ -8,13 +8,18 @@ const walletModel = require("../../models/walletSchema")
 const PDFDocument = require('pdfkit');
 const path = require('path');
 const mongoose = require("mongoose");
+const razorpay=require('../../config/razorpay')
 
 const orders = async (req, res) => {
   try {
+
+    const userId = req.session.userId;
+
     const page = parseInt(req.query.page) || 1;
     const limit = 3;
     const skip = (page - 1) * limit;
 
+    const user = await userModel.findById(userId);
     const totalOrders = await ordersModel.countDocuments({ userId: req.session.userId });
     const totalPages = Math.ceil(totalOrders / limit);
 
@@ -31,6 +36,7 @@ const orders = async (req, res) => {
 
     res.render('user/orders', {
       orders,
+      user,
       pagination: {
         page,
         limit,
@@ -621,6 +627,110 @@ const generateInvoice = async (req, res) => {
   };
 
 
+  const saveFailedPayment = async (req, res) => {
+    try {
+      const { orderId, error } = req.body;
+      const userId = req.session.userId;
+      const cart = await cartModel.findOne({ user: userId }).populate("cartItem.productId");
+      const address = await addressModel.findById(req.session.deliveryAddressId);
+  
+      // Get discount details from session (from checkout controller)
+      const totalPrice = req.session.totalPrice || 0;
+      const offerDiscountAmount = req.session.offerDiscountAmount || 0;
+      const couponDiscountAmount = req.session.couponDiscountAmount || 0;
+      const appliedOffers = req.session.appliedOffers || {};
+      const appliedCoupon = req.session.appliedCoupon || null;
+  
+      let totalAmount = 0;
+      const orderedItems = cart.cartItem.map((item) => {
+        const productPrice = item.productId.price;
+        const quantity = item.quantity;
+        const totalProductPrice = productPrice * quantity;
+        totalAmount += totalProductPrice;
+  
+        // Apply discounts per item
+        let itemOfferDiscount = appliedOffers[item.productId._id]?.discountAmount || 0;
+        let itemCouponDiscount = couponDiscountAmount > 0 ? (totalProductPrice / totalPrice) * couponDiscountAmount : 0;
+        const totalDiscountPerItem = itemOfferDiscount + itemCouponDiscount;
+        const finalTotalProductPrice = totalProductPrice - totalDiscountPerItem;
+        const finalProductPrice = finalTotalProductPrice / quantity;
+  
+        return {
+          productId: item.productId._id,
+          quantity,
+          productPrice,
+          totalProductPrice,
+          finalProductPrice,
+          finalTotalProductPrice,
+          productStatus: "Pending",
+        };
+      });
+  
+      const discountAmount = offerDiscountAmount + couponDiscountAmount;
+      const finalAmount = totalAmount - discountAmount;
+  
+      const newOrder = new ordersModel({
+        userId,
+        cartId: cart._id,
+        deliveryAddress: address._id,
+        orderNumber: "ORD" + Math.floor(Math.random() * 1000000),
+        orderedItem: orderedItems,
+        orderAmount: totalAmount,
+        discountAmount,
+        finalAmount,
+        paymentMethod: "Online Payment",
+        paymentStatus: "Failed",
+        orderStatus: "Pending",
+        razorpayOrderId: orderId,
+        couponApplied: appliedCoupon ? appliedCoupon.id : null,
+        appliedOffer: req.session.appliedOffer ? req.session.appliedOffer.id : null,
+      });
+  
+      await newOrder.save();
+      res.status(200).json({ success: true });
+    } catch (error) {
+      console.error("Error saving failed payment:", error);
+      res.status(500).json({ success: false, message: "Failed to save payment attempt" });
+    }
+  };
+  
+  const retryPayment = async (req, res) => {
+    try {
+      const { orderId } = req.body;
+      const order = await ordersModel.findById(orderId);
+  
+      if (!order || order.paymentStatus !== "Failed") {
+        return res.status(400).json({ success: false, message: "Invalid order for retry" });
+      }
+  
+      const amountInPaise = Math.floor(order.finalAmount * 100);
+      const options = {
+        amount: amountInPaise,
+        currency: "INR",
+        receipt: `retry_rcpt_${order.orderNumber}_${Date.now()}`,
+      };
+  
+      const newRazorpayOrder = await razorpay.orders.create(options);
+  
+      await ordersModel.updateOne(
+        { _id: orderId },
+        { razorpayOrderId: newRazorpayOrder.id }
+      );
+  
+      res.status(200).json({
+        success: true,
+        key_id: process.env.RAZORPAY_KEY_ID,
+        amount: newRazorpayOrder.amount,
+        currency: newRazorpayOrder.currency,
+        orderId: newRazorpayOrder.id,
+      });
+    } catch (error) {
+      console.error("Error in retry payment:", error);
+      res.status(500).json({ success: false, message: "Failed to initiate retry" });
+    }
+  };
+
+
 
 
 module.exports = {
@@ -631,5 +741,7 @@ module.exports = {
   generateInvoice,
   orderConfirmation,
   placeOrderWallet,
-  getWalletBalance
+  getWalletBalance,
+  saveFailedPayment,
+  retryPayment,
 };

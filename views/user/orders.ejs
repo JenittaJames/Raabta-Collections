@@ -1,5 +1,6 @@
 <%- include('../partials/user/header') %>
-<!-- Begin Hiraola's Breadcrumb Area -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <div class="breadcrumb-area">
   <div class="container">
     <div class="breadcrumb-content">
@@ -13,112 +14,53 @@
   </div>
 </div>
 
-<!-- Begin Hiraola's Page Content Area -->
 <main class="page-content">
   <div class="account-page-area">
     <div class="container">
       <div class="row">
         <div class="col-lg-3">
-          <ul
-            class="nav myaccount-tab-trigger"
-            id="account-page-tab"
-            role="tablist"
-          >
+          <ul class="nav myaccount-tab-trigger" id="account-page-tab" role="tablist">
             <li class="nav-item">
-              <a
-                class="nav-link"
-                id="account-dashboard-tab"
-                href="/profile"
-                aria-controls="account-dashboard"
-                aria-selected="false"
-                >Dashboard</a
-              >
+              <a class="nav-link" id="account-dashboard-tab" href="/profile" aria-selected="false">Dashboard</a>
             </li>
             <li class="nav-item">
-              <a
-                class="nav-link active"
-                id="account-orders-tab"
-                href="/orders"
-                aria-controls="account-orders"
-                aria-selected="true"
-                >Orders</a
-              >
+              <a class="nav-link active" id="account-orders-tab" href="/orders" aria-selected="true">Orders</a>
             </li>
             <li class="nav-item">
-              <a
-                class="nav-link"
-                id="account-address-tab"
-                href="/address"
-                aria-controls="account-address"
-                aria-selected="false"
-                >Addresses</a
-              >
+              <a class="nav-link" id="account-address-tab" href="/address" aria-selected="false">Addresses</a>
             </li>
-
             <li class="nav-item">
-              <a
-                class="nav-link"
-                id="account-address-tab"
-                href="/walletHistory"
-                aria-controls="account-address"
-                aria-selected="false"
-                >Wallet</a
-              >
+              <a class="nav-link" id="account-address-tab" href="/walletHistory" aria-selected="false">Wallet</a>
             </li>
-
             <li class="nav-item">
-              <a
-                class="nav-link"
-                id="account-details-tab"
-                href="/changepassword"
-                aria-controls="account-details"
-                aria-selected="false"
-                >Change Password</a
-              >
+              <a class="nav-link" id="account-details-tab" href="/changepassword" aria-selected="false">Change Password</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" id="account-logout-tab" href="#" onclick="logout()" role="tab" aria-selected="false">Logout</a>
-          </li>
+            </li>
           </ul>
         </div>
         <div class="col-lg-9">
-          <div
-            class="tab-content myaccount-tab-content"
-            id="account-page-tab-content"
-          >
-            <div
-              class="tab-pane fade show active"
-              id="account-orders"
-              role="tabpanel"
-              aria-labelledby="account-orders-tab"
-            >
+          <div class="tab-content myaccount-tab-content" id="account-page-tab-content">
+            <div class="tab-pane fade show active" id="account-orders" role="tabpanel">
               <div class="myaccount-orders">
                 <h4 class="small-title">MY ORDERS</h4>
-                <% if (orders && orders.length > 0) { %> <%
-                orders.forEach(function(order) { %>
+                <% if (orders && orders.length > 0) { %>
+                <% orders.forEach(function(order) { %>
                 <div class="order-card">
                   <div class="order-header">
                     <div class="order-header-left">
-                      <div class="order-id">
-                        Order ID: <%= order.orderNumber %>
-                      </div>
+                      <div class="order-id">Order ID: <%= order.orderNumber %></div>
                       <div class="order-date">
-                        Ordered on: <%= new
-                        Date(order.createdAt).toLocaleDateString() %>
+                        Ordered on: <%= new Date(order.createdAt).toLocaleDateString() %>
                       </div>
                     </div>
                     <div class="order-header-right">
-                      <div class="order-amount">
-                        Total: ₹<%= order.finalAmount %>
-                      </div>
-                      <div
-                        class="payment-status <%= order.paymentStatus.toLowerCase() %>"
-                      >
+                      <div class="order-amount">Total: ₹<%= order.finalAmount.toFixed(2) %></div>
+                      <div class="payment-status <%= order.paymentStatus.toLowerCase() %>">
                         Payment: <%= order.paymentStatus %>
                       </div>
-                      <div
-                        class="order-status <%= order.orderStatus.toLowerCase() %>"
-                      >
+                      <div class="order-status <%= order.orderStatus.toLowerCase() %>">
                         Status: <%= order.orderStatus %>
                       </div>
                     </div>
@@ -126,45 +68,43 @@
 
                   <div class="order-footer">
                     <div class="order-actions">
-                      <a
-                        href="/orderdetails/<%= order._id %>"
-                        class="btn-view-order"
-                        >View Details</a
-                      >
+                      <a href="/orderdetails/<%= order._id %>" class="btn-view-order">View Details</a>
+                      <% if (order.paymentStatus === "Failed") { %>
+                      <button onclick="retryPayment('<%= order._id %>')" class="btn-retry-payment">Retry Payment</button>
+                      <% } %>
                     </div>
                   </div>
+
+                  <% if (order.paymentStatus === "Failed") { %>
+                  <div class="payment-failed-notice">
+                    <i class="fas fa-credit-card text-danger"></i> <i class="fas fa-times-circle text-danger"></i>
+
+                    <p>Payment attempt failed. Please retry to complete your order.</p>
+                  </div>
+                  <% } %>
                 </div>
                 <% }); %>
 
-                <!-- Pagination Section -->
                 <% if (pagination && pagination.totalPages > 1) { %>
                 <div class="pagination-wrapper">
                   <div class="pagination">
                     <% if (pagination.hasPrevPage) { %>
-                    <a
-                      href="/orders?page=<%= pagination.prevPage %>"
-                      class="pagination-btn prev"
-                      >&laquo;</a
-                    >
-                    <% } %> <% for(let i = 1; i <= pagination.totalPages; i++) {
-                    %> <% if (i === pagination.page) { %>
-                    <a href="javascript:void(0)" class="pagination-btn active"
-                      ><%= i %></a
-                    >
+                    <a href="/orders?page=<%= pagination.prevPage %>" class="pagination-btn prev">«</a>
+                    <% } %>
+                    <% for(let i = 1; i <= pagination.totalPages; i++) { %>
+                    <% if (i === pagination.page) { %>
+                    <a href="javascript:void(0)" class="pagination-btn active"><%= i %></a>
                     <% } else { %>
-                    <a href="/orders?page=<%= i %>" class="pagination-btn"
-                      ><%= i %></a
-                    >
-                    <% } %> <% } %> <% if (pagination.hasNextPage) { %>
-                    <a
-                      href="/orders?page=<%= pagination.nextPage %>"
-                      class="pagination-btn next"
-                      >&raquo;</a
-                    >
+                    <a href="/orders?page=<%= i %>" class="pagination-btn"><%= i %></a>
+                    <% } %>
+                    <% } %>
+                    <% if (pagination.hasNextPage) { %>
+                    <a href="/orders?page=<%= pagination.nextPage %>" class="pagination-btn next">»</a>
                     <% } %>
                   </div>
                 </div>
-                <% } %> <% } else { %>
+                <% } %>
+                <% } else { %>
                 <div class="no-orders">
                   <p>No orders found</p>
                   <a href="/shop" class="btn-shop">Start Shopping</a>
@@ -229,6 +169,7 @@
     color: #e65100;
   }
 
+  .payment-status.completed,
   .payment-status.paid {
     background-color: #e8f5e9;
     color: #2e7d32;
@@ -264,8 +205,41 @@
     font-weight: 500;
   }
 
+  .btn-retry-payment{
+    display: inline-block;
+    padding: 10px 24px;
+    background-color: #333;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.3s;
+    font-weight: 500;
+  }
+
   .btn-view-order:hover {
     background-color: #000;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .btn-retry’Connor
+
+-payment {
+    display: inline-block;
+    padding: 10px 24px;
+    background-color: #1d2951;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.3s;
+    font-weight: 500;
+    margin-left: 10px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-retry-payment:hover {
+    background-color: #1d2951;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
@@ -302,11 +276,6 @@
     color: #1565c0;
   }
 
-  .order-status.processing {
-    background-color: #e8f5e9;
-    color: #2e7d32;
-  }
-
   .order-status.shipped {
     background-color: #e0f7fa;
     color: #00838f;
@@ -322,7 +291,18 @@
     color: #c62828;
   }
 
-  /* Updated Pagination Styles */
+  .payment-failed-notice {
+    padding: 20px;
+    text-align: center;
+    background-color: #ffebee;
+    border-top: 1px solid #ffcdd2;
+  }
+
+  .failed-illustration {
+    max-width: 150px;
+    margin-bottom: 15px;
+  }
+
   .pagination-wrapper {
     margin-top: 30px;
     margin-bottom: 20px;
@@ -389,19 +369,121 @@
 
 <script>
   function logout() {
-        Swal.fire({
-            title: `Are you sure?`,
-            text: `Do you want to continue to logout?`,
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#000000",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Logout",
-            cancelButtonText: "Cancel",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = "/logout";
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you want to continue to logout?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#000000",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Logout",
+      cancelButtonText: "Cancel",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = "/logout";
+      }
+    });
+  }
+
+  function retryPayment(orderId) {
+    fetch("/retry-payment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        const options = {
+          key: data.key_id,
+          amount: data.amount,
+          currency: data.currency,
+          name: "Raabta Collections",
+          description: "Retry Payment for Order",
+          order_id: data.orderId,
+          handler: function (response) {
+            verifyRetryPayment(response, data.orderId);
+          },
+          prefill: {
+              name: "<%= user.name %>",
+              email: "<%= user.email %>",
+              contact: "<%= user.phone %>",
+            },
+          theme: {
+            color: "#1d2951",
+          },
+          modal: {
+            ondismiss: function() {
+              window.location.href = "/orders";
             }
+          }
+        };
+        
+        const rzp = new Razorpay(options);
+        rzp.open();
+
+        rzp.on("payment.failed", function (response) {
+          Swal.fire({
+            title: "Payment Failed",
+            text: response.error.description,
+            icon: "error",
+            confirmButtonColor: "#1d2951",
+          });
         });
-    }
+      } else {
+        Swal.fire({
+          title: "Error",
+          text: data.message || "Failed to initiate retry payment",
+          icon: "error",
+          confirmButtonColor: "#1d2951",
+        });
+      }
+    })
+    .catch(error => {
+      console.error("Retry payment error:", error);
+      Swal.fire({
+        title: "Error",
+        text: "An error occurred while retrying payment",
+        icon: "error",
+        confirmButtonColor: "#1d2951",
+      });
+    });
+  }
+
+  function verifyRetryPayment(payment, orderId) {
+    fetch("/verify-payment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        payment: {
+          razorpay_payment_id: payment.razorpay_payment_id,
+          razorpay_order_id: payment.razorpay_order_id,
+          razorpay_signature: payment.razorpay_signature
+        },
+        order: { id: payment.razorpay_order_id }
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        window.location.href = "/orderconfirmation/" + data.orderId;
+      } else {
+        Swal.fire({
+          title: "Payment Failed",
+          text: data.message,
+          icon: "error",
+          confirmButtonColor: "#1d2951",
+        });
+      }
+    })
+    .catch(error => {
+      console.error("Verification error:", error);
+      Swal.fire({
+        title: "Error",
+        text: "Payment verification failed",
+        icon: "error",
+        confirmButtonColor: "#1d2951",
+      });
+    });
+  }
 </script>

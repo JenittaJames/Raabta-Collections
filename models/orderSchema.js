@@ -105,6 +105,10 @@ const orderSchema = new Schema({
         enum: ["Pending", "Shipped", "Delivered", "Cancelled", "Returned"],
         default: "Pending"
     },
+    razorpayOrderId: {
+        type: String,
+        default: null
+      }
 }, { timestamps: true });
 
 const Orders = mongoose.model("Orders", orderSchema);

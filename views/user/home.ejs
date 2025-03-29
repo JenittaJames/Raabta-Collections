@@ -69,6 +69,22 @@
         margin: 0;
         font-size: 14px;
     }
+
+    .new-tag {
+    display: inline-block;
+    background-color: #209e1c; /* Red background */
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 5px;
+    text-transform: uppercase;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
 </style>
 
 <% if (error_msg && error_msg.length > 0) { %>
@@ -210,7 +226,18 @@
                                         <a href="/singleproduct/<%=product._id%>">
                                             <img class="primary-img" src="<%= product.productImage[0]%>" alt="<%= product.productName %>">
                                         </a>
-                                        <span class="sticker">New</span>
+                                        <% if (product.createdAt) { 
+                                            const createdAtDate = new Date(product.createdAt);
+                                            const fiveDaysAgo = new Date();
+                                            fiveDaysAgo.setDate(fiveDaysAgo.getDate() - 7);
+                                       
+                                            if (createdAtDate >= fiveDaysAgo) { 
+                                       %>
+                                           <div class="new-tag">New!</div>
+                                       <% 
+                                           } 
+                                       } 
+                                       %>
                                         <div class="add-actions">
                                             <ul>
                                                 <li><a class="hiraola-add_cart" href="#" data-bs-toggle="tooltip" data-placement="top" title="Add To Cart"><i class="ion-bag"></i></a></li>
@@ -219,6 +246,7 @@
                                         </div>
                                     </div>
                                     <div class="hiraola-product_content">
+                                        
                                         <div class="product-desc_info">
                                             <h6><a class="product-name" href="/singleproduct/<%= product._id %>"><%= product.productName %></a></h6>
                                             <div class="price-box">

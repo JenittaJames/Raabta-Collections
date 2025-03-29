@@ -442,25 +442,42 @@ const walletHistory = async (req, res) => {
       return res.status(401).redirect("/login");
     }
 
-    const wallet = await walletModel.findOne({ userId: userId }).populate('userId');
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5; // Number of transactions per page
+    const skip = (page - 1) * limit;
+
+    let wallet = await walletModel.findOne({ userId: userId }).populate('userId');
 
     if (!wallet) {
-      
       const newWallet = new walletModel({
         userId,
-        balance : 0,
-        transaction : []
-      })
-
-      await newWallet.save()
-
+        balance: 0,
+        transaction: []
+      });
+      await newWallet.save();
+      wallet = newWallet;
     }
 
-    wallet.transaction.sort((a, b) => new Date(b.date) - new Date(a.date));
+    // Sort transactions by date (newest first)
+    const transactions = wallet.transaction.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    // Calculate total pages
+    const totalTransactions = transactions.length;
+    const totalPages = Math.ceil(totalTransactions / limit);
+    
+    // Get paginated transactions
+    const paginatedTransactions = transactions.slice(skip, skip + limit);
 
     res.render("user/walletHistory", { 
       user: wallet.userId, 
-      wallet: wallet 
+      wallet: {
+        ...wallet.toObject(),
+        transaction: paginatedTransactions
+      },
+      currentPage: page,
+      totalPages: totalPages,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1
     });
   } catch (error) {
     console.error("Error fetching wallet history:", error);

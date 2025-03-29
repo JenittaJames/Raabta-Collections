@@ -105,6 +105,8 @@ router.get('/orders/:orderId/invoice', ifLogged, orderController.generateInvoice
 router.get("/orderconfirmation/:orderId", ifLogged, orderController.orderConfirmation);
 router.get('/get-wallet-balance', ifLogged, orderController.getWalletBalance);
 router.post('/place-order-wallet', ifLogged, orderController.placeOrderWallet);
+router.post('/save-failed-payment', ifLogged, orderController.saveFailedPayment)
+router.post('/retry-payment', ifLogged, orderController.retryPayment)
 
 
 

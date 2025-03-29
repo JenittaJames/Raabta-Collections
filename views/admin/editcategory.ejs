@@ -1,5 +1,15 @@
 <%- include('../partials/admin/header') %>
 
+<style>
+    .form-control.error {
+        border-color: #dc3545;
+    }
+    .text-danger {
+        font-size: 0.875em;
+        margin-top: 5px;
+    }
+</style>
+
 <section class="content-main">
     <div class="content-header">
         <div>
@@ -10,17 +20,34 @@
     <div class="card-body">
         <div class="row">
             <div class="col-md-8">
-                <form method="post" action="/admin/editcategory/<%= category._id %>" onsubmit="return validateForm()">
+                <form 
+                    id="editCategoryForm" 
+                    method="post" 
+                    action="/admin/editcategory/<%= category._id %>"
+                >
                     <input type="hidden" name="id" value="<%= category._id %>">
                     <div class="mb-4">
                         <label for="name" class="form-label">Name</label>
-                        <input type="text" placeholder="Type here" class="form-control" id="name" name="name" value="<%= category.name %>" required />
+                        <input 
+                            type="text" 
+                            placeholder="Type here" 
+                            class="form-control" 
+                            id="name" 
+                            name="name" 
+                            value="<%= category.name %>" 
+                            required 
+                        />
                         <div id="nameError" class="text-danger"></div>
                     </div>
 
                     <div class="mb-4">
                         <label for="description" class="form-label">Description</label>
-                        <textarea id="description" name="description" class="form-control" required><%= category.description %></textarea>
+                        <textarea 
+                            id="description" 
+                            name="description" 
+                            class="form-control" 
+                            required
+                        ><%= category.description %></textarea>
                         <div id="descriptionError" class="text-danger"></div>
                     </div>
 
@@ -28,36 +55,77 @@
                 </form>
             </div>
         </div>
-    </div> 
+    </div>
 </section>
 
 <script>
-    function validateForm() {
-        var name = document.getElementById('name').value;
-        var description = document.getElementById('description').value;
-        var nameError = document.getElementById('nameError');
-        var descriptionError = document.getElementById('descriptionError');
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('editCategoryForm');
+        
+        // Form submission handler
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            if (validateForm()) {
+                this.submit();
+            }
+        });
 
-        nameError.innerHTML = '';
-        descriptionError.innerHTML = '';
+        // Real-time validation
+        const inputs = document.querySelectorAll('.form-control');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                validateField(this);
+            });
+        });
 
-        // Validate name
-        if (name.trim() === '') {
-            nameError.innerHTML = 'Name is required';
-            return false;
-        } else if (/\d/.test(name)) {
-            nameError.innerHTML = 'Name should not contain numbers';
-            return false;
+        function validateField(field) {
+            const errorElement = document.getElementById(field.id + 'Error');
+            errorElement.innerHTML = '';
+            field.classList.remove('error');
+
+            switch(field.id) {
+                case 'name':
+                    const name = field.value.trim();
+                    if (!name) {
+                        showError(field, errorElement, 'Category name is required');
+                    } else if (name.length < 2 || name.length > 50) {
+                        showError(field, errorElement, 'Name must be 2-50 characters long');
+                    } else if (/[^a-zA-Z\s]/.test(name)) {
+                        showError(field, errorElement, 'Name should only contain letters and spaces');
+                    }
+                    break;
+
+                case 'description':
+                    const description = field.value.trim();
+                    if (!description) {
+                        showError(field, errorElement, 'Description is required');
+                    } else if (description.length < 10 || description.length > 500) {
+                        showError(field, errorElement, 'Description must be 10-500 characters long');
+                    }
+                    break;
+            }
         }
 
-        // Validate description
-        if (description.trim() === '') {
-            descriptionError.innerHTML = 'Description is required';
-            return false;
+        function validateForm() {
+            let isValid = true;
+            const fields = ['name', 'description'];
+            
+            fields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                validateField(field);
+                if (field.classList.contains('error')) {
+                    isValid = false;
+                }
+            });
+
+            return isValid;
         }
 
-        return true;
-    }
+        function showError(field, errorElement, message) {
+            errorElement.innerHTML = message;
+            field.classList.add('error');
+        }
+    });
 </script>
 
 <%- include('../partials/admin/footer') %>

@@ -280,17 +280,13 @@
     const placeOrderBtn = document.getElementById("placeOrderBtn");
     const selectedPaymentMethod = document.getElementById("selectedPaymentMethod");
 
-    // Get the final price from the template
     const finalPrice = parseFloat("<%= finalPrice %>");
     const codOption = document.querySelector('.payment-option[data-method="Cash on Delivery"]');
 
-    // Restrict COD if finalPrice > 1000
     if (finalPrice > 1000) {
       codOption.classList.remove("active");
       codOption.classList.add("disabled");
       codOption.title = "Cash on Delivery is not available for orders above ₹1000";
-
-      // Switch to Online Payment if COD was default
       if (selectedPaymentMethod.value === "Cash on Delivery") {
         const onlinePaymentOption = document.querySelector('.payment-option[data-method="Online Payment"]');
         onlinePaymentOption.classList.add("active");
@@ -306,11 +302,9 @@
         if (!this.classList.contains("disabled")) {
           paymentOptions.forEach((opt) => opt.classList.remove("active"));
           this.classList.add("active");
-
           const paymentName = this.querySelector(".payment-name").textContent;
           paymentTitle.textContent = paymentName;
           selectedPaymentMethod.value = this.dataset.method;
-
           const optionIcon = this.querySelector(".payment-icon svg").cloneNode(true);
           methodIcon.replaceWith(optionIcon);
         }
@@ -319,12 +313,10 @@
 
     placeOrderBtn.addEventListener("click", function () {
       const paymentMethod = selectedPaymentMethod.value;
-
       if (paymentMethod === "Cash on Delivery" && finalPrice > 1000) {
-        alert("Cash on Delivery is not available for orders above ₹1000. Please select another payment method.");
+        alert("Cash on Delivery is not available for orders above ₹1000.");
         return;
       }
-
       if (paymentMethod === "Online Payment") {
         payNow();
       } else if (paymentMethod === "Cash on Delivery") {
@@ -359,9 +351,7 @@
       fetch("/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amount: finalPrice,
-        }),
+        body: JSON.stringify({ amount: finalPrice }),
       })
         .then((response) => response.json())
         .then((order) => {
@@ -381,8 +371,11 @@
               email: "<%= user.email %>",
               contact: "<%= user.phone %>",
             },
-            theme: {
-              color: "#1d2951",
+            theme: { color: "#1d2951" },
+            modal: {
+              ondismiss: function () {
+                window.location.href = "/orders";
+              },
             },
           };
 
@@ -390,11 +383,20 @@
           rzp.open();
 
           rzp.on("payment.failed", function (response) {
-            Swal.fire({
-              title: "Payment Failed",
-              text: response.error.description,
-              icon: "error",
-              confirmButtonColor: "#1d2951",
+            fetch("/save-failed-payment", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                orderId: order.id,
+                error: response.error,
+              }),
+            }).then(() => {
+              Swal.fire({
+                title: "Payment Failed",
+                text: response.error.description,
+                icon: "error",
+                confirmButtonColor: "#1d2951",
+              });
             });
           });
         })
@@ -402,7 +404,7 @@
           console.error("Error:", error);
           Swal.fire({
             title: "Error",
-            text: "There was a problem preparing your payment. Please try again.",
+            text: "There was a problem preparing your payment.",
             icon: "error",
             confirmButtonColor: "#1d2951",
           });
@@ -413,10 +415,7 @@
       fetch("/verify-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          payment: payment,
-          order: order,
-        }),
+        body: JSON.stringify({ payment, order }),
       })
         .then((response) => response.json())
         .then((data) => {
@@ -435,25 +434,12 @@
           console.error("Error:", error);
           Swal.fire({
             title: "Error",
-            text: "There was a problem verifying your payment. Please contact support.",
+            text: "There was a problem verifying your payment.",
             icon: "error",
             confirmButtonColor: "#1d2951",
           });
         });
     }
-
-    fetch("/get-wallet-balance")
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          const walletOption = document.querySelector('.payment-option[data-method="Wallet"]');
-          if (walletOption) {
-            const paymentName = walletOption.querySelector(".payment-name");
-            paymentName.textContent = `Wallet (₹${data.balance.toFixed(2)})`;
-          }
-        }
-      })
-      .catch((error) => console.error("Error fetching wallet balance:", error));
 
     function payWithWallet() {
       Swal.fire({
@@ -487,13 +473,69 @@
           console.error("Error:", error);
           Swal.fire({
             title: "Error",
-            text: "There was a problem processing your wallet payment. Please try again.",
+            text: "There was a problem processing your wallet payment.",
             icon: "error",
             confirmButtonColor: "#1d2951",
           });
         });
     }
+
+    fetch("/get-wallet-balance")
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          const walletOption = document.querySelector('.payment-option[data-method="Wallet"]');
+          if (walletOption) {
+            const paymentName = walletOption.querySelector(".payment-name");
+            paymentName.textContent = `Wallet (₹${data.balance.toFixed(2)})`;
+          }
+        }
+      })
+      .catch((error) => console.error("Error fetching wallet balance:", error));
   });
+
+  function retryPayment(orderId) {
+    fetch("/retry-payment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          const options = {
+            key: data.key_id,
+            amount: data.amount,
+            currency: data.currency,
+            name: "Raabta Collections",
+            description: "Jewellery Purchase Retry",
+            order_id: data.orderId,
+            handler: function (response) {
+              verifyPayment(response, data);
+            },
+            theme: { color: "#1d2951" },
+            modal: {
+              ondismiss: function () {
+                window.location.href = "/orders";
+              },
+            },
+          };
+          const rzp = new Razorpay(options);
+          rzp.open();
+        }
+      })
+      .catch((error) => {
+        console.error("Retry payment error:", error);
+        Swal.fire({
+          title: "Error",
+          text: "Failed to initiate payment retry",
+          icon: "error",
+          confirmButtonColor: "#1d2951",
+        });
+      });
+  }
+
+  window.retryPayment = retryPayment;
 </script>
 
 <%- include('../partials/user/footer') %>
