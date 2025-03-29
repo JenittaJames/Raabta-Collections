@@ -712,6 +712,7 @@ const generateInvoice = async (req, res) => {
   
       const newRazorpayOrder = await razorpay.orders.create(options);
   
+      // Update the existing order with the new Razorpay order ID
       await ordersModel.updateOne(
         { _id: orderId },
         { razorpayOrderId: newRazorpayOrder.id }
@@ -723,13 +724,13 @@ const generateInvoice = async (req, res) => {
         amount: newRazorpayOrder.amount,
         currency: newRazorpayOrder.currency,
         orderId: newRazorpayOrder.id,
+        originalOrderId: orderId // Send the original order ID back for reference
       });
     } catch (error) {
       console.error("Error in retry payment:", error);
       res.status(500).json({ success: false, message: "Failed to initiate retry" });
     }
   };
-
 
 
 

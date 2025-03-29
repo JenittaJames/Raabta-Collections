@@ -386,24 +386,24 @@
   }
 
   function retryPayment(orderId) {
-    fetch("/retry-payment", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ orderId })
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        const options = {
-          key: data.key_id,
-          amount: data.amount,
-          currency: data.currency,
-          name: "Raabta Collections",
-          description: "Retry Payment for Order",
-          order_id: data.orderId,
-          handler: function (response) {
-            verifyRetryPayment(response, data.orderId);
-          },
+  fetch("/retry-payment", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ orderId })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      const options = {
+        key: data.key_id,
+        amount: data.amount,
+        currency: data.currency,
+        name: "Raabta Collections",
+        description: "Retry Payment for Order",
+        order_id: data.orderId,
+        handler: function (response) {
+          verifyRetryPayment(response, data.originalOrderId);
+        },
           prefill: {
               name: "<%= user.name %>",
               email: "<%= user.email %>",
@@ -451,39 +451,40 @@
   }
 
   function verifyRetryPayment(payment, orderId) {
-    fetch("/verify-payment", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        payment: {
-          razorpay_payment_id: payment.razorpay_payment_id,
-          razorpay_order_id: payment.razorpay_order_id,
-          razorpay_signature: payment.razorpay_signature
-        },
-        order: { id: payment.razorpay_order_id }
-      })
+  fetch("/verify-payment", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      payment: {
+        razorpay_payment_id: payment.razorpay_payment_id,
+        razorpay_order_id: payment.razorpay_order_id,
+        razorpay_signature: payment.razorpay_signature
+      },
+      originalOrderId: orderId, // Pass the original order ID
+      order: { id: payment.razorpay_order_id }
     })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        window.location.href = "/orderconfirmation/" + data.orderId;
-      } else {
-        Swal.fire({
-          title: "Payment Failed",
-          text: data.message,
-          icon: "error",
-          confirmButtonColor: "#1d2951",
-        });
-      }
-    })
-    .catch(error => {
-      console.error("Verification error:", error);
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      window.location.href = "/orderconfirmation/" + data.orderId;
+    } else {
       Swal.fire({
-        title: "Error",
-        text: "Payment verification failed",
+        title: "Payment Failed",
+        text: data.message,
         icon: "error",
         confirmButtonColor: "#1d2951",
       });
+    }
+  })
+  .catch(error => {
+    console.error("Verification error:", error);
+    Swal.fire({
+      title: "Error",
+      text: "Payment verification failed",
+      icon: "error",
+      confirmButtonColor: "#1d2951",
     });
-  }
+  });
+}
 </script>

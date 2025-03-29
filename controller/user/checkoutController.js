@@ -502,7 +502,7 @@ const createOrder = async (req, res) => {
 
 const verifyPayment = async (req, res) => {
   try {
-    const { payment, order } = req.body;
+    const { payment, order, originalOrderId } = req.body;
     const userId = req.session.userId;
 
     const crypto = require('crypto');
@@ -516,6 +516,22 @@ const verifyPayment = async (req, res) => {
         message: 'Payment verification failed',
       });
     }
+
+    if (originalOrderId) {
+      // Update the existing order for retry payment
+      await orderModel.findByIdAndUpdate(originalOrderId, {
+        paymentStatus: "Completed",
+        orderStatus: "Confirmed",
+        razorpayPaymentId: payment.razorpay_payment_id,
+        razorpaySignature: payment.razorpay_signature
+      });
+      
+      return res.status(200).json({
+        success: true,
+        message: "Payment verified successfully",
+        orderId: originalOrderId
+      });
+    } else {
 
     const tempOrder = req.session.tempOrder;
     if (!tempOrder) {
@@ -580,6 +596,7 @@ const verifyPayment = async (req, res) => {
       message: 'Payment verified successfully',
       orderId: newOrder._id,
     });
+  }
   } catch (error) {
     console.error('Payment verification error:', error);
     return res.status(500).json({
