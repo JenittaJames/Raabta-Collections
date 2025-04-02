@@ -85,6 +85,8 @@ const orders = async (req, res) => {
   }
 };
 
+
+
 const orderDetails = async (req, res) => {
   try {
     const orderId = req.params.orderId;
@@ -103,7 +105,6 @@ const orderDetails = async (req, res) => {
       return res.status(404).render("error", { message: "Order not found" });
     }
 
-    // Convert order to plain object to avoid Mongoose document issues
     const orderData = order.toObject();
 
     const address =
@@ -116,7 +117,6 @@ const orderDetails = async (req, res) => {
     let totalDiscount = 0;
     const shippingCharge = orderData.shippingCharge || 0;
 
-    // Use the order-level discountAmount instead of calculating from item-level fields
     const orderLevelDiscount = Number(orderData.discountAmount) || 0;
     const totalOriginalPrice = orderData.orderedItem.reduce(
       (sum, item) => sum + (Number(item.totalProductPrice) || 0),
@@ -126,14 +126,11 @@ const orderDetails = async (req, res) => {
     const enhancedOrderItems = orderData.orderedItem.map((item) => {
       const quantity = Number(item.quantity) || 1;
 
-      // Use schema fields directly for pricing
-      let originalUnitPrice = Number(item.productPrice) || 0; // Original price per unit
+      let originalUnitPrice = Number(item.productPrice) || 0;
       let originalTotal =
-        Number(item.totalProductPrice) || originalUnitPrice * quantity; // Original total (price * quantity)
+        Number(item.totalProductPrice) || originalUnitPrice * quantity;
 
-      // If the item prices are 0 or incorrect, calculate them based on order totals
       if (originalUnitPrice === 0 || originalTotal === 0) {
-        // Pro-rate the orderAmount across items based on quantity
         const totalQuantity = orderData.orderedItem.reduce(
           (sum, item) => sum + (Number(item.quantity) || 1),
           0
@@ -141,11 +138,10 @@ const orderDetails = async (req, res) => {
         originalTotal =
           (orderData.orderAmount || 0) * (quantity / totalQuantity);
         originalUnitPrice = originalTotal / quantity;
-        item.productPrice = originalUnitPrice; // Update the item for display
+        item.productPrice = originalUnitPrice;
         item.totalProductPrice = originalTotal;
       }
 
-      // Pro-rate the order-level discount across items based on their original totals
       let itemDiscount = 0;
       let finalTotal = originalTotal;
 
@@ -155,12 +151,10 @@ const orderDetails = async (req, res) => {
         finalTotal = originalTotal - itemDiscount;
       }
 
-      // Update the item with the corrected final price
       const discountedUnitPrice = finalTotal / quantity;
       item.finalProductPrice = discountedUnitPrice;
       item.finalTotalProductPrice = finalTotal;
 
-      // Update subtotals and total discount
       originalSubtotal += originalTotal;
       discountedSubtotal += finalTotal;
       totalDiscount += itemDiscount;
@@ -176,7 +170,6 @@ const orderDetails = async (req, res) => {
       return enhancedItem;
     });
 
-    // Update the plain object
     orderData.orderedItem = enhancedOrderItems;
 
     const appliedCoupon = orderData.couponApplied
@@ -189,7 +182,6 @@ const orderDetails = async (req, res) => {
 
     const finalPrice = discountedSubtotal + shippingCharge;
 
-    // Update the order totals to reflect the discount
     orderData.orderAmount = originalSubtotal;
     orderData.finalAmount = finalPrice;
 
@@ -236,7 +228,6 @@ const verifyReturnRequest = async (req, res) => {
         .json({ success: false, message: "Product not found in this order" });
     }
 
-    // Update the product status
     orderItem.productStatus = status;
     orderItem.updatedAt = new Date();
 
@@ -257,13 +248,11 @@ const verifyReturnRequest = async (req, res) => {
           .json({ success: false, message: "Wallet not found for the user" });
       }
 
-      // Calculate finalTotal for refund (mirroring orderDetails logic)
       const quantity = Number(orderItem.quantity) || 1;
       let originalUnitPrice = Number(orderItem.productPrice) || 0;
       let originalTotal =
         Number(orderItem.totalProductPrice) || originalUnitPrice * quantity;
 
-      // If original prices are missing or incorrect, pro-rate based on order totals
       if (originalUnitPrice === 0 || originalTotal === 0) {
         const totalQuantity = order.orderedItem.reduce(
           (sum, item) => sum + (Number(item.quantity) || 1),
@@ -273,7 +262,6 @@ const verifyReturnRequest = async (req, res) => {
         originalUnitPrice = originalTotal / quantity;
       }
 
-      // Calculate item-level discount based on order-level discount
       const orderLevelDiscount = Number(order.discountAmount) || 0;
       const totalOriginalPrice = order.orderedItem.reduce(
         (sum, item) => sum + (Number(item.totalProductPrice) || 0),
@@ -288,7 +276,6 @@ const verifyReturnRequest = async (req, res) => {
         finalTotal = originalTotal - itemDiscount;
       }
 
-      // Use finalTotal as the refund amount
       const refundAmount = finalTotal;
 
       wallet.balance += refundAmount;
@@ -301,10 +288,9 @@ const verifyReturnRequest = async (req, res) => {
       });
 
       orderItem.refunded = true;
-      orderItem.finalTotalProductPrice = refundAmount; // Optionally store this for reference
+      orderItem.finalTotalProductPrice = refundAmount;
       await wallet.save();
 
-      // Determine refund status for online payments
       const isOnlinePayment = ["Online", "Wallet", "Card", "UPI"].includes(
         order.paymentMethod
       );
@@ -323,7 +309,6 @@ const verifyReturnRequest = async (req, res) => {
         order.paymentStatus = "partially-refunded";
       }
 
-      // Update inventory
       const product = await productModel.findById(orderItem.productId);
       if (product) {
         product.totalStock += orderItem.quantity;
@@ -379,17 +364,12 @@ const updateOrderStatus = async (req, res) => {
     if (orderStatus) {
       order.orderStatus = orderStatus;
     }
-
-    // If payment status is provided and this is NOT an online payment, update it
-    // For online payments, we ignore manual payment status changes
     if (paymentStatus && !isOnlinePayment) {
       order.paymentStatus = paymentStatus;
     } else if (isOnlinePayment) {
-      // For online payments, always ensure it's marked as paid
       order.paymentStatus = "Paid";
     }
 
-    // Automatically set payment status to 'paid' if order is delivered and payment method is COD
     if (orderStatus === "Delivered" && order.paymentMethod === "COD") {
       order.paymentStatus = "Paid";
     }

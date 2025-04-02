@@ -26,7 +26,6 @@ router.get(
   "/auth/google/callback",
   passport.authenticate("google", { failureRedirect: "/register" }),
   (req, res) => {
-    // User is available as req.user after successful authentication
     req.session.userId = req.user._id;
     req.session.email = req.user.email;
     req.session.isAuth = true;
@@ -50,6 +49,8 @@ router.post("/verifyforgotpasswordotp", userController.verifyForgotPasswordOtp);
 router.post("/verify-otp", userController.verifyOtp);
 router.get("/reset-password", userController.loadResetPassword);
 router.post("/reset-password", userController.resetPassword);
+router.get("/about",userController.loadAbout);
+router.get("/contact",userController.loadContact);
 
 
 router.get("/shop",wishlistMiddleware, userController.loadShop);

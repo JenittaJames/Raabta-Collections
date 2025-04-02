@@ -1,17 +1,13 @@
 const adminModel = require("../../models/userSchema");
-const mongoose = require('mongoose');
 const Orders = require('../../models/orderSchema');
 const Product = require('../../models/productSchema')
-const Category = require('../../models/categorySchema');
-const User = require('../../models/userSchema');
 const bcrypt = require('bcrypt');
 
 const loadDashboard = async (req, res) => {
     try {
         const currentDate = new Date();
-        const filter = req.query.filter || 'monthly'; // Default to monthly
+        const filter = req.query.filter || 'monthly';
 
-        // Calculate date range based on filter
         let startDate;
         switch (filter) {
             case 'daily':
@@ -28,7 +24,6 @@ const loadDashboard = async (req, res) => {
                 break;
         }
 
-        // Basic Stats
         const totalRevenue = await Orders.aggregate([
             { $match: { createdAt: { $gte: startDate }, orderStatus: 'Delivered' } },
             { $group: { _id: null, total: { $sum: '$finalAmount' } } }
@@ -53,7 +48,6 @@ const loadDashboard = async (req, res) => {
             { $group: { _id: null, total: { $sum: '$finalAmount' } } }
         ]);
 
-        // Sales Chart Data
         const salesData = await Orders.aggregate([
             { $match: { createdAt: { $gte: startDate }, orderStatus: 'Delivered' } },
             {
@@ -138,7 +132,6 @@ const loadDashboard = async (req, res) => {
         .populate('userId', 'userName')
         .populate('deliveryAddress');
 
-        // Sales report URL for redirection
         const salesReportUrl = '/admin/salesreport';
 
         res.render('admin/index', {
@@ -244,7 +237,7 @@ const usersPage = async (req, res) => {
     }
 };
 
-// Original block user function (non-AJAX)
+
 const blockUser = async (req,res) => {
     try {
         const id = req.params.userId;
@@ -263,7 +256,7 @@ const blockUser = async (req,res) => {
     }
 }
 
-// New AJAX block user endpoint
+
 const blockUserAjax = async (req, res) => {
     try {
         const id = req.params.userId;
@@ -277,7 +270,6 @@ const blockUserAjax = async (req, res) => {
         
         await adminModel.updateOne({ _id: id }, { $set: { status: newStatus } });
         
-        // Return the updated status
         return res.status(200).json({ 
             success: true, 
             status: newStatus, 

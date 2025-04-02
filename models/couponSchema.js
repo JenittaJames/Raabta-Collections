@@ -61,7 +61,7 @@ const couponSchema = new mongoose.Schema({
     usedBy: [{
         userId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'User' // Reference to the User model
+            ref: 'User'
         },
         usedAt: {
             type: Date,

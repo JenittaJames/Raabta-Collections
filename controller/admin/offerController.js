@@ -181,16 +181,16 @@ const toggleOfferStatus = async (req, res) => {
   }
 };
 
-// Generate referral code for user
+
 const generateReferralCode = (userId) => {
   const randomBytes = crypto.randomBytes(3).toString("hex");
   return `REF${userId.substring(0, 5)}${randomBytes}`.toUpperCase();
 };
 
-// Handle referral reward by adding Rs.500 to referrer's wallet
+
 const handleReferralReward = async (referrerId) => {
   try {
-    // Find an active referral offer
+
     const referralOffer = await Offer.findOne({
       status: true,
       offerType: 'referral',
@@ -207,7 +207,6 @@ const handleReferralReward = async (referrerId) => {
       return false;
     }
 
-    // Update referrer's wallet and track referral reward
     const referrer = await User.findByIdAndUpdate(
       referrerId,
       {
@@ -223,13 +222,11 @@ const handleReferralReward = async (referrerId) => {
       { new: true }
     );
 
-    // Update offer's used count
     await Offer.findByIdAndUpdate(
       referralOffer._id,
       { $inc: { usedCount: 1 } }
     );
 
-    // Create wallet transaction
     await walletModel.findOneAndUpdate(
       { userId: referrerId },
       {

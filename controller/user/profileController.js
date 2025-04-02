@@ -60,10 +60,8 @@ const updateProfile = async (req, res) => {
         .json({ status: "error", message: "All fields are required" });
     }
 
-    // Get current user data
     const currentUser = await userModel.findById(userId);
 
-    // If email hasn't changed, update profile directly
     if (currentUser.email === email) {
       const updatedUser = await userModel.findByIdAndUpdate(
         userId,
@@ -85,9 +83,7 @@ const updateProfile = async (req, res) => {
         .json({ status: "success", message: "Profile updated successfully" });
     }
 
-    // If email has changed, send OTP for verification
     else {
-      // Check if email already exists with another user
       const emailExists = await userModel.findOne({
         email: email,
         _id: { $ne: userId },
@@ -101,22 +97,19 @@ const updateProfile = async (req, res) => {
           });
       }
 
-      // Generate OTP
       const otp = generateOtp();
 
       console.log("otp ividaanoooo", otp);
 
-      // Store update data and OTP in session
       req.session.profileUpdate = {
         userId,
         userName,
         phone,
         newEmail: email,
         otp,
-        timestamp: Date.now(), // For OTP expiration
+        timestamp: Date.now(), 
       };
 
-      // Send verification email
       const emailSent = await sendVerificationEmail(email, otp);
       if (!emailSent) {
         return res
@@ -139,7 +132,7 @@ const updateProfile = async (req, res) => {
   }
 };
 
-// Render email verification page
+
 const verifyEmailUpdate = async (req, res) => {
   try {
     if (!req.session.profileUpdate) {
@@ -155,7 +148,8 @@ const verifyEmailUpdate = async (req, res) => {
   }
 };
 
-// Verify email OTP and complete profile update
+
+
 const verifyEmailOtp = async (req, res) => {
   try {
     const { otp } = req.body;
@@ -167,7 +161,6 @@ const verifyEmailOtp = async (req, res) => {
       });
     }
 
-    // Check OTP expiration (30 minutes)
     const otpAge = Date.now() - req.session.profileUpdate.timestamp;
 
     if (otpAge > 30 * 60 * 1000) {
@@ -178,9 +171,7 @@ const verifyEmailOtp = async (req, res) => {
       });
     }
 
-    // Verify OTP
     if (otp === req.session.profileUpdate.otp) {
-      // Update user profile
       const { userId, userName, phone, newEmail } = req.session.profileUpdate;
 
       const updatedUser = await userModel.findByIdAndUpdate(
@@ -200,7 +191,6 @@ const verifyEmailOtp = async (req, res) => {
         });
       }
 
-      // Clear session data
       delete req.session.profileUpdate;
 
       return res.status(200).json({
@@ -233,15 +223,12 @@ const resendEmailOtp = async (req, res) => {
       });
     }
 
-    // Generate new OTP
     const newOtp = generateOtp();
     const email = req.session.profileUpdate.newEmail;
 
-    // Update session with new OTP and timestamp
     req.session.profileUpdate.otp = newOtp;
     req.session.profileUpdate.timestamp = Date.now();
 
-    // Send verification email
     const emailSent = await sendVerificationEmail(email, newOtp);
     if (!emailSent) {
       return res.status(500).json({
@@ -443,7 +430,7 @@ const walletHistory = async (req, res) => {
     }
 
     const page = parseInt(req.query.page) || 1;
-    const limit = 5; // Number of transactions per page
+    const limit = 5; 
     const skip = (page - 1) * limit;
 
     let wallet = await walletModel.findOne({ userId: userId }).populate('userId');
@@ -458,14 +445,12 @@ const walletHistory = async (req, res) => {
       wallet = newWallet;
     }
 
-    // Sort transactions by date (newest first)
     const transactions = wallet.transaction.sort((a, b) => new Date(b.date) - new Date(a.date));
     
-    // Calculate total pages
+  
     const totalTransactions = transactions.length;
     const totalPages = Math.ceil(totalTransactions / limit);
     
-    // Get paginated transactions
     const paginatedTransactions = transactions.slice(skip, skip + limit);
 
     res.render("user/walletHistory", { 
@@ -541,7 +526,6 @@ const editAddress = async (req, res) => {
     const addressId = req.params.id;
     const userId = req.session.userId;
     
-    // Find the address document
     const addressDoc = await addressModel.findOne({
       _id: addressId,
       userId: userId
@@ -551,7 +535,6 @@ const editAddress = async (req, res) => {
       return res.status(404).render("error", { message: "Address not found" });
     }
     
-    // Get the address data
     const addressData = addressDoc.address[0];
     
     res.render("user/editaddress", { 
@@ -583,10 +566,8 @@ const updateAddress = async (req, res) => {
       saveAs
     } = req.body;
     
-    // Check if this address should be set as default
     const isDefault = req.body.isDefault === "on";
     
-    // If this address is being set as default, unset all other addresses as default
     if (isDefault) {
       await addressModel.updateMany(
         { userId: userId },
@@ -594,7 +575,6 @@ const updateAddress = async (req, res) => {
       );
     }
     
-    // Update the address document
     const updatedAddress = await addressModel.findOneAndUpdate(
       { _id: addressId, userId: userId },
       { 

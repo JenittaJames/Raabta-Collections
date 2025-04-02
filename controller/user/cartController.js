@@ -6,72 +6,73 @@ const offerModel = require("../../models/offerSchema");
 const loadCart = async (req, res) => {
   try {
     const userId = req.session.userId;
-    const cartDetails = await cartModel
-      .find({ user: userId })
-      .populate({
-        path: "cartItem.productId",
-        select: "productName price productImage totalStock category",
-        populate: { path: "category" }
-      });
+    const cartDetails = await cartModel.find({ user: userId }).populate({
+      path: "cartItem.productId",
+      select: "productName price productImage totalStock category",
+      populate: { path: "category" },
+    });
 
-    // Initialize offers data
     const appliedOffers = {};
     let originalSubtotal = 0;
     let discountedSubtotal = 0;
     let totalDiscount = 0;
 
-    // Process cart data only if cart exists and has items
-    if (cartDetails.length > 0 && cartDetails[0].cartItem && cartDetails[0].cartItem.length > 0) {
-      // Get active offers
+    if (
+      cartDetails.length > 0 &&
+      cartDetails[0].cartItem &&
+      cartDetails[0].cartItem.length > 0
+    ) {
       const activeOffers = await offerModel.find({
         status: true,
         startDate: { $lte: new Date() },
-        endDate: { $gte: new Date() }
+        endDate: { $gte: new Date() },
       });
-      
-      // Calculate values for each cart item
+
       for (const item of cartDetails[0].cartItem) {
-        if (!item.productId) continue; // Skip if productId is null
-        
+        if (!item.productId) continue;
+
         const productIdString = item.productId._id.toString();
         const originalItemPrice = item.productId.price;
         const originalItemTotal = originalItemPrice * item.quantity;
         originalSubtotal += originalItemTotal;
-        
-        // Find applicable offers for this item
-        const productOffers = activeOffers.filter(offer => 
-          offer.offerType === "product" && 
-          offer.productId && 
-          offer.productId.some(p => p && p.toString() === productIdString)
+
+        const productOffers = activeOffers.filter(
+          (offer) =>
+            offer.offerType === "product" &&
+            offer.productId &&
+            offer.productId.some((p) => p && p.toString() === productIdString)
         );
-        
+
         const categoryOffers = [];
         if (item.productId.category) {
           const categoryIdString = item.productId.category._id.toString();
-          categoryOffers.push(...activeOffers.filter(offer => 
-            offer.offerType === "category" && 
-            offer.categoryId && 
-            offer.categoryId.some(c => c && c.toString() === categoryIdString)
-          ));
-        }
-        
-        const allOffers = [...productOffers, ...categoryOffers];
-        
-        if (allOffers.length > 0) {
-          // Find best offer (highest discount)
-          const bestOffer = allOffers.reduce((max, offer) =>
-            offer.discount > max.discount ? offer : max, allOffers[0]
+          categoryOffers.push(
+            ...activeOffers.filter(
+              (offer) =>
+                offer.offerType === "category" &&
+                offer.categoryId &&
+                offer.categoryId.some(
+                  (c) => c && c.toString() === categoryIdString
+                )
+            )
           );
-          
-          // Calculate discounted price
+        }
+
+        const allOffers = [...productOffers, ...categoryOffers];
+
+        if (allOffers.length > 0) {
+          const bestOffer = allOffers.reduce(
+            (max, offer) => (offer.discount > max.discount ? offer : max),
+            allOffers[0]
+          );
+
           const discountAmount = (originalItemPrice * bestOffer.discount) / 100;
           const discountedPrice = originalItemPrice - discountAmount;
           const discountedItemTotal = discountedPrice * item.quantity;
-          
-          // Update item price in cart
+
           item.price = discountedPrice;
           item.total = discountedItemTotal;
-          
+
           // Store offer details for this product
           appliedOffers[productIdString] = {
             name: bestOffer.offerName,
@@ -79,51 +80,46 @@ const loadCart = async (req, res) => {
             discountedPrice: discountedPrice,
             originalPrice: originalItemPrice,
             discountAmount: discountAmount,
-            itemDiscountTotal: discountAmount * item.quantity
+            itemDiscountTotal: discountAmount * item.quantity,
           };
-          
+
           discountedSubtotal += discountedItemTotal;
         } else {
-          // No discount applies
           item.price = originalItemPrice;
           item.total = originalItemTotal;
           discountedSubtotal += originalItemTotal;
         }
       }
-      
-      // Calculate total discount amount
+
       totalDiscount = originalSubtotal - discountedSubtotal;
-      
-      // Update cart total
+
       cartDetails[0].cartTotal = discountedSubtotal;
     }
 
-    // Prepare summary data for the view
     const cartSummary = {
       originalSubtotal,
       discountedSubtotal,
       totalDiscount,
-      itemCount: cartDetails.length > 0 && cartDetails[0].cartItem ? cartDetails[0].cartItem.length : 0
+      itemCount:
+        cartDetails.length > 0 && cartDetails[0].cartItem
+          ? cartDetails[0].cartItem.length
+          : 0,
     };
 
-
     req.session.originalSubtotal = originalSubtotal;
-req.session.discountedSubtotal = discountedSubtotal;
-req.session.cartTotalDiscount = totalDiscount;
+    req.session.discountedSubtotal = discountedSubtotal;
+    req.session.cartTotalDiscount = totalDiscount;
 
-
-    res.render("user/cart", { 
-      cartDetails, 
-      appliedOffers, 
-      cartSummary 
+    res.render("user/cart", {
+      cartDetails,
+      appliedOffers,
+      cartSummary,
     });
-    
   } catch (error) {
     console.error("Error in rendering cart page:", error);
     res.status(500).send("Server Error");
   }
 };
-
 
 const addCart = async (req, res) => {
   try {
@@ -135,14 +131,19 @@ const addCart = async (req, res) => {
       return res.status(400).json({ message: "Invalid product or quantity" });
     }
 
-    const product = await productModel.findOne({ _id: productId, status: true });
+    const product = await productModel.findOne({
+      _id: productId,
+      status: true,
+    });
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
 
     const category = await catModel.findById(product.category);
     if (!category || category.status === false) {
-      return res.status(400).json({ message: "This product's category is no longer available" });
+      return res
+        .status(400)
+        .json({ message: "This product's category is no longer available" });
     }
 
     if (product.totalStock <= 0 || product.totalStock < quantity) {
@@ -162,28 +163,35 @@ const addCart = async (req, res) => {
       (item) => item.productId.toString() === productId.toString()
     );
 
-    const productOffers = await offerModel.find({
-      status: true,
-      offerType: "product",
-      productId: productId,
-      startDate: { $lte: new Date() },
-      endDate: { $gte: new Date() },
-      $or: [{ maxUses: null }, { maxUses: { $gt: 0 } }],
-    }).sort({ discount: -1 });
+    const productOffers = await offerModel
+      .find({
+        status: true,
+        offerType: "product",
+        productId: productId,
+        startDate: { $lte: new Date() },
+        endDate: { $gte: new Date() },
+        $or: [{ maxUses: null }, { maxUses: { $gt: 0 } }],
+      })
+      .sort({ discount: -1 });
 
-    const categoryOffers = await offerModel.find({
-      status: true,
-      offerType: "category",
-      categoryId: product.category,
-      startDate: { $lte: new Date() },
-      endDate: { $gte: new Date() },
-      $or: [{ maxUses: null }, { maxUses: { $gt: 0 } }],
-    }).sort({ discount: -1 });
+    const categoryOffers = await offerModel
+      .find({
+        status: true,
+        offerType: "category",
+        categoryId: product.category,
+        startDate: { $lte: new Date() },
+        endDate: { $gte: new Date() },
+        $or: [{ maxUses: null }, { maxUses: { $gt: 0 } }],
+      })
+      .sort({ discount: -1 });
 
     const allOffers = [...productOffers, ...categoryOffers];
     const bestOffer =
       allOffers.length > 0
-        ? allOffers.reduce((max, offer) => (offer.discount > max.discount ? offer : max), allOffers[0])
+        ? allOffers.reduce(
+            (max, offer) => (offer.discount > max.discount ? offer : max),
+            allOffers[0]
+          )
         : null;
 
     const unitPrice = bestOffer
@@ -191,7 +199,8 @@ const addCart = async (req, res) => {
       : product.price;
 
     if (existingItemIndex > -1) {
-      const newQuantity = cart.cartItem[existingItemIndex].quantity + parseInt(quantity);
+      const newQuantity =
+        cart.cartItem[existingItemIndex].quantity + parseInt(quantity);
 
       if (newQuantity > MAX_QUANTITY) {
         return res.status(400).json({
@@ -242,7 +251,7 @@ const addCart = async (req, res) => {
         id: bestOffer._id,
         name: bestOffer.offerName,
         discount: bestOffer.discount,
-        discountAmount: (product.price * bestOffer.discount) / 100 * quantity,
+        discountAmount: ((product.price * bestOffer.discount) / 100) * quantity,
       };
     }
 
@@ -312,10 +321,9 @@ const updateCartQuantity = async (req, res) => {
       });
     }
 
-    const cart = await cartModel.findOne({ user: userId }).populate(
-      "cartItem.productId",
-      "price totalStock category"
-    );
+    const cart = await cartModel
+      .findOne({ user: userId })
+      .populate("cartItem.productId", "price totalStock category");
     if (!cart) {
       return res.status(404).json({ message: "Cart not found" });
     }
@@ -327,13 +335,14 @@ const updateCartQuantity = async (req, res) => {
       return res.status(404).json({ message: "Product not found in cart" });
     }
 
-    // Fetch active offers
-    const activeOffers = await offerModel.find({
-      status: true,
-      startDate: { $lte: new Date() },
-      endDate: { $gte: new Date() },
-      $or: [{ maxUses: null }, { maxUses: { $gt: 0 } }],
-    }).populate("productId categoryId");
+    const activeOffers = await offerModel
+      .find({
+        status: true,
+        startDate: { $lte: new Date() },
+        endDate: { $gte: new Date() },
+        $or: [{ maxUses: null }, { maxUses: { $gt: 0 } }],
+      })
+      .populate("productId categoryId");
 
     const filterOffersByUsedCount = (offers) => {
       return offers.filter((offer) => {
@@ -367,13 +376,12 @@ const updateCartQuantity = async (req, res) => {
       ? product.price - (product.price * bestOffer.discount) / 100
       : product.price;
 
-    // Update item
+    
     cart.cartItem[itemIndex].quantity = parseInt(quantity);
     cart.cartItem[itemIndex].price = unitPrice;
     cart.cartItem[itemIndex].stock = product.totalStock;
     cart.cartItem[itemIndex].total = quantity * unitPrice;
 
-    // Recalculate cart total
     cart.cartTotal = cart.cartItem.reduce((acc, item) => acc + item.total, 0);
 
     await cart.save();
@@ -418,10 +426,9 @@ const getCartTotals = async (req, res) => {
   try {
     const userId = req.session.userId;
 
-    const cart = await cartModel.findOne({ user: userId }).populate(
-      "cartItem.productId",
-      "price category"
-    );
+    const cart = await cartModel
+      .findOne({ user: userId })
+      .populate("cartItem.productId", "price category");
 
     if (!cart || !cart.cartItem.length) {
       return res.json({
@@ -431,12 +438,14 @@ const getCartTotals = async (req, res) => {
       });
     }
 
-    const activeOffers = await offerModel.find({
-      status: true,
-      startDate: { $lte: new Date() },
-      endDate: { $gte: new Date() },
-      $or: [{ maxUses: null }, { maxUses: { $gt: 0 } }],
-    }).populate("productId categoryId");
+    const activeOffers = await offerModel
+      .find({
+        status: true,
+        startDate: { $lte: new Date() },
+        endDate: { $gte: new Date() },
+        $or: [{ maxUses: null }, { maxUses: { $gt: 0 } }],
+      })
+      .populate("productId categoryId");
 
     const filterOffersByUsedCount = (offers) => {
       return offers.filter((offer) => {

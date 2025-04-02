@@ -17,7 +17,6 @@ const generateReferralCode = (userId) => {
   return `REF${userId.substring(0, 5)}${randomBytes}`.toUpperCase();
 };
 
-// Helper Functions
 function generateOtp() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
@@ -50,22 +49,18 @@ async function sendVerificationEmail(email, otp) {
   }
 }
 
-// Home Page
 const loadHomepage = async (req, res) => {
   try {
-    // Fetch categories
     const categories = await catModel.find({});
 
-    // Fetch active products
     const products = await productModel.find({ status: true });
 
-    // Fetch active offers (status: true, within date range)
     const activeOffers = await offerModel.find({
       status: true,
-      startDate: { $lte: new Date() }, // Offers that have started
-      endDate: { $gte: new Date() }    // Offers that haven't ended
+      startDate: { $lte: new Date() }, 
+      endDate: { $gte: new Date() } 
     })
-    .populate('productId', 'productName') // Populate product details if offer type is 'product'
+    .populate('productId', 'productName')
     .populate('categoryId', 'name');      
 
     let userWishlist = [];
@@ -96,14 +91,12 @@ const loadShop = async (req, res) => {
     const searchQuery = query || "";
     const sortOption = sort || "";
 
-    // Fetch all active categories
     const activeCategories = await catModel.find({ status: true }).select('_id');
     const activeCategoriesId = activeCategories.map(cat => cat._id);
 
-    // Create search filter with both product status and category check
     const searchFilter = {
       status: true,
-      category: { $in: activeCategoriesId } // Only include products from active categories
+      category: { $in: activeCategoriesId } 
     };
 
     if (searchQuery) {
@@ -117,7 +110,6 @@ const loadShop = async (req, res) => {
     const limit = 9;
     const skip = (page - 1) * limit;
 
-    // Sorting logic
     let sortCriteria = { createdAt: -1 }; // Default sort by newest
     switch(sortOption) {
       case 'a-z':
@@ -144,11 +136,13 @@ const loadShop = async (req, res) => {
 
     const categories = await catModel.find({ status: true });
 
-    // Fetch active offers
+    
     const activeOffers = await offerModel.find({
       status: true,
-      startDate: { $lte: new Date() }, // Offers that have started
-      endDate: { $gte: new Date() }    // Offers that haven't ended
+      startDate: { $lte: new Date() }, 
+      
+      endDate: { $gte: new Date() } 
+      
     })
       .populate('productId', 'productName')
       .populate('categoryId', 'name');     
@@ -169,7 +163,8 @@ const loadShop = async (req, res) => {
       limit,
       offers: activeOffers,
       userWishlist,
-      sort: sortOption // Pass the sort option to the view
+      sort: sortOption 
+      
     });
   } catch (error) {
     console.error("Error loading shop page:", error);
@@ -213,7 +208,7 @@ const shopByFilter = async (req, res) => {
   }
 };
 
-// Registration Flow
+
 const loadRegister = async (req, res) => {
   try {
     return res.render("user/register");
@@ -409,7 +404,7 @@ const logout = async (req, res) => {
   }
 };
 
-// Password Reset Flow
+
 const loadForgot = async (req, res) => {
   try {
     return res.render("user/forgot");
@@ -540,7 +535,7 @@ const resetPassword = async (req, res) => {
   }
 };
 
-// Error Page
+
 const pageNotFound = async (req, res) => {
   try {
     res.render("user/404");
@@ -549,6 +544,26 @@ const pageNotFound = async (req, res) => {
     res.status(500).send("Server error");
   }
 };
+
+
+
+const loadAbout = async (req,res) => {
+  try {
+    res.render("user/about")
+  } catch (error) {
+    console.log("Error occured while rendering About page",error);
+  }
+}
+
+
+
+const loadContact = async (req,res) => {
+  try {
+    res.render("user/contact")
+  } catch (error) {
+    console.log("Error occured while rendering Contact page",error);
+  }
+}
 
 
 
@@ -572,4 +587,6 @@ module.exports = {
   verifyForgotPasswordOtp,
   resetPassword,
   logout,
+  loadAbout,
+  loadContact
 };

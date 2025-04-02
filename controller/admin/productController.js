@@ -74,7 +74,8 @@ const addProductPost = async (req, res) => {
   }
 };
 
-// Original block product function (non-AJAX)
+
+
 const blockProduct = async (req, res) => {
   try {
     const id = req.params.productId;
@@ -91,7 +92,8 @@ const blockProduct = async (req, res) => {
   }
 };
 
-// New AJAX block product endpoint
+
+
 const blockProductAjax = async (req, res) => {
   try {
     const id = req.params.productId;
@@ -133,13 +135,11 @@ const editProductPost = async (req, res) => {
     const productId = req.params.productId;
     const { name, description, price, stock } = req.body;
 
-    // Find the product by ID
     const product = await productModel.findById(productId);
     if (!product) {
       return res.redirect("/admin/products");
     }
 
-    // Check if another product exists with the same name
     const existingProduct = await productModel.findOne({
       name,
       _id: { $ne: productId },
@@ -148,7 +148,6 @@ const editProductPost = async (req, res) => {
       return res.redirect("/admin/product");
     }
 
-    // Update the product details
     product.name = name;
     product.description = description;
     product.price = price;
@@ -156,7 +155,6 @@ const editProductPost = async (req, res) => {
 
     await product.save();
 
-    // Redirect to the product page after successful update
     res.redirect("/admin/product");
   } catch (error) {
     console.error("Error updating product:", error);
@@ -179,24 +177,18 @@ const editImagePost = async (req, res) => {
     try {
         const productId = req.params.productId;
 
-        // Get indices of the images being updated
         const imageIndices = req.body.imageIndices || [];
         const newImages = req.files.map(file => file.path);
 
-        // Find the product
         const product = await productModel.findById(productId);
 
-        // Initialize productImage array if it doesn't exist
         if (!product.productImage) {
             product.productImage = [];
         }
 
-        // Handle image updates
         for (let i = 0; i < newImages.length; i++) {
             const currentIndex = i;
             
-            // If the index exists in productImage array, replace it
-            // Otherwise, add the new image
             if (currentIndex < product.productImage.length) {
                 product.productImage[currentIndex] = newImages[i];
             } else {
@@ -204,12 +196,10 @@ const editImagePost = async (req, res) => {
             }
         }
 
-        // Ensure we don't exceed 3 images
         if (product.productImage.length > 3) {
             product.productImage = product.productImage.slice(0, 3);
         }
 
-        // Save the updated product
         await product.save();
 
         res.redirect('/admin/editproduct/' + productId);

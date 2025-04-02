@@ -161,8 +161,6 @@ const applyCoupon = async (req, res) => {
   try {
     const { couponCode } = req.body;
     const userId = req.session.userId;
-
-    // Fetch the coupon from the database
     const coupon = await couponModel.findOne({
       couponCode: couponCode.toUpperCase(),
       status: true,
@@ -176,7 +174,6 @@ const applyCoupon = async (req, res) => {
       });
     }
 
-    // Check if the cart total meets the minimum price requirement
     const totalPrice = req.session.totalPrice;
     if (totalPrice < coupon.minimumPrice) {
       return res.status(400).json({
@@ -185,7 +182,6 @@ const applyCoupon = async (req, res) => {
       });
     }
 
-    // Check if the user has already used this coupon for completed orders
     const completedUsageCount = coupon.usedBy.filter(
       (use) => use.userId.toString() === userId.toString() && use.orderId
     ).length;
@@ -197,7 +193,6 @@ const applyCoupon = async (req, res) => {
       });
     }
 
-    // Calculate discount amount
     let discountAmount = 0;
     if (coupon.type === "percentageDiscount") {
       discountAmount = (totalPrice * coupon.discount) / 100;
@@ -205,10 +200,8 @@ const applyCoupon = async (req, res) => {
       discountAmount = coupon.discount;
     }
 
-    // Ensure discount does not exceed total price
     discountAmount = Math.min(discountAmount, totalPrice);
 
-    // Update session with coupon details
     req.session.appliedCoupon = {
       id: coupon._id,
       code: coupon.couponCode,
@@ -220,7 +213,6 @@ const applyCoupon = async (req, res) => {
     req.session.discountAmount = discountAmount;
     req.session.finalPrice = totalPrice - discountAmount;
 
-    // Add the user to the usedBy array and save the coupon
     coupon.usedBy.push({ userId: userId });
     await coupon.save();
 
@@ -246,14 +238,12 @@ const removeCoupon = async (req, res) => {
     const couponCode = req.session.appliedCoupon?.code;
 
     if (couponCode) {
-      // Remove the user from the usedBy array (only if the order is not placed)
       await couponModel.updateOne(
         { couponCode: couponCode.toUpperCase() },
         { $pull: { usedBy: { userId, orderId: { $exists: false } } } }
       );
     }
 
-    // Clear coupon-related session data
     delete req.session.appliedCoupon;
     delete req.session.discountAmount;
     req.session.finalPrice = req.session.totalPrice;
@@ -295,11 +285,9 @@ const applyOffer = async (req, res) => {
     const { offerId } = req.body;
     const userId = req.session.userId;
 
-    // Fetch the user with referral rewards
     const user = await userModel.findById(userId).populate("referralRewards.offerId");
     const totalPrice = req.session.totalPrice;
 
-    // Find the referral offer in the user's referral rewards
     const referralReward = user.referralRewards.find(
       (reward) =>
         reward.offerId._id.toString() === offerId &&
@@ -316,13 +304,10 @@ const applyOffer = async (req, res) => {
 
     const offer = referralReward.offerId;
 
-    // Calculate discount amount based on percentage
     let discountAmount = (totalPrice * offer.discount) / 100;
 
-    // Ensure discount does not exceed total price
     discountAmount = Math.min(discountAmount, totalPrice);
 
-    // Update session with offer details
     req.session.appliedOffer = {
       id: offer._id,
       name: offer.offerName,
@@ -332,7 +317,6 @@ const applyOffer = async (req, res) => {
     };
     req.session.referralDiscountAmount = discountAmount;
 
-    // Recalculate final price
     const offerDiscountAmount = req.session.offerDiscountAmount || 0;
     const couponDiscountAmount = req.session.couponDiscountAmount || 0;
     const totalDiscountAmount = offerDiscountAmount + couponDiscountAmount + discountAmount;
@@ -367,12 +351,10 @@ const removeOffer = async (req, res) => {
       });
     }
 
-    // Clear offer-related session data
     const removedDiscountAmount = req.session.referralDiscountAmount || 0;
     delete req.session.appliedOffer;
     delete req.session.referralDiscountAmount;
 
-    // Recalculate totals
     const totalPrice = req.session.totalPrice;
     const offerDiscountAmount = req.session.offerDiscountAmount - removedDiscountAmount || 0;
     const couponDiscountAmount = req.session.couponDiscountAmount || 0;
@@ -423,7 +405,6 @@ const createOrder = async (req, res) => {
     const appliedOffers = req.session.appliedOffers || {};
     const appliedCoupon = req.session.appliedCoupon || null;
 
-    // Calculate total amount and apply discounts per item
     let totalAmount = 0;
     const orderedItems = cart.cartItem.map((item) => {
       const productPrice = item.productId.price;
@@ -457,8 +438,7 @@ const createOrder = async (req, res) => {
       return res.status(400).json({ error: 'Invalid amount' });
     }
 
-    // Check if amount exceeds Razorpay's maximum limit (1 billion paise = 10 crore INR)
-    const MAX_AMOUNT_IN_PAISE = 100000000000; // 1 billion paise (10 crore INR)
+    const MAX_AMOUNT_IN_PAISE = 100000000000;
     if (amountInPaise > MAX_AMOUNT_IN_PAISE) {
       return res.status(400).json({ error: `Amount exceeds maximum allowed limit of ₹${MAX_AMOUNT_IN_PAISE / 100}` });
     }
@@ -518,7 +498,6 @@ const verifyPayment = async (req, res) => {
     }
 
     if (originalOrderId) {
-      // Update the existing order for retry payment
       await orderModel.findByIdAndUpdate(originalOrderId, {
         paymentStatus: "Completed",
         orderStatus: "Confirmed",
@@ -577,7 +556,6 @@ const verifyPayment = async (req, res) => {
 
     await cartModel.deleteOne({ user: userId });
 
-    // Clear all session data
     delete req.session.tempOrder;
     delete req.session.appliedCoupon;
     delete req.session.discountAmount;

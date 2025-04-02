@@ -27,7 +27,7 @@ const orders = async (req, res) => {
       .find({ userId: req.session.userId })
       .populate({
         path: "orderedItem.productId",
-        model: "Product", // Make sure this matches your product model name exactly
+        model: "Product", 
       })
       .populate("userId")
       .sort("-createdAt")
@@ -265,15 +265,12 @@ const cancelOrder = async (req, res) => {
         .json({ success: false, message: "Order not found" });
     }
 
-    // Update the order status to 'Cancelled'
     order.orderStatus = "Cancelled";
 
-    // Update the status of each product in the orderedItem array
     order.orderedItem.forEach((item) => {
       item.productStatus = "Cancelled";
     });
 
-    // Restore stock for each cancelled product
     for (const item of order.orderedItem) {
       const product = await productModel.findById(item.productId);
       if (product) {
@@ -282,7 +279,6 @@ const cancelOrder = async (req, res) => {
       }
     }
 
-    // Handle refund for online or wallet payments
     if (["Online Payment", "Wallet Payment"].includes(order.paymentMethod)) {
       const wallet = await walletModel.findOne({ userId: order.userId });
 
@@ -298,7 +294,6 @@ const cancelOrder = async (req, res) => {
       }
     }
 
-    // Save the modified order
     await order.save();
 
     return res
@@ -317,7 +312,6 @@ const generateInvoice = async (req, res) => {
   try {
     const orderId = req.params.orderId;
 
-    // Fetch order with populated data
     const order = await ordersModel
       .findById(orderId)
       .populate('orderedItem.productId')
@@ -329,39 +323,31 @@ const generateInvoice = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
-    // Create a PDF document
     const doc = new PDFDocument({ margin: 50 });
 
-    // Set response headers for PDF download
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=invoice-${order.orderNumber}.pdf`);
 
-    // Pipe the PDF document to the response
     doc.pipe(res);
 
     const imagePath = path.join(__dirname, '../../public/user/assets/images/menu/logo/1.png');
 
-    // Add company logo or header
     doc.image(imagePath, 50, 100, { width: 100 });
 
-    // Add invoice header
     doc.fontSize(20).text('Raabta Collections - Invoice', { align: 'center' });
     doc.moveDown();
 
-    // Add invoice and order information
     doc.fontSize(12).text(`Invoice #: INV-${order.orderNumber}`, { align: 'right' });
     doc.fontSize(12).text(`Order #: ${order.orderNumber}`, { align: 'right' });
     doc.fontSize(12).text(`Date: ${new Date(order.createdAt).toLocaleDateString()}`, { align: 'right' });
     doc.moveDown();
 
-    // Add customer information
     doc.fontSize(14).text('Customer Information', { underline: true });
     doc.fontSize(10).text(`Name: ${order.userId?.userName || 'N/A'}`);
     doc.fontSize(10).text(`Email: ${order.userId?.email || 'N/A'}`);
     doc.fontSize(10).text(`Phone: ${order.userId?.phone || 'N/A'}`);
     doc.moveDown();
 
-    // Add shipping address if available
     if (order.deliveryAddress && order.deliveryAddress.address && order.deliveryAddress.address.length > 0) {
       const addr = order.deliveryAddress.address[0];
       doc.fontSize(14).text('Shipping Address', { underline: true });
@@ -371,7 +357,7 @@ const generateInvoice = async (req, res) => {
       doc.moveDown();
     }
 
-    // Add order items table
+    //order items table
     doc.fontSize(14).text('Order Items', { underline: true });
     doc.moveDown();
 
@@ -428,12 +414,11 @@ const generateInvoice = async (req, res) => {
     doc.fontSize(12).text(`₹${order.finalAmount.toFixed(2)}`, 380, doc.y, { bold: true });
     doc.moveDown();
 
-    // Add footer
+ 
     doc.fontSize(10).text('Thank you for your business!', { align: 'center' });
     doc.moveDown();
     doc.fontSize(8).text('This is a computer-generated invoice and does not require a signature.', { align: 'center' });
 
-    // Finalize the PDF and end the stream
     doc.end();
   } catch (error) {
     console.error('Error generating invoice:', error);
@@ -491,7 +476,7 @@ const generateInvoice = async (req, res) => {
     }
   };
   
-  // Add this function to handle wallet payment
+
   const placeOrderWallet = async (req, res) => {
     try {
       const userId = req.session.userId;
@@ -518,8 +503,7 @@ const generateInvoice = async (req, res) => {
       const couponDiscountAmount = req.session.couponDiscountAmount || 0;
       const appliedOffers = req.session.appliedOffers || {};
       const appliedCoupon = req.session.appliedCoupon || null;
-  
-      // Check wallet balance
+
       const wallet = await walletModel.findOne({ userId });
       if (!wallet || wallet.balance < finalPrice) {
         return res.status(400).json({ 
@@ -570,13 +554,12 @@ const generateInvoice = async (req, res) => {
         couponApplied: appliedCoupon ? appliedCoupon.id : null,
         appliedOffer: req.session.appliedOffer ? req.session.appliedOffer.id : null,
         paymentMethod: "Wallet",
-        paymentStatus: "Paid", // Mark as paid immediately
+        paymentStatus: "Paid", 
         orderStatus: "Pending",
       });
   
       await newOrder.save();
   
-      // Update wallet balance
       wallet.balance -= finalAmount;
       wallet.transaction.push({
         amount: -finalAmount,
@@ -602,7 +585,6 @@ const generateInvoice = async (req, res) => {
   
       await cartModel.deleteOne({ user: userId });
   
-      // Clear session data
       delete req.session.appliedCoupon;
       delete req.session.discountAmount;
       delete req.session.finalPrice;
@@ -634,7 +616,6 @@ const generateInvoice = async (req, res) => {
       const cart = await cartModel.findOne({ user: userId }).populate("cartItem.productId");
       const address = await addressModel.findById(req.session.deliveryAddressId);
   
-      // Get discount details from session (from checkout controller)
       const totalPrice = req.session.totalPrice || 0;
       const offerDiscountAmount = req.session.offerDiscountAmount || 0;
       const couponDiscountAmount = req.session.couponDiscountAmount || 0;
@@ -648,7 +629,6 @@ const generateInvoice = async (req, res) => {
         const totalProductPrice = productPrice * quantity;
         totalAmount += totalProductPrice;
   
-        // Apply discounts per item
         let itemOfferDiscount = appliedOffers[item.productId._id]?.discountAmount || 0;
         let itemCouponDiscount = couponDiscountAmount > 0 ? (totalProductPrice / totalPrice) * couponDiscountAmount : 0;
         const totalDiscountPerItem = itemOfferDiscount + itemCouponDiscount;
@@ -724,7 +704,7 @@ const generateInvoice = async (req, res) => {
         amount: newRazorpayOrder.amount,
         currency: newRazorpayOrder.currency,
         orderId: newRazorpayOrder.id,
-        originalOrderId: orderId // Send the original order ID back for reference
+        originalOrderId: orderId 
       });
     } catch (error) {
       console.error("Error in retry payment:", error);

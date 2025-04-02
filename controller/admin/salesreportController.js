@@ -2,14 +2,14 @@ const orderModel = require("../../models/orderSchema"); // Adjust path as per yo
 const PDFDocument = require("pdfkit");
 const ExcelJS = require("exceljs");
 
-// Daily Sales Report
+
 const dailySalesReport = async (req, res) => {
   try {
     const now = new Date();
-    const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30)); // Limit to last 30 days
+    const thirtyDaysAgo = new Date(now.setDate(now.getDate() - 30));
 
     let dailyReport = await orderModel.aggregate([
-      { $match: { createdAt: { $gte: thirtyDaysAgo } } }, // Add date filter
+      { $match: { createdAt: { $gte: thirtyDaysAgo } } },
       { $unwind: "$orderedItem" },
       {
         $match: {
@@ -28,7 +28,7 @@ const dailySalesReport = async (req, res) => {
           "orderedItem.quantity": 1,
         },
       },
-      // Add this stage to group by orderId first
+      
       {
         $group: {
           _id: {
@@ -42,7 +42,7 @@ const dailySalesReport = async (req, res) => {
           totalProducts: { $sum: "$orderedItem.quantity" },
         },
       },
-      // Now group by date to get the final counts
+      
       {
         $group: {
           _id: {
@@ -109,7 +109,6 @@ const dailySalesReport = async (req, res) => {
 };
 
 
-// Weekly Sales Report
 const weeklySalesReport = async (req, res) => {
   try {
     const sevenWeeksAgo = new Date(new Date().setDate(new Date().getDate() - 49));
@@ -206,7 +205,8 @@ const weeklySalesReport = async (req, res) => {
   }
 };
 
-// Monthly Sales Report
+
+
 const monthlySalesReport = async (req, res) => {
   try {
     const twelveMonthsAgo = new Date(new Date().setFullYear(new Date().getFullYear() - 1));
@@ -298,7 +298,10 @@ const monthlySalesReport = async (req, res) => {
   }
 };
 
-// Yearly Sales Report
+
+
+
+
 const yearlySalesReport = async (req, res) => {
   try {
     const yearlyReport = await orderModel.aggregate([
@@ -378,10 +381,12 @@ const yearlySalesReport = async (req, res) => {
   }
 };
 
-// Custom Date Sales Report
+
+
+
 const customDateSalesReport = async (req, res) => {
   try {
-    const { fromDate, toDate } = req.body; // Extract from POST request
+    const { fromDate, toDate } = req.body;
     if (!fromDate || !toDate) {
       return res.status(400).render("admin/salesreport", {
         reportData: [],
@@ -397,7 +402,7 @@ const customDateSalesReport = async (req, res) => {
 
     const startDate = new Date(fromDate);
     const endDate = new Date(toDate);
-    endDate.setHours(23, 59, 59, 999); // Include full end date
+    endDate.setHours(23, 59, 59, 999); 
 
     if (isNaN(startDate) || isNaN(endDate)) {
       return res.status(400).render("admin/salesreport", {
@@ -546,7 +551,6 @@ const customDateSalesReport = async (req, res) => {
 };
 
 
-// PDF Generation Function
 const generateSalesReportPdf = (reportData, reportType, totalAmount, totalSaleCount, totalDiscountAmount, fromDate, toDate) => {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ margin: 50, size: "A4" });
@@ -637,12 +641,12 @@ const generateSalesReportPdf = (reportData, reportType, totalAmount, totalSaleCo
   });
 };
 
-// Excel Generation Function
+
+
 const generateSalesReportExcel = async (reportData, reportType, totalAmount, totalSaleCount, totalDiscountAmount, fromDate, toDate) => {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet(`${reportType} Sales Report`);
 
-  // Add headers
   worksheet.columns = [
     { header: reportType === "weekly" ? "Start Date" : reportType === "monthly" ? "Month-Year" : reportType === "yearly" ? "Year" : "Date", key: "date", width: 20 },
     { header: "Orders", key: "orders", width: 10 },
@@ -651,7 +655,6 @@ const generateSalesReportExcel = async (reportData, reportType, totalAmount, tot
     { header: "Discount", key: "discount", width: 15 },
   ];
 
-  // Add rows
   reportData.forEach((row) => {
     worksheet.addRow({
       date: row.dateFormatted || row.monthYear || row.year || `${row.startOfWeek} to ${row.endOfWeek}`,
@@ -662,7 +665,8 @@ const generateSalesReportExcel = async (reportData, reportType, totalAmount, tot
     });
   });
 
-  // Add summary
+  
+
   worksheet.addRow([]);
   worksheet.addRow(["Summary", "", "", "", ""]);
   worksheet.addRow(["Total Sales", "", `₹${totalAmount.toFixed(2)}`, "", ""]);
@@ -672,7 +676,7 @@ const generateSalesReportExcel = async (reportData, reportType, totalAmount, tot
     worksheet.addRow(["Date Range", "", `${fromDate} to ${toDate}`, "", ""]);
   }
 
-  // Style the worksheet
+  
   worksheet.getRow(1).font = { bold: true };
   worksheet.getRow(1).alignment = { vertical: "middle", horizontal: "center" };
 

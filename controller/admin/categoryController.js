@@ -69,7 +69,9 @@ const addCategoryPost = async (req,res) => {
     }
 }
 
-// Original function - keeps the redirect for non-AJAX calls
+
+
+
 const blockCategory = async (req,res) => {
     try {
         const id = req.params.categoryId;
@@ -87,24 +89,22 @@ const blockCategory = async (req,res) => {
     }
 }
 
-// New API endpoint for AJAX requests
+
+
+
 const blockCategoryApi = async (req, res) => {
     try {
         const id = req.params.categoryId;
         
-        // Find the category
         const category = await catModel.findById(id);
         if (!category) {
             return res.status(404).json({ success: false, message: "Category not found" });
         }
         
-        // Toggle the status
         const newStatus = !category.status;
         
-        // Update in database
         await catModel.updateOne({ _id: id }, { $set: { status: newStatus } });
         
-        // Return the updated status
         return res.status(200).json({
             success: true,
             status: newStatus,
@@ -116,6 +116,8 @@ const blockCategoryApi = async (req, res) => {
         return res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 }
+
+
 
 const editCategory = async (req,res) => {
     try {
@@ -158,12 +160,14 @@ const editCategoryPost = async (req, res) => {
     }
 };
 
+
+
 module.exports = {
     categoriesPage,
     addCategory,
     addCategoryPost,
     blockCategory,
-    blockCategoryApi, // New API endpoint export
+    blockCategoryApi,
     editCategory,
     editCategoryPost,
 }

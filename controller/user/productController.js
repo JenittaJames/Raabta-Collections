@@ -15,36 +15,31 @@ const loadSingleproduct = async (req, res) => {
       });
     }
 
-    // Find applicable product offers (without maxUses)
     const productOffers = await offerModel.find({
       status: true,
       offerType: 'product',
-      productId: { $in: [productId] }, // Using $in for array
+      productId: { $in: [productId] },
       startDate: { $lte: new Date() },
       endDate: { $gte: new Date() }
     }).sort({ discount: -1 });
 
-    // Find applicable category offers (without maxUses)
     const categoryOffers = await offerModel.find({
       status: true,
       offerType: 'category',
-      categoryId: { $in: [product.category._id] }, // Using $in for array
+      categoryId: { $in: [product.category._id] }, 
       startDate: { $lte: new Date() },
       endDate: { $gte: new Date() }
     }).sort({ discount: -1 });
 
-    // Get the best offer (highest discount)
     const allOffers = [...productOffers, ...categoryOffers];
     const bestOffer = allOffers.length > 0 ? 
       allOffers.reduce((max, offer) => offer.discount > max.discount ? offer : max) 
       : null;
 
-    // Calculate discounted price if offers exist
     const discountedPrice = bestOffer ? 
       product.price - (product.price * bestOffer.discount / 100) 
       : product.price;
 
-    // Fetch related products
     const relatedProduct = await productModel.find({
       category: product.category,
       _id: { $ne: productId },
