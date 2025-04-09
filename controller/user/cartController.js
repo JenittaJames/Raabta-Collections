@@ -8,9 +8,39 @@ const loadCart = async (req, res) => {
     const userId = req.session.userId;
     const cartDetails = await cartModel.find({ user: userId }).populate({
       path: "cartItem.productId",
-      select: "productName price productImage totalStock category",
-      populate: { path: "category" },
+      select: "productName price productImage totalStock category status",
+      populate: { path: "category", select: "status"},
     });
+
+    if (cartDetails.length > 0 && cartDetails[0].cartItem && cartDetails[0].cartItem.length > 0) {
+      const originalCartItems = [...cartDetails[0].cartItem];
+      let hasRemovedItems = false;
+      
+      // Filter out invalid products (inactive products or products with inactive categories)
+      cartDetails[0].cartItem = cartDetails[0].cartItem.filter(item => {
+        if (!item.productId) return false;
+        
+        const isProductActive = item.productId.status === true;
+        const isCategoryActive = item.productId.category && item.productId.category.status === true;
+        
+        if (!isProductActive || !isCategoryActive) {
+          hasRemovedItems = true;
+          return false;
+        }
+        return true;
+      });
+      
+      // If items were removed, save the updated cart
+      if (hasRemovedItems) {
+        const cart = await cartModel.findOne({ user: userId });
+        if (cart) {
+          cart.cartItem = cartDetails[0].cartItem;
+          // Recalculate cart total
+          cart.cartTotal = cart.cartItem.reduce((acc, item) => acc + item.total, 0);
+          await cart.save();
+        }
+      }
+    }
 
     const appliedOffers = {};
     let originalSubtotal = 0;
@@ -310,10 +340,16 @@ const updateCartQuantity = async (req, res) => {
       });
     }
 
-    const product = await productModel.findById(productId);
-    if (!product) {
-      return res.status(404).json({ message: "Product not found" });
-    }
+     // Check if product is active
+     const product = await productModel.findById(productId);
+     if (!product || product.status === false) {
+       return res.status(404).json({ message: "Product not available" });
+     }
+
+     const category = await catModel.findById(product.category);
+     if (!category || category.status === false) {
+       return res.status(400).json({ message: "This product's category is no longer available" });
+     }
 
     if (product.totalStock < quantity) {
       return res.status(400).json({
@@ -428,7 +464,11 @@ const getCartTotals = async (req, res) => {
 
     const cart = await cartModel
       .findOne({ user: userId })
-      .populate("cartItem.productId", "price category");
+      .populate({
+        path: "cartItem.productId",
+        select: "price category status",
+        populate: { path: "category", select: "status" }
+      });
 
     if (!cart || !cart.cartItem.length) {
       return res.json({
@@ -437,6 +477,16 @@ const getCartTotals = async (req, res) => {
         itemCount: 0,
       });
     }
+
+     // Filter out inactive products or products with inactive categories
+     const validCartItems = cart.cartItem.filter(item => {
+      if (!item.productId) return false;
+      
+      const isProductActive = item.productId.status === true;
+      const isCategoryActive = item.productId.category && item.productId.category.status === true;
+      
+      return isProductActive && isCategoryActive;
+    });
 
     const activeOffers = await offerModel
       .find({
@@ -517,6 +567,60 @@ const getCartItem = async (req, res) => {
   }
 };
 
+
+const verifyCartForCheckout = async (req, res) => {
+  try {
+    const userId = req.session.userId;
+    
+    const cartDetails = await cartModel.find({ user: userId }).populate({
+      path: "cartItem.productId",
+      select: "productName price productImage totalStock category status",
+      populate: { path: "category", select: "status"},
+    });
+
+    let invalidProducts = [];
+    
+    if (cartDetails.length > 0 && cartDetails[0].cartItem && cartDetails[0].cartItem.length > 0) {
+      // Check each item for validity
+      for (const item of cartDetails[0].cartItem) {
+        if (!item.productId) {
+          invalidProducts.push("Unknown product");
+          continue;
+        }
+        
+        const isProductActive = item.productId.status === true;
+        const isCategoryActive = item.productId.category && item.productId.category.status === true;
+        
+        if (!isProductActive || !isCategoryActive) {
+          invalidProducts.push(item.productId.productName);
+        } else if (item.quantity > item.productId.totalStock) {
+          return res.json({
+            valid: false,
+            message: `${item.productId.productName} has only ${item.productId.totalStock} items in stock`
+          });
+        }
+      }
+      
+      if (invalidProducts.length > 0) {
+        return res.json({ 
+          valid: false, 
+          message: "Some products in your cart are no longer available", 
+          invalidProducts 
+        });
+      }
+      
+      return res.json({ valid: true });
+    } else {
+      return res.json({ valid: false, message: "Your cart is empty" });
+    }
+  } catch (error) {
+    console.error("Error verifying cart:", error);
+    return res.json({ valid: false, message: "Error verifying cart" });
+  }
+};
+
+
+
 module.exports = {
   loadCart,
   addCart,
@@ -524,4 +628,5 @@ module.exports = {
   updateCartQuantity,
   getCartTotals,
   getCartItem,
+  verifyCartForCheckout
 };

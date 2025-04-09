@@ -97,6 +97,25 @@
                         <div id="stockError" class="text-danger"></div>
                     </div>
 
+
+                    <div class="mb-4">
+                        <label for="category" class="form-label">Category</label>
+                        <select 
+                            class="form-control" 
+                            id="category" 
+                            name="category" 
+                            required
+                        >
+                            <option value="">Select a category</option>
+                            <% categories.forEach(function(category) { %>
+                                <option value="<%= category._id %>" <%= (product.category && product.category.toString() === category._id.toString()) ? 'selected' : '' %>>
+                                    <%= category.name %>
+                                </option>
+                            <% }); %>
+                        </select>
+                        <div id="categoryError" class="text-danger"></div>
+                    </div>
+
                     <!-- Image Preview Section -->
                     <div class="mb-4">
                         <label class="form-label">Image Previews</label>
@@ -185,6 +204,14 @@
                         showError(field, errorElement, 'Stock cannot exceed 10,000');
                     }
                     break;
+
+
+                    case 'category':
+    const category = field.value.trim();
+    if (!category) {
+        showError(field, errorElement, 'Please select a category');
+    }
+    break;
             }
         }
 

@@ -171,20 +171,24 @@ const adminLoginPost = async (req,res) => {
         const isMatch = await bcrypt.compare(password,admin.password)
 
         if(!admin){
-          return  res.redirect("/admin/login")
+            req.flash('error_msg', "Admin not found");
+          return  res.redirect("/admin/")
         }
 
         if(!isMatch){
-           return res.redirect("/admin/login")
+            req.flash('error_msg', "Wrong Password");
+           return res.redirect("/admin/")
         }
 
         req.session.isAdmin = true;
+        req.flash('success_msg', "Login successfull!!!");
         res.redirect("/admin/dashboard")
 
 
     } catch (error) {
         console.log("Server error");
-
+        req.flash('error_msg', "Login failed");
+        res.redirect("/admin/");
     }
 }
 

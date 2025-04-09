@@ -123,7 +123,8 @@ const editProduct = async (req, res) => {
   try {
     const productId = req.params.productId;
     const product = await productModel.findOne({ _id: productId });
-    res.render("admin/editproduct", { product });
+    const categories = await catModel.find();
+    res.render("admin/editproduct", { product, categories });
   } catch (error) {
     console.log("edit product error", error);
     res.status(500).send("Internal Server Error");
@@ -133,9 +134,10 @@ const editProduct = async (req, res) => {
 const editProductPost = async (req, res) => {
   try {
     const productId = req.params.productId;
-    const { name, description, price, stock } = req.body;
+    const { name, description, price, stock, category } = req.body;
 
     const product = await productModel.findById(productId);
+    const categories = await catModel.find();
     if (!product) {
       return res.redirect("/admin/products");
     }
@@ -152,6 +154,7 @@ const editProductPost = async (req, res) => {
     product.description = description;
     product.price = price;
     product.totalStock = stock;
+    product.category = category;
 
     await product.save();
 

@@ -9,9 +9,51 @@ const orderModel = require("../../models/orderSchema")
 const razorpay=require('../../config/razorpay')
 const mongoose = require("mongoose");
 
+// Function to validate stock for cart items
+const validateCartItemsStock = async (userId) => {
+  const cartDetails = await cartModel
+    .findOne({ user: userId })
+    .populate("cartItem.productId", "productName price productImage category totalStock");
+  
+  if (!cartDetails || cartDetails.cartItem.length === 0) {
+    return { valid: false, message: "Your cart is empty." };
+  }
+
+  const invalidItems = [];
+  
+  for (const item of cartDetails.cartItem) {
+    if (item.quantity > item.productId.totalStock) {
+      invalidItems.push({
+        name: item.productId.productName,
+        requested: item.quantity,
+        available: item.productId.totalStock
+      });
+    }
+  }
+  
+  if (invalidItems.length > 0) {
+    return {
+      valid: false,
+      message: "Some items in your cart have insufficient stock.",
+      invalidItems
+    };
+  }
+  
+  return { valid: true };
+};
+
+
 const checkout = async (req, res) => {
   try {
     const userId = req.session.userId;
+
+    // Stock validation
+    const stockValidation = await validateCartItemsStock(userId);
+    if (!stockValidation.valid) {
+      req.session.stockValidationError = stockValidation;
+      req.flash('error_msg', "Insufficient stock");
+      return res.redirect('/cart');
+    }
 
     const user = await userModel.findById(userId).populate("referralRewards.offerId");
     const userAddresses = await addressModel.find({ userId });
@@ -123,6 +165,7 @@ const checkout = async (req, res) => {
 
     const couponMessage = req.session.couponMessage || null;
     const couponSuccess = req.session.couponSuccess || null;
+    const stockValidationMessage = req.session.stockValidationMessage || null;
 
     res.render("user/checkout", {
       userAddresses: userAddresses || [],
@@ -139,6 +182,7 @@ const checkout = async (req, res) => {
       finalPrice,
       couponMessage,
       couponSuccess,
+      stockValidationMessage,
       availableCoupons,
       activeOffers,
       appliedOffers,
@@ -149,6 +193,7 @@ const checkout = async (req, res) => {
 
     delete req.session.couponMessage;
     delete req.session.couponSuccess;
+    delete req.session.stockValidationMessage;
   } catch (error) {
     console.error("Error in checkout controller:", error);
     res.status(500).send("Server Error");
@@ -262,6 +307,14 @@ const removeCoupon = async (req, res) => {
 const placingOrder = async (req, res) => {
   try {
     const userId = req.session.userId;
+
+    const stockValidation = await validateCartItemsStock(userId);
+    if (!stockValidation.valid) {
+      req.session.stockValidationError = stockValidation;
+      req.flash('error_msg', "Insufficient stock");
+      return res.redirect('/cart');
+    }
+
     const user = await userModel.findById(userId);
     const totalPrice = req.session.totalPrice;
     const finalPrice = req.session.finalPrice || totalPrice;
@@ -382,6 +435,15 @@ const createOrder = async (req, res) => {
   try {
     const { amount } = req.body;
     const userId = req.session.userId;
+
+     // Stock validation
+     const stockValidation = await validateCartItemsStock(userId);
+     if (!stockValidation.valid) {
+       return res.status(400).json({ 
+         error: 'Stock validation failed', 
+         details: stockValidation 
+       });
+     }
 
     const cart = await cartModel.findOne({ user: userId }).populate("cartItem.productId");
     if (!cart || cart.cartItem.length === 0) {
@@ -511,6 +573,16 @@ const verifyPayment = async (req, res) => {
         orderId: originalOrderId
       });
     } else {
+
+      // Final stock validation before order completion
+      const stockValidation = await validateCartItemsStock(userId);
+      if (!stockValidation.valid) {
+        return res.status(400).json({
+          success: false,
+          message: 'Stock validation failed',
+          details: stockValidation
+        });
+      }
 
     const tempOrder = req.session.tempOrder;
     if (!tempOrder) {

@@ -65,6 +65,7 @@ router.get("/remove/:productId", ifLogged, cartController.removeCart);
 router.post("/update-cart", ifLogged, cartController.updateCartQuantity);
 router.get('/get-cart-totals',ifLogged, cartController.getCartTotals);
 router.get('/get-cart-item',ifLogged, cartController.getCartItem);
+router.get('/verify-cart-checkout',ifLogged, cartController.verifyCartForCheckout);
 
 
 router.get("/checkout", ifLogged, checkoutController.checkout);
