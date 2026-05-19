@@ -46,6 +46,18 @@ async function sendVerificationEmail(email, otp) {
   },
 });
 
+
+transporter.verify(function(error, success) {
+   if(error) {
+      console.log("SMTP ERROR:", error);
+   } else {
+      console.log("SMTP READY");
+   }
+});
+
+
+
+
     const info = await transporter.sendMail({
       from: process.env.NODEMAILER_EMAIL,
       to: email,
