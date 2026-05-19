@@ -35,11 +35,10 @@ async function sendVerificationEmail(email, otp) {
     // });
 
 
-    console.log("EMAIL:", process.env.BREVO_EMAIL);
+   console.log("EMAIL:", process.env.BREVO_EMAIL);
 console.log("KEY:", process.env.BREVO_SMTP_KEY);
 
-
-    const transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransport({
   host: "smtp-relay.brevo.com",
   port: 587,
   secure: false,
@@ -50,15 +49,15 @@ console.log("KEY:", process.env.BREVO_SMTP_KEY);
   },
 });
 
+console.log("Creating transporter...");
 
-transporter.verify(function(error, success) {
-   if(error) {
-      console.log("SMTP ERROR:", error);
-   } else {
-      console.log("SMTP READY");
-   }
+transporter.verify((error, success) => {
+  if (error) {
+    console.log("SMTP ERROR:", error);
+  } else {
+    console.log("SMTP READY");
+  }
 });
-
 
 
 
