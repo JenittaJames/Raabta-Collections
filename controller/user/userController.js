@@ -47,6 +47,10 @@ const transporter = nodemailer.createTransport({
     user: process.env.BREVO_EMAIL,
     pass: process.env.BREVO_SMTP_KEY,
   },
+
+  connectionTimeout: 30000,
+  greetingTimeout: 30000,
+  socketTimeout: 30000,
 });
 
 console.log("Creating transporter...");
@@ -58,7 +62,6 @@ transporter.verify((error, success) => {
     console.log("SMTP READY");
   }
 });
-
 
 
     const info = await transporter.sendMail({
