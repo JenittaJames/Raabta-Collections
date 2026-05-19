@@ -35,6 +35,10 @@ async function sendVerificationEmail(email, otp) {
     // });
 
 
+    console.log("EMAIL:", process.env.BREVO_EMAIL);
+console.log("KEY:", process.env.BREVO_SMTP_KEY);
+
+
     const transporter = nodemailer.createTransport({
   host: "smtp-relay.brevo.com",
   port: 587,
