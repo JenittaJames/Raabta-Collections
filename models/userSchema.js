@@ -12,6 +12,10 @@ const userSchema = new Schema({
         required: true,
         unique: true
     },
+    googleId: {
+        type: String,
+        required: false
+    },
     phone: {
         type: String,
         required: false,
